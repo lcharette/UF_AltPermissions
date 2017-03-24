@@ -1,0 +1,59 @@
+{% extends "layouts/dashboard.html.twig" %}
+
+{% block stylesheets_page %}
+    <!-- Page-specific CSS asset bundle -->
+    {{ assets.css('css/form-widgets') | raw }}
+{% endblock %}
+
+{# Overrides blocks in head of base template #}
+{% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker})}}{% endblock %}
+
+{% block page_description %}{{ translate("ALT_ROLE.PAGE_DESCRIPTION", {'seeker' : seeker})}}{% endblock %}
+
+{% block body_matter %}
+    <div class="row">
+        <div class="col-md-12">
+            <div id="widget-roles" class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-fw fa-drivers-license"></i> {{translate('ROLE', 2)}}</h3>
+                    <div class="pull-right">
+                        <button class="btn btn-sm btn-default js-download-table">{{ translate("DOWNLOAD.CSV") }}</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    {% include "components/tables/altRoles.html.twig" with {
+                            "table" : {
+                                "id" : "table-roles"
+                            }
+                        }
+                    %}
+                </div>
+                <div class="box-footer">
+                    <button type="button" class="btn btn-success js-role-create">
+                        <i class="fa fa-plus-square"></i>  {{translate("ROLE.CREATE")}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts_page %}
+
+    <!-- Include page-specific JS -->
+    {{ assets.js('js/FormGenerator') | raw }}
+
+    <script>
+        $(".js-displayForm").formGenerator();
+        $(".js-displayConfirm").formGenerator('confirm');
+
+        $("#widget-roles").ufTable({
+            dataUrl: site.uri.public + "/api/roles/{{seeker}}"
+        });
+
+        // Bind table buttons
+        $("#widget-projects").on("pagerComplete.ufTable", function () {
+            $(".js-displayForm").formGenerator();
+            $(".js-displayConfirm").formGenerator('confirm');
+        });
+    </script>
+{% endblock %}

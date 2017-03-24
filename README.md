@@ -1,2 +1,2 @@
 # UF-AltPermission
-Alternate/complimentary permission system for UserFrosting
+Alternate/complementary permission system for UserFrosting
