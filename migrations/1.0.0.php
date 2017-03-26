@@ -8,7 +8,6 @@
     if (!$schema->hasTable('alt_roles')) {
         $schema->create('alt_roles', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('slug');
             $table->string('seeker');
             $table->string('name');
             $table->text('description')->nullable();
@@ -17,8 +16,6 @@
             $table->engine = 'InnoDB';
             $table->collation = 'utf8_unicode_ci';
             $table->charset = 'utf8';
-            $table->unique('slug');
-            $table->index('slug');
         });
 
         // Add default roles

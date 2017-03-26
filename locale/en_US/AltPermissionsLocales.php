@@ -15,6 +15,8 @@
 return [
 
     "ALT_ROLE" => [
+        "INFO_LANGUAGE" => "<strong>Tip: </strong> Language keys can also be used to display internationalized role name and description.",
+
         "PAGE_DESCRIPTION"  => "A listing of the roles for the <em>{{seeker}}</em> seeker.  Provides management tools for editing and deleting roles for this seeker.",
         "PAGE_TITLE" => "Roles for {{seeker}}"
     ]

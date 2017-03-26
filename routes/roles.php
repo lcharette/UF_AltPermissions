@@ -26,14 +26,15 @@ $app->group('/api/roles/{seeker}', function () {
 
     $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions');
 
-    $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:create');
+    $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:create')
+         ->setName('api.roles.create.post');
 
     $this->put('/r/{slug}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo');
 
     $this->put('/r/{slug}/{field}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateField');
 })->add('checkAuthSeeker')->add('authGuard');
 
-$app->group('/modals/roles', function () {
+$app->group('/modals/roles/{seeker}', function () {
     $this->get('/confirm-delete', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalConfirmDelete');
 
     $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalCreate');

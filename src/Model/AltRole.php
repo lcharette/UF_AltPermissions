@@ -27,7 +27,6 @@ class AltRole extends UFModel
     protected $table = "alt_roles";
 
     protected $fillable = [
-        "slug",
         "seeker",
         "name",
         "description"
@@ -65,6 +64,39 @@ class AltRole extends UFModel
         $classMapper = static::$ci->classMapper;
 
         return $this->belongsToMany($classMapper->getClassMapping('altPermission'), 'alt_permission_roles', 'alt_role_id', 'alt_permission_id')->withTimestamps();
+    }
+
+    /**
+     * Model's getter
+     *
+     */
+
+    /**
+     * getStatusTxt function.
+     * Prend le code de status et retourne la version localisé que le code représente
+     *
+     * @access public
+     * @return void
+     */
+    public function getLocaleName()
+    {
+        return static::$ci->translator->translate($this->name);
+    }
+    public function getLocaleDescription()
+    {
+        return static::$ci->translator->translate($this->description);
+    }
+
+    /**
+     * Query scope to get all roles assigned to a specific seeker.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $seeker
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForSeeker($query, $seeker)
+    {
+        return $query->where('seeker', $seeker);
     }
 
     /**

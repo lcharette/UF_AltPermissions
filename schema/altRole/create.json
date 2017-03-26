@@ -1,0 +1,30 @@
+{
+    "name" : {
+        "validators" : {
+            "required" : {
+                "label" : "&NAME",
+                "message" : "VALIDATE.REQUIRED"
+            },
+            "length" : {
+                "label" : "&NAME",
+                "min" : 1,
+                "max" : 255,
+                "message" : "VALIDATE.LENGTH_RANGE"
+            }
+        },
+        "transformations" : ["trim"],
+        "form" : {
+            "type" : "text",
+            "label" : "ROLE.NAME",
+            "icon" : "fa-edit",
+            "placeholder" : "ROLE.NAME_EXPLAIN"
+        }
+    },
+    "description" : {
+        "form" : {
+            "type" : "textarea",
+            "label" : "DESCRIPTION",
+            "rows" : 6
+        }
+    }
+}

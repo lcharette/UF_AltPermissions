@@ -8,11 +8,11 @@
 {% extends "components/tables/table-paginated.html.twig" %}
 
 {% block table %}
-    <table id="{{table.id}}" class="tablesorter table table-bordered table-hover table-striped" data-sortlist="[[0, 0]]">
+    <table id="{{table.id}}" class="tablesorter table table-bordered table-hover table-striped">
         <thead>
             <tr>
-                <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-info">{{translate('ROLE')}} <i class="fa fa-sort"></i></th>
-                <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description">{{translate('DESCRIPTION')}} <i class="fa fa-sort"></i></th>
+                <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-info" data-sorter="false" data-filter="false">{{translate('ROLE')}}</th>
+                <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description" data-sorter="false" data-filter="false">{{translate('DESCRIPTION')}}</th>
                 <th data-column-template="#role-table-column-actions" data-sorter="false" data-filter="false">{{translate('ACTIONS')}}</th>
             </tr>
         </thead>

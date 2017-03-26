@@ -9,6 +9,10 @@
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
 use Interop\Container\ContainerInterface;
+use UserFrosting\Sprinkle\FormGenerator\RequestSchema;
+use UserFrosting\Fortress\RequestDataTransformer;
+use UserFrosting\Fortress\ServerSideValidator;
+use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
 
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
@@ -16,10 +20,6 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
-use UserFrosting\Fortress\RequestDataTransformer;
-use UserFrosting\Fortress\RequestSchema;
-use UserFrosting\Fortress\ServerSideValidator;
-use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
 use UserFrosting\Sprinkle\Account\Model\Role;
 use UserFrosting\Sprinkle\Account\Model\User;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
@@ -51,6 +51,62 @@ class RoleController extends SimpleController
             throw new \Exception("Sprinkle dependencies not met. FormGenerator Sprinkle is not available");
         }
     }
+
+    /**
+     * Renders the modal form for creating a new role.
+     *
+     * This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
+     * This page requires authentication.
+     * Request type: GET
+     */
+    public function getModalCreate($request, $response, $args)
+    {
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
+        $translator = $this->ci->translator;
+
+        // Request GET data
+        $get = $request->getQueryParams();
+
+        // Access-controlled page
+        if (!$authorizer->checkAccess($currentUser, 'create_role')) {
+            throw new ForbiddenException();
+        }
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        // Create a dummy role to prepopulate fields
+        $role = $classMapper->createInstance('altRole', []);
+
+        // Load validation rules
+        $schema = new RequestSchema('schema://altRole/create.json');
+        $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
+
+        // Generate the form
+        $schema->initForm($role);
+
+        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE', $data);
+
+        return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
+            "box_id" => $get['box_id'],
+            "box_title" => "ROLE.CREATE",
+            "form_action" => $this->ci->get('router')->pathFor('api.roles.create.post', $args),
+            "fields" => $schema->generateForm(),
+            "validators" => $validator->rules()
+        ]);
+    }
+
     /**
      * Processes the request to create a new role.
      *
@@ -82,7 +138,7 @@ class RoleController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Load the request schema
-        $schema = new RequestSchema('schema://role/create.json');
+        $schema = new RequestSchema('schema://altRole/create.json');
 
         // Whitelist and set parameter defaults
         $transformer = new RequestDataTransformer($schema);
@@ -101,19 +157,17 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Check if name or slug already exists
-        if ($classMapper->staticMethod('role', 'where', 'name', $data['name'])->first()) {
-            $ms->addMessageTranslated('danger', 'ROLE.NAME.IN_USE', $data);
-            $error = true;
-        }
-
-        if ($classMapper->staticMethod('role', 'where', 'slug', $data['slug'])->first()) {
-            $ms->addMessageTranslated('danger', 'ROLE.SLUG.IN_USE', $data);
+        if ($classMapper->staticMethod('altRole', 'where', 'name', $data['name'])->forSeeker($args['seeker'])->first()) {
+            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
             $error = true;
         }
 
         if ($error) {
             return $response->withStatus(400);
         }
+
+        // Insert the seeker
+        $data['seeker'] = $args['seeker'];
 
         /** @var Config $config */
         $config = $this->ci->config;
@@ -122,7 +176,7 @@ class RoleController extends SimpleController
         // Begin transaction - DB will be rolled back if an exception occurs
         Capsule::transaction( function() use ($classMapper, $data, $ms, $config, $currentUser) {
             // Create the role
-            $role = $classMapper->createInstance('role', $data);
+            $role = $classMapper->createInstance('altRole', $data);
 
             // Store new role to database
             $role->save();
@@ -218,39 +272,6 @@ class RoleController extends SimpleController
         return $response->withStatus(200);
     }
 
-    /**
-     * Returns a list of Roles
-     *
-     * Generates a list of roles, optionally paginated, sorted and/or filtered.
-     * This page requires authentication.
-     * Request type: GET
-     */
-    public function getList($request, $response, $args)
-    {
-        // GET parameters
-        $params = $request->getQueryParams();
-
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
-        $authorizer = $this->ci->authorizer;
-
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = $this->ci->currentUser;
-
-        // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
-            throw new ForbiddenException();
-        }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
-
-        $sprunje = $classMapper->createInstance('role_sprunje', $classMapper, $params);
-
-        // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
-        // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
-        return $sprunje->toResponse($response);
-    }
-
     public function getModalConfirmDelete($request, $response, $args)
     {
         // GET parameters
@@ -301,61 +322,6 @@ class RoleController extends SimpleController
             'role' => $role,
             'form' => [
                 'action' => "api/roles/r/{$role->slug}",
-            ]
-        ]);
-    }
-
-    /**
-     * Renders the modal form for creating a new role.
-     *
-     * This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
-     * This page requires authentication.
-     * Request type: GET
-     */
-    public function getModalCreate($request, $response, $args)
-    {
-        // GET parameters
-        $params = $request->getQueryParams();
-
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
-        $authorizer = $this->ci->authorizer;
-
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = $this->ci->currentUser;
-
-        $translator = $this->ci->translator;
-
-        // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'create_role')) {
-            throw new ForbiddenException();
-        }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
-
-        // Create a dummy role to prepopulate fields
-        $role = $classMapper->createInstance('role', []);
-
-        $fieldNames = ['name', 'slug', 'description'];
-        $fields = [
-            'hidden' => [],
-            'disabled' => []
-        ];
-
-        // Load validation rules
-        $schema = new RequestSchema('schema://role/create.json');
-        $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
-
-        return $this->ci->view->render($response, 'components/modals/role.html.twig', [
-            'role' => $role,
-            'form' => [
-                'action' => 'api/roles',
-                'method' => 'POST',
-                'fields' => $fields,
-                'submit_text' => $translator->translate("CREATE")
-            ],
-            'page' => [
-                'validators' => $validator->rules('json', false)
             ]
         ]);
     }
@@ -612,6 +578,40 @@ class RoleController extends SimpleController
     }
 
     /**
+     * Returns a list of Roles
+     *
+     * Generates a list of roles, optionally paginated, sorted and/or filtered.
+     * This page requires authentication.
+     * Request type: GET
+     * OK
+     */
+    public function getList($request, $response, $args)
+    {
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        // Access-controlled page
+        if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
+            throw new ForbiddenException();
+        }
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        $sprunje = $classMapper->createInstance('altRole_sprunje', $classMapper, $params, $args['seeker']);
+
+        // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
+        // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
+        return $sprunje->toResponse($response);
+    }
+
+    /**
      * Processes the request to update an existing role's details.
      *
      * Processes the request from the role update form, checking that:
@@ -685,16 +685,7 @@ class RoleController extends SimpleController
             $data['name'] != $role->name &&
             $classMapper->staticMethod('role', 'where', 'name', $data['name'])->first()
         ) {
-            $ms->addMessageTranslated('danger', 'ROLE.NAME.IN_USE', $data);
-            $error = true;
-        }
-
-        if (
-            isset($data['slug']) &&
-            $data['slug'] != $role->slug &&
-            $classMapper->staticMethod('role', 'where', 'slug', $data['slug'])->first()
-        ) {
-            $ms->addMessageTranslated('danger', 'ROLE.SLUG.IN_USE', $data);
+            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
             $error = true;
         }
 
