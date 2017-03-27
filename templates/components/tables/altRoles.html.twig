@@ -62,7 +62,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" data-slug="{{row.slug}}" class="js-role-delete">
+                        <a href="#" class="js-displayConfirm"
+                            data-confirm-title="ROLE.DELETE"
+                            data-confirm-message="ROLE.DELETE_CONFIRM"
+                            data-confirm-button="ROLE.DELETE_YES"
+                            data-post-url="{{ row.uri_delete }}"
+                            data-post-method="DELETE" data-toggle="modal">
                         <i class="fa fa-trash-o"></i> {% endverbatim %}{{translate("ROLE.DELETE")}}{% verbatim %}
                         </a>
                     </li>

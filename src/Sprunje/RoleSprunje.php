@@ -57,6 +57,9 @@ class RoleSprunje extends Sprunje
             $item->name = $item->getLocaleName();
             $item->description = $item->getLocaleDescription();
 
+            // Route
+            $item->uri_delete = $item->getRoute('api.roles.delete');
+
             return $item;
         });
 

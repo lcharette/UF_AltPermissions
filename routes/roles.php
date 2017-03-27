@@ -18,7 +18,8 @@ $app->group('/admin/roles/{seeker}', function () {
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/api/roles/{seeker}', function () {
-    $this->delete('/r/{slug}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:delete');
+    $this->delete('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:delete')
+         ->setName('api.roles.delete');
 
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList');
 
@@ -35,8 +36,6 @@ $app->group('/api/roles/{seeker}', function () {
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/modals/roles/{seeker}', function () {
-    $this->get('/confirm-delete', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalConfirmDelete');
-
     $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalCreate');
 
     $this->get('/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEdit');

@@ -42,6 +42,7 @@ class RoleController extends SimpleController
      * @access public
      * @param ContainerInterface $ci
      * @return void
+     * OK
      */
     public function __construct(ContainerInterface $ci) {
         $this->ci = $ci;
@@ -58,6 +59,7 @@ class RoleController extends SimpleController
      * This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
      * This page requires authentication.
      * Request type: GET
+     * OK
      */
     public function getModalCreate($request, $response, $args)
     {
@@ -96,7 +98,7 @@ class RoleController extends SimpleController
         // Generate the form
         $schema->initForm($role);
 
-        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE', $data);
+        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $get['box_id'],
@@ -117,6 +119,7 @@ class RoleController extends SimpleController
      * This route requires authentication (and should generally be limited to admins or the root user).
      * Request type: POST
      * @see getModalCreateRole
+     * OK
      */
     public function create($request, $response, $args)
     {
@@ -204,21 +207,24 @@ class RoleController extends SimpleController
      * 4. The submitted data is valid.
      * This route requires authentication (and should generally be limited to admins or the root user).
      * Request type: DELETE
+     * OK
      */
     public function delete($request, $response, $args)
     {
-        $role = $this->getRoleFromParams($args);
-
-        // If the role doesn't exist, return 404
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
         /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
+        {
+            throw new NotFoundException($request, $response);
+        }
 
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'delete_role', [
@@ -231,14 +237,14 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Check that we are not deleting a default role
-        $defaultRoleSlugs = $classMapper->staticMethod('role', 'getDefaultSlugs');
+        //$defaultRoleSlugs = $classMapper->staticMethod('altRole', 'getDefaultSlugs');
 
         // Need to use loose comparison for now, because some DBs return `id` as a string
-        if (in_array($role->slug, $defaultRoleSlugs)) {
+        /*if (in_array($role->slug, $defaultRoleSlugs)) {
             $e = new BadRequestException();
             $e->addUserMessage('ROLE.DELETE_DEFAULT');
             throw $e;
-        }
+        }*/
 
         // Check if there are any users associated with this role
         $countUsers = $role->users()->count();
@@ -248,7 +254,7 @@ class RoleController extends SimpleController
             throw $e;
         }
 
-        $roleName = $role->name;
+        $roleName = $role->getLocaleName();
 
         // Begin transaction - DB will be rolled back if an exception occurs
         Capsule::transaction( function() use ($role, $roleName, $currentUser) {
@@ -270,60 +276,6 @@ class RoleController extends SimpleController
         ]);
 
         return $response->withStatus(200);
-    }
-
-    public function getModalConfirmDelete($request, $response, $args)
-    {
-        // GET parameters
-        $params = $request->getQueryParams();
-
-        $role = $this->getRoleFromParams($params);
-
-        // If the role no longer exists, forward to main role listing page
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
-        $authorizer = $this->ci->authorizer;
-
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = $this->ci->currentUser;
-
-        // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'delete_role', [
-            'role' => $role
-        ])) {
-            throw new ForbiddenException();
-        }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
-
-        // Check that we are not deleting a default role
-        $defaultRoleSlugs = $classMapper->staticMethod('role', 'getDefaultSlugs');
-
-        // Need to use loose comparison for now, because some DBs return `id` as a string
-        if (in_array($role->slug, $defaultRoleSlugs)) {
-            $e = new BadRequestException();
-            $e->addUserMessage('ROLE.DELETE_DEFAULT', $role->toArray());
-            throw $e;
-        }
-
-        // Check if there are any users associated with this role
-        $countUsers = $role->users()->count();
-        if ($countUsers > 0) {
-            $e = new BadRequestException();
-            $e->addUserMessage('ROLE.HAS_USERS', $role->toArray());
-            throw $e;
-        }
-
-        return $this->ci->view->render($response, 'components/modals/confirm-delete-role.html.twig', [
-            'role' => $role,
-            'form' => [
-                'action' => "api/roles/r/{$role->slug}",
-            ]
-        ]);
     }
 
     /**

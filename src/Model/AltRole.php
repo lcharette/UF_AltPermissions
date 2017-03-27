@@ -44,7 +44,7 @@ class AltRole extends UFModel
     public function delete()
     {
         // Remove all permission associations
-        $this->permissions()->detach();
+        //$this->permissions()->detach();
 
         // Remove all user associations
         //$this->users()->detach();
@@ -88,6 +88,19 @@ class AltRole extends UFModel
     }
 
     /**
+     * getRoute function.
+     * Helper function for when the $ci is not directly avaiable
+     *
+     * @access public
+     * @param string $routeName
+     * @return Route for the designated route name
+     */
+    public function getRoute($routeName)
+    {
+        return static::$ci->router->pathFor($routeName, $this->toArray());
+    }
+
+    /**
      * Query scope to get all roles assigned to a specific seeker.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -117,11 +130,11 @@ class AltRole extends UFModel
     /**
      * Get a list of users who have this role.
      */
-    /*public function users()
+    public function users()
     {
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper * /
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = static::$ci->classMapper;
 
-        return $this->belongsToMany($classMapper->getClassMapping('user'), 'role_users', 'role_id', 'user_id');
-    }*/
+        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id');
+    }
 }
