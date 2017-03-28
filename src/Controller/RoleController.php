@@ -329,7 +329,7 @@ class RoleController extends SimpleController
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
             "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.post', [
+            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.put', [
                 'seeker' => $args['seeker'],
                 'id' => $params['id']
             ]),
@@ -626,13 +626,20 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
+        /** @var UserFrosting\Sprinkle\Core\Router $router */
+        $router = $this->ci->router;
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
             throw new ForbiddenException();
         }
 
         return $this->ci->view->render($response, 'pages/altRoles.html.twig', [
-            'seeker' => $args['seeker']
+            'seeker' => $args['seeker'],
+            'uri' => [
+                'create' => $router->pathFor('modal.roles.create', $args),
+                'sprunje' => $router->pathFor('api.roles.sprunje', $args)
+            ]
         ]);
     }
 

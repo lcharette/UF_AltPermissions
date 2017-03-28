@@ -57,9 +57,13 @@ class RoleSprunje extends Sprunje
             $item->name = $item->getLocaleName();
             $item->description = $item->getLocaleDescription();
 
-            // Route
-            $item->uri_delete = $item->getRoute('api.roles.delete');
-            $item->uri_edit_form = $item->getRoute('api.roles.edit.form');
+            // Routes
+            $item->uri = [
+                'view'   => $item->getRoute('alt_uri_roles.view'),
+                'delete' => $item->getRoute('api.roles.delete'),
+                'edit'   => $item->getRoute('modal.roles.edit'),
+                'permissions' => $item->getRoute('modal.roles.permissions')
+            ];
 
             return $item;
         });

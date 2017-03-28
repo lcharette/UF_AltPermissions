@@ -14,16 +14,17 @@ $app->group('/admin/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageList')
         ->setName('alt_uri_roles');
 
-    $this->get('/r/{slug}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageInfo');
+    $this->get('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageInfo')
+         ->setName('alt_uri_roles.view');
+
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/api/roles/{seeker}', function () {
     $this->delete('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:delete')
          ->setName('api.roles.delete');
 
-    $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList');
-
-    $this->get('/r/{slug}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getInfo');
+    $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList')
+         ->setName('api.roles.sprunje');
 
     $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions');
 
@@ -31,16 +32,20 @@ $app->group('/api/roles/{seeker}', function () {
          ->setName('api.roles.create.post');
 
     $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo')
-         ->setName('api.roles.edit.post');
+         ->setName('api.roles.edit.put');
 
     $this->put('/r/{slug}/{field}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateField');
+
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/modals/roles/{seeker}', function () {
-    $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalCreate');
+    $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalCreate')
+         ->setName('modal.roles.create');
 
     $this->get('/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEdit')
-         ->setName('api.roles.edit.form');
+         ->setName('modal.roles.edit');
 
-    $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions');
+    $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions')
+         ->setName('modal.roles.permissions');
+
 })->add('checkAuthSeeker')->add('authGuard');
