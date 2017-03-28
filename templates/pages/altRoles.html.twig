@@ -1,10 +1,5 @@
 {% extends "layouts/dashboard.html.twig" %}
 
-{% block stylesheets_page %}
-    <!-- Page-specific CSS asset bundle -->
-    {{ assets.css('css/form-widgets') | raw }}
-{% endblock %}
-
 {# Overrides blocks in head of base template #}
 {% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }}{% endblock %}
 

@@ -66,6 +66,34 @@ class AltPermission extends UFModel
     }
 
     /**
+     * getStatusTxt function.
+     * Prend le code de status et retourne la version localisé que le code représente
+     *
+     * @access public
+     * @return void
+     */
+    public function getLocaleName()
+    {
+        return static::$ci->translator->translate($this->name);
+    }
+    public function getLocaleDescription()
+    {
+        return static::$ci->translator->translate($this->description);
+    }
+
+    /**
+     * Query scope to get all roles assigned to a specific seeker.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $seeker
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForSeeker($query, $seeker)
+    {
+        return $query->where('seeker', $seeker);
+    }
+
+    /**
      * Query scope to get all permissions assigned to a specific role.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query

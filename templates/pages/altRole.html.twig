@@ -1,0 +1,63 @@
+{% extends "layouts/dashboard.html.twig" %}
+
+{# Overrides blocks in head of base template #}
+{% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }} | {{ role.localeName }}{% endblock %}
+
+{% block page_description %}{{ translate("ROLE.INFO_PAGE", {name: role.localeName}) }}{% endblock %}
+
+{% block body_matter %}
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-fw fa-drivers-license"></i> {{ translate('ROLE') }}</h3>
+                </div>
+                <div class="box-body">
+                    <dl>
+                        <dt>{{ translate('ROLE.NAME') }}</dt>
+                        <dd><p>{{ role.localeName }}</p></dd>
+                        <dt>{{ translate('DESCRIPTION') }}</dt>
+                        <dd><p>{{ role.localeDescription }}</p></dd>
+                    </dl>
+                </div>
+                <div class="box-footer text-center">
+                    <button type="button" class="btn btn-primary js-displayForm" data-id="{{ role.id }}" data-formUrl="{{ uri.edit }}">{{ translate('EDIT') }}</button>
+                </div>
+            </div><!-- /.box -->
+
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-fw fa-users"></i> {{ translate('ROLE.USERS') }}</h3>
+                </div>
+                <div class="box-body">
+                </div>
+                <div class="box-footer text-center">
+                </div>
+            </div><!-- /.box -->
+        </div>
+        <div class="col-lg-8">
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-fw fa-key"></i> {{translate('PERMISSION', 2)}}</h3>
+                </div>
+                <div class="box-body">
+                    {% for permission in permissions %}
+                        <dl>
+                        <dt>{{ translate('PERMISSION.NAME') }}</dt>
+                        <dd><p>{{ permission.localeName }}</p></dd>
+                        <dt>{{ translate('DESCRIPTION') }}</dt>
+                        <dd><p>{{ permission.localeDescription }}</p></dd>
+                    </dl>
+                    <hr />
+                    {% endfor %}
+                </div>
+                <div class="box-footer text-center">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts_page %}
+    <!-- Include page-specific JS -->
+    {{ assets.js('js/FormGenerator') | raw }}
+{% endblock %}
