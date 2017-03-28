@@ -30,7 +30,8 @@ $app->group('/api/roles/{seeker}', function () {
     $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:create')
          ->setName('api.roles.create.post');
 
-    $this->put('/r/{slug}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo');
+    $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo')
+         ->setName('api.roles.edit.post');
 
     $this->put('/r/{slug}/{field}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateField');
 })->add('checkAuthSeeker')->add('authGuard');
@@ -38,7 +39,8 @@ $app->group('/api/roles/{seeker}', function () {
 $app->group('/modals/roles/{seeker}', function () {
     $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalCreate');
 
-    $this->get('/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEdit');
+    $this->get('/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEdit')
+         ->setName('api.roles.edit.form');
 
     $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions');
 })->add('checkAuthSeeker')->add('authGuard');

@@ -52,12 +52,12 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li>
-                        <a href="#" data-slug="{{row.slug}}" class="js-role-permissions">
+                        <a href="#" class="js-displayForm">
                         <i class="fa fa-key"></i> {% endverbatim %}{{translate("PERMISSION.MANAGE")}}{% verbatim %}
                         </a>
                     </li>
                     <li>
-                        <a href="#" data-slug="{{row.slug}}" class="js-role-edit">
+                        <a href="#" class="js-displayForm" data-id="{{ row.id }}" data-formUrl="{{ row.uri_edit_form }}">
                         <i class="fa fa-edit"></i> {% endverbatim %}{{translate("ROLE.EDIT")}}{% verbatim %}
                         </a>
                     </li>
@@ -67,7 +67,7 @@
                             data-confirm-message="ROLE.DELETE_CONFIRM"
                             data-confirm-button="ROLE.DELETE_YES"
                             data-post-url="{{ row.uri_delete }}"
-                            data-post-method="DELETE" data-toggle="modal">
+                            data-post-method="DELETE">
                         <i class="fa fa-trash-o"></i> {% endverbatim %}{{translate("ROLE.DELETE")}}{% verbatim %}
                         </a>
                     </li>

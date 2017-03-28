@@ -59,6 +59,7 @@ class RoleSprunje extends Sprunje
 
             // Route
             $item->uri_delete = $item->getRoute('api.roles.delete');
+            $item->uri_edit_form = $item->getRoute('api.roles.edit.form');
 
             return $item;
         });

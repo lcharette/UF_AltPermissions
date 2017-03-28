@@ -98,6 +98,7 @@ class RoleController extends SimpleController
         // Generate the form
         $schema->initForm($role);
 
+        // Add info box about the language keys
         $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
@@ -132,6 +133,12 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
+        /** @var Config $config */
+        $config = $this->ci->config;
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
             throw new ForbiddenException();
@@ -156,9 +163,6 @@ class RoleController extends SimpleController
             $error = true;
         }
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
-
         // Check if name or slug already exists
         if ($classMapper->staticMethod('altRole', 'where', 'name', $data['name'])->forSeeker($args['seeker'])->first()) {
             $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
@@ -171,9 +175,6 @@ class RoleController extends SimpleController
 
         // Insert the seeker
         $data['seeker'] = $args['seeker'];
-
-        /** @var Config $config */
-        $config = $this->ci->config;
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
@@ -220,6 +221,9 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
         // Get the role
         if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
         {
@@ -232,9 +236,6 @@ class RoleController extends SimpleController
         ])) {
             throw new ForbiddenException();
         }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
 
         // Check that we are not deleting a default role
         //$defaultRoleSlugs = $classMapper->staticMethod('altRole', 'getDefaultSlugs');
@@ -268,9 +269,6 @@ class RoleController extends SimpleController
             ]);
         });
 
-        /** @var MessageStream $ms */
-        $ms = $this->ci->alerts;
-
         $ms->addMessageTranslated('success', 'ROLE.DELETION_SUCCESSFUL', [
             'name' => $roleName
         ]);
@@ -290,13 +288,6 @@ class RoleController extends SimpleController
         // GET parameters
         $params = $request->getQueryParams();
 
-        $role = $this->getRoleFromParams($params);
-
-        // If the role doesn't exist, return 404
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
@@ -306,37 +297,153 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first())
+        {
+            throw new NotFoundException($request, $response);
+        }
+
         // Access-controlled resource - check that currentUser has permission to edit basic fields "name", "slug", "description" for this role
-        $fieldNames = ['name', 'slug', 'description'];
+        // !TODO
+        /*$fieldNames = ['name', 'slug', 'description'];
         if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
             'role' => $role,
             'fields' => $fieldNames
         ])) {
             throw new ForbiddenException();
-        }
-
-        // Generate form
-        $fields = [
-            'hidden' => [],
-            'disabled' => []
-        ];
+        }*/
 
         // Load validation rules
-        $schema = new RequestSchema('schema://role/edit-info.json');
+        $schema = new RequestSchema('schema://altRole/create.json');
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
-        return $this->ci->view->render($response, 'components/modals/role.html.twig', [
-            'role' => $role,
-            'form' => [
-                'action' => "api/roles/r/{$role->slug}",
-                'method' => 'PUT',
-                'fields' => $fields,
-                'submit_text' => 'Update role'
-            ],
-            'page' => [
-                'validators' => $validator->rules('json', false)
-            ]
+        // Generate the form
+        $schema->initForm($role);
+
+        // Add info box about the language keys
+        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
+
+        return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
+            "box_id" => $params['box_id'],
+            "box_title" => "ROLE.EDIT",
+            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.post', [
+                'seeker' => $args['seeker'],
+                'id' => $params['id']
+            ]),
+            "form_method" => "PUT",
+            "fields" => $schema->generateForm(),
+            "validators" => $validator->rules()
         ]);
+    }
+
+    /**
+     * Processes the request to update an existing role's details.
+     *
+     * Processes the request from the role update form, checking that:
+     * 1. The role name/slug are not already in use;
+     * 2. The user has the necessary permissions to update the posted field(s);
+     * 3. The submitted data is valid.
+     * This route requires authentication (and should generally be limited to admins or the root user).
+     * Request type: PUT
+     * @see getModalRoleEdit
+     */
+    public function updateInfo($request, $response, $args)
+    {
+        /** @var Config $config */
+        $config = $this->ci->config;
+
+        // Get PUT parameters: (name, slug, description)
+        $params = $request->getParsedBody();
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
+        {
+            throw new NotFoundException($request, $response);
+        }
+
+        // Load the request schema
+        $schema = new RequestSchema('schema://altRole/create.json');
+
+        // Whitelist and set parameter defaults
+        $transformer = new RequestDataTransformer($schema);
+        $data = $transformer->transform($params);
+
+        $error = false;
+
+        // Validate request data
+        $validator = new ServerSideValidator($schema, $this->ci->translator);
+        if (!$validator->validate($data)) {
+            $ms->addValidationErrors($validator);
+            $error = true;
+        }
+
+        // Determine targeted fields
+        $fieldNames = [];
+        foreach ($data as $name => $value) {
+            $fieldNames[] = $name;
+        }
+
+        // Access-controlled resource - check that currentUser has permission to edit submitted fields for this role
+        // !TODO
+        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+            'role' => $role,
+            'fields' => array_values(array_unique($fieldNames))
+        ])) {
+            throw new ForbiddenException();
+        }
+
+        // Check if name or slug already exists
+        if (
+            isset($data['name']) &&
+            $data['name'] != $role->name &&
+            $classMapper->staticMethod('altRole', 'where', 'name', $data['name'])->forSeeker($args['seeker'])->first()
+        ) {
+            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
+            $error = true;
+        }
+
+        if ($error) {
+            return $response->withStatus(400);
+        }
+
+        // Begin transaction - DB will be rolled back if an exception occurs
+        Capsule::transaction( function() use ($data, $role, $currentUser) {
+            // Update the role and generate success messages
+            foreach ($data as $name => $value) {
+                if ($value != $role->$name){
+                    $role->$name = $value;
+                }
+            }
+
+            $role->save();
+
+            // Create activity record
+            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated details for role {$role->name}.", [
+                'type' => 'role_update_info',
+                'user_id' => $currentUser->id
+            ]);
+        });
+
+        $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
+            'name' => $role->name
+        ]);
+
+        return $response->withStatus(200);
     }
 
     /**
@@ -561,113 +668,6 @@ class RoleController extends SimpleController
         // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
         // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
         return $sprunje->toResponse($response);
-    }
-
-    /**
-     * Processes the request to update an existing role's details.
-     *
-     * Processes the request from the role update form, checking that:
-     * 1. The role name/slug are not already in use;
-     * 2. The user has the necessary permissions to update the posted field(s);
-     * 3. The submitted data is valid.
-     * This route requires authentication (and should generally be limited to admins or the root user).
-     * Request type: PUT
-     * @see getModalRoleEdit
-     */
-    public function updateInfo($request, $response, $args)
-    {
-        // Get the role based on slug in the URL
-        $role = $this->getRoleFromParams($args);
-
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
-        /** @var Config $config */
-        $config = $this->ci->config;
-
-        // Get PUT parameters: (name, slug, description)
-        $params = $request->getParsedBody();
-
-        /** @var MessageStream $ms */
-        $ms = $this->ci->alerts;
-
-        // Load the request schema
-        $schema = new RequestSchema('schema://role/edit-info.json');
-
-        // Whitelist and set parameter defaults
-        $transformer = new RequestDataTransformer($schema);
-        $data = $transformer->transform($params);
-
-        $error = false;
-
-        // Validate request data
-        $validator = new ServerSideValidator($schema, $this->ci->translator);
-        if (!$validator->validate($data)) {
-            $ms->addValidationErrors($validator);
-            $error = true;
-        }
-
-        // Determine targeted fields
-        $fieldNames = [];
-        foreach ($data as $name => $value) {
-            $fieldNames[] = $name;
-        }
-
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
-        $authorizer = $this->ci->authorizer;
-
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = $this->ci->currentUser;
-
-        // Access-controlled resource - check that currentUser has permission to edit submitted fields for this role
-        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
-            'role' => $role,
-            'fields' => array_values(array_unique($fieldNames))
-        ])) {
-            throw new ForbiddenException();
-        }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
-
-        // Check if name or slug already exists
-        if (
-            isset($data['name']) &&
-            $data['name'] != $role->name &&
-            $classMapper->staticMethod('role', 'where', 'name', $data['name'])->first()
-        ) {
-            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
-            $error = true;
-        }
-
-        if ($error) {
-            return $response->withStatus(400);
-        }
-
-        // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($data, $role, $currentUser) {
-            // Update the role and generate success messages
-            foreach ($data as $name => $value) {
-                if ($value != $role->$name){
-                    $role->$name = $value;
-                }
-            }
-
-            $role->save();
-
-            // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated details for role {$role->name}.", [
-                'type' => 'role_update_info',
-                'user_id' => $currentUser->id
-            ]);
-        });
-
-        $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
-            'name' => $role->name
-        ]);
-
-        return $response->withStatus(200);
     }
 
     /**
