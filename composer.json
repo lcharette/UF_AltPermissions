@@ -1,6 +1,6 @@
 {
-    "name": "UF AltPermissions",
-    "type": "sprinkle",
+    "name": "lcharette/UF-AltPermissions ",
+    "type": "userfrosting-sprinkle",
     "description": "Alternate/complementary permission system for UserFrosting V4",
     "keywords": ["permissions", "roles", "userfrosting"],
     "homepage": "https://github.com/lcharette/UF-AltPermissions",
@@ -19,5 +19,8 @@
         "psr-4": {
             "UserFrosting\\Sprinkle\\AltPermissions\\": "src/"
         }
+    },
+    "extra": {
+        "installer-name": "AltPermissions"
     }
 }
