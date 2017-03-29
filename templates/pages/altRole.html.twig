@@ -37,22 +37,43 @@
         </div>
         <div class="col-lg-8">
             <div class="box box-primary">
-                <div class="box-header">
-                    <h3 class="box-title"><i class="fa fa-fw fa-key"></i> {{translate('PERMISSION', 2)}}</h3>
-                </div>
-                <div class="box-body">
-                    {% for permission in permissions %}
-                        <dl>
-                        <dt>{{ translate('PERMISSION.NAME') }}</dt>
-                        <dd><p>{{ permission.localeName }}</p></dd>
-                        <dt>{{ translate('DESCRIPTION') }}</dt>
-                        <dd><p>{{ permission.localeDescription }}</p></dd>
-                    </dl>
-                    <hr />
-                    {% endfor %}
-                </div>
-                <div class="box-footer text-center">
-                </div>
+                <form method="PUT" action="{{site.uri.public}}/api/roles/r/{{role.slug}}/permissions" id="role-permissions">
+                    {% include "components/csrf.html.twig" %}
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="fa fa-fw fa-key"></i> {{ translate('PERMISSION', 2) }}</h3>
+                    </div>
+                    <div class="box-body no-padding">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ translate('PERMISSION', 2) }}</th>
+                                    <th class="text-center">{{ translate('STATUS') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for permission in permissions %}
+                                <tr>
+                                    <td>
+                                        <p><strong>{{ permission.localeName }}</strong></p>
+                                        <small>{{ permission.localeDescription }}</small>
+                                    </td>
+                                    <td class="text-center" nowrap="nowrap">
+                                        <div class="checkbox icheck">
+                                            <label>
+                                              <input type="checkbox" class="js-icheck" name="permissions[{{ permission.id }}]">
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer text-center">
+                        <button type="reset" class="btn btn-default">{{ translate('RESET') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ translate('PERMISSION.UPDATE') }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -60,4 +81,16 @@
 {% block scripts_page %}
     <!-- Include page-specific JS -->
     {{ assets.js('js/FormGenerator') | raw }}
+
+    <script>
+        // ufForm instance. Don't need FormGeneator now
+        $("#role-permissions").ufForm({
+            validators: [],
+            msgTarget: $("#alerts-page")
+        }).on("submitSuccess.ufForm", function() {
+            // Forward to settings page on success
+            window.location.reload(true);
+        });
+    </script>
+
 {% endblock %}
