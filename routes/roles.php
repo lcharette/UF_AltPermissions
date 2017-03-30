@@ -26,15 +26,17 @@ $app->group('/api/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList')
          ->setName('api.roles.sprunje');
 
-    $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions');
+    $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions')
+         ->setName('api.roles.get.permissions');
+
+    $this->put('/r/{id}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updatePermissions')
+         ->setName('api.roles.put.permissions');
 
     $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:create')
          ->setName('api.roles.create.post');
 
     $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo')
          ->setName('api.roles.edit.put');
-
-    $this->put('/r/{id}/{field}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateField');
 
 })->add('checkAuthSeeker')->add('authGuard');
 

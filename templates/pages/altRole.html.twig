@@ -60,7 +60,7 @@
                                     <td class="text-center" nowrap="nowrap">
                                         <div class="checkbox icheck">
                                             <label>
-                                              <input type="checkbox" class="js-icheck" name="permissions[{{ permission.id }}]">
+                                              <input type="checkbox" class="js-icheck" name="permissions[{{ permission.id }}]"{% if permission.active %} checked="checked" {% endif %}>
                                             </label>
                                         </div>
                                     </td>

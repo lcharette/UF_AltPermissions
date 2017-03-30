@@ -553,7 +553,7 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->with('permissions')->first())
         {
             throw new NotFoundException($request, $response);
         }
@@ -568,7 +568,14 @@ class RoleController extends SimpleController
         // Get the permissions
         $permissions = $classMapper->staticMethod('altPermission', 'forSeeker', $args['seeker'])->get();
 
-        error_log(print_r($permissions, true));
+        // Role permissions
+        $role_permissions = $role->permissions->pluck('id');
+
+        // Marked as defined the permissions that the role have
+        $permissions = $permissions->map(function ($item, $key) use ($role_permissions) {
+            $item->active = $role_permissions->contains($item->id);
+            return $item;
+        });
 
         return $this->ci->view->render($response, 'pages/altRole.html.twig', [
             'seeker' => $args['seeker'],
@@ -657,101 +664,69 @@ class RoleController extends SimpleController
      * This route requires authentication.
      * Request type: PUT
      */
-    public function updateField($request, $response, $args)
+    public function updatePermissions($request, $response, $args)
     {
-        // Get the username from the URL
-        $role = $this->getRoleFromParams($args);
-
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
-        // Get key->value pair from URL and request body
-        $fieldName = $args['field'];
-
         /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        // Access-controlled resource - check that currentUser has permission to edit the specified field for this user
-        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
-            'role' => $role,
-            'fields' => [$fieldName]
-        ])) {
-            throw new ForbiddenException();
-        }
-
         /** @var Config $config */
         $config = $this->ci->config;
-
-        // Get PUT parameters: value
-        $put = $request->getParsedBody();
-
-        if (!isset($put['value'])) {
-            throw new BadRequestException();
-        }
-
-        $params = [
-            $fieldName => $put['value']
-        ];
-
-        // Validate key -> value pair
-
-        // Load the request schema
-        $schema = new RequestSchema('schema://role/edit-field.json');
-
-        // Whitelist and set parameter defaults
-        $transformer = new RequestDataTransformer($schema);
-        $data = $transformer->transform($params);
-
-        // Validate, and throw exception on validation errors.
-        $validator = new ServerSideValidator($schema, $this->ci->translator);
-        if (!$validator->validate($data)) {
-            // TODO: encapsulate the communication of error messages from ServerSideValidator to the BadRequestException
-            $e = new BadRequestException();
-            foreach ($validator->errors() as $idx => $field) {
-                foreach($field as $eidx => $error) {
-                    $e->addUserMessage($error);
-                }
-            }
-            throw $e;
-        }
-
-        // Get validated and transformed value
-        $fieldValue = $data[$fieldName];
 
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
+        {
+            throw new NotFoundException($request, $response);
+        }
+
+        // Access-controlled resource - check that currentUser has permission to edit the specified field for this user
+        //!TODO
+        /*if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+            'role' => $role,
+            'fields' => [$fieldName]
+        ])) {
+            throw new ForbiddenException();
+        }*/
+
+        // Get PUT parameters: value
+        $put = $request->getParsedBody();
+
+        if (!isset($put['permissions'])) {
+            throw new BadRequestException();
+        }
+
+        // The checkbox are defined as a $permission_id => $active key/pair array. We need to find only the keys that are active
+        $newPermissions = collect($put['permissions'])->filter(function ($value, $key) {
+            return $value == 1;
+        })->keys();
+
+        // Role name for later use
+        $roleName = $role->getLocaleName();
+
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($fieldName, $fieldValue, $role, $currentUser) {
-            if ($fieldName == "permissions") {
-                $newPermissions = collect($fieldValue)->pluck('permission_id')->all();
-                $role->permissions()->sync($newPermissions);
-            } else {
-                $role->$fieldName = $fieldValue;
-                $role->save();
-            }
+        Capsule::transaction( function() use ($newPermissions, $role, $currentUser, $roleName) {
+
+            $role->permissions()->sync($newPermissions);
 
             // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated property '$fieldName' for role {$role->name}.", [
+            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated permissions for role {$roleName}.", [
                 'type' => 'role_update_field',
                 'user_id' => $currentUser->id
             ]);
         });
 
         // Add success messages
-        if ($fieldName == 'permissions') {
-            $ms->addMessageTranslated('success', 'ROLE.PERMISSIONS_UPDATED', [
-                'name' => $role->name
-            ]);
-        } else {
-            $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
-                'name' => $role->name
-            ]);
-        }
+        $ms->addMessageTranslated('success', 'ROLE.PERMISSIONS_UPDATED', [
+            'name' => $roleName
+        ]);
 
         return $response->withStatus(200);
     }
