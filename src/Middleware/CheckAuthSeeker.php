@@ -53,10 +53,11 @@ class CheckAuthSeeker
         $route = $request->getAttribute('route');
         $seeker = $route->getArgument('seeker');
 
-        if ($seeker == "" || !in_array($seeker, $this->config['seekers']))
+        if ($seeker == "" || !array_key_exists($seeker, $this->config['seekers']))
         {
             throw new NotFoundException($request, $response);
         }
+        //!TODO Check class exist
         else
         {
             return $next($request, $response);

@@ -1,0 +1,79 @@
+{# This partial template renders a table of roles, to be populated with rows via an AJAX request.
+ # This extends a generic template for paginated tables.
+ #
+ # Note that this template contains a "skeleton" table with an empty table body, and then a block of Handlebars templates which are used
+ # to render the table cells with the data from the AJAX request.
+#}
+
+{% extends "components/tables/table-paginated.html.twig" %}
+
+{% block table %}
+    <div id="table-users-role">
+        <table class="tablesorter table table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-info" data-sorter="false" data-filter="false">{{ translate('USER') }}</th>
+                    <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description" data-sorter="false" data-filter="false">{{ translate('ROLE') }}</th>
+                    <th data-column-template="#role-table-column-actions" data-sorter="false" data-filter="false">{{ translate('ACTIONS') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block table_cell_templates %}
+    {# This contains a series of <script> blocks, each of which is a client-side Handlebars template.
+     # Note that these are NOT Twig templates, although the syntax is similar.  We wrap them in the `verbatim` tag,
+     # so that Twig will output them directly into the DOM instead of trying to treat them like Twig templates.
+     #
+     # These templates require handlebars-helpers.js, moment.js
+    #}
+    {% verbatim %}
+    <script id="role-table-column-info" type="text/x-handlebars-template">
+        <td>
+            <strong>{{ row.first_name }} {{ row.last_name }}</strong>
+        </td>
+    </script>
+
+    <script id="role-table-column-description" type="text/x-handlebars-template">
+        <td>
+            {{ row.description }}
+        </td>
+    </script>
+
+    <script id="role-table-column-actions" type="text/x-handlebars-template">
+        <td>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    {% endverbatim %}{{ translate("ACTIONS") }}{% verbatim %}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li>
+                        <a href="{{ row.uri.view }}">
+                        <i class="fa fa-key"></i> {% endverbatim %}{{ translate("PERMISSION.MANAGE") }}{% verbatim %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="js-displayForm" data-id="{{ row.id }}" data-formUrl="{{ row.uri.edit }}">
+                        <i class="fa fa-edit"></i> {% endverbatim %}{{ translate("ROLE.EDIT") }}{% verbatim %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="js-displayConfirm"
+                            data-confirm-title="ROLE.DELETE"
+                            data-confirm-message="ROLE.DELETE_CONFIRM"
+                            data-confirm-button="ROLE.DELETE_YES"
+                            data-post-url="{{ row.uri.delete }}"
+                            data-post-method="DELETE">
+                        <i class="fa fa-trash-o"></i> {% endverbatim %}{{ translate("ROLE.DELETE") }}{% verbatim %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    </script>
+    {% endverbatim %}
+{% endblock %}

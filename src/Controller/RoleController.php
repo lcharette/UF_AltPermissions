@@ -582,7 +582,8 @@ class RoleController extends SimpleController
             'role' => $role,
             'permissions' => $permissions,
             'uri' => [
-                'edit'   => $role->getRoute('modal.roles.edit')
+                'edit'      => $role->getRoute('modal.roles.edit'),
+                'addUsers'  => $role->getRoute('modal.roles.addUsers')
             ]
         ]);
     }
@@ -649,6 +650,32 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         $sprunje = $classMapper->createInstance('altRole_sprunje', $classMapper, $params, $args['seeker']);
+
+        // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
+        // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
+        return $sprunje->toResponse($response);
+    }
+
+    public function getAuthList($request, $response, $args)
+    {
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        // Access-controlled page
+        if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
+            throw new ForbiddenException();
+        }
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        $sprunje = $classMapper->createInstance('altRole_auth_sprunje', $classMapper, $params, $args['seeker']);
 
         // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
         // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
@@ -729,5 +756,50 @@ class RoleController extends SimpleController
         ]);
 
         return $response->withStatus(200);
+    }
+
+    public function getModalAddUser($request, $response, $args)
+    {
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first())
+        {
+            throw new NotFoundException($request, $response);
+        }
+
+        // Access-controlled resource - check that currentUser has permission to edit basic fields "name", "slug", "description" for this role
+        // !TODO
+        /*$fieldNames = ['name', 'slug', 'description'];
+        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+            'role' => $role,
+            'fields' => $fieldNames
+        ])) {
+            throw new ForbiddenException();
+        }*/
+
+        return $this->ci->view->render($response, 'components/modals/role-add-user.html.twig', [
+            "role" => $role,
+            "box_id" => $params['box_id'],
+            "box_title" => "ALT_ROLE.ADD_USER",
+            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.put', [
+                'seeker' => $args['seeker'],
+                'id' => $params['id']
+            ]),
+            "form_method" => "PUT"
+        ]);
     }
 }

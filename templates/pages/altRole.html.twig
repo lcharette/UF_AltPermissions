@@ -32,7 +32,7 @@
                 <div class="box-body">
                 </div>
                 <div class="box-footer text-center">
-                    <button type="button" class="btn btn-primary js-displayForm" data-id="{{ role.id }}" data-formUrl="{{ uri.add_users }}">{{ translate('ALT_ROLE.ADD_USER') }}</button>
+                    <button type="button" class="btn btn-primary js-displayForm" data-id="{{ role.id }}" data-formUrl="{{ uri.addUsers }}">{{ translate('ALT_ROLE.ADD_USER') }}</button>
                 </div>
             </div><!-- /.box -->
         </div>
@@ -81,6 +81,7 @@
 {% endblock %}
 {% block scripts_page %}
     <!-- Include page-specific JS -->
+    {{ assets.js('js/form-widgets') | raw }}
     {{ assets.js('js/FormGenerator') | raw }}
 
     <script>

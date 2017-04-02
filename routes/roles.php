@@ -26,6 +26,9 @@ $app->group('/api/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList')
          ->setName('api.roles.sprunje');
 
+    $this->get('/auth', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
+         ->setName('api.roles.auth.sprunje');
+
     $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions')
          ->setName('api.roles.get.permissions');
 
@@ -49,5 +52,8 @@ $app->group('/modals/roles/{seeker}', function () {
 
     $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions')
          ->setName('modal.roles.permissions');
+
+    /*$this->get('/addUsers', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalAddUser')
+         ->setName('modal.roles.addUsers');*/
 
 })->add('checkAuthSeeker')->add('authGuard');
