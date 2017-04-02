@@ -11,6 +11,8 @@
             $table->string('seeker');
             $table->string('name');
             $table->text('description')->nullable();
+            $table->boolean('locked')->default(0);
+            $table->boolean('default')->default(0);
             $table->timestamps();
 
             $table->engine = 'InnoDB';
@@ -27,30 +29,6 @@
         echo "Created table 'alt_roles'..." . PHP_EOL;
     } else {
         echo "Table 'alt_roles' already exists.  Skipping..." . PHP_EOL;
-    }
-
-    /**
-     * Many-to-many mapping between permissions and roles.
-     */
-    if (!$schema->hasTable('alt_permission_roles')) {
-        $schema->create('alt_permission_roles', function (Blueprint $table) {
-            $table->integer('permission_id')->unsigned();
-            $table->integer('role_id')->unsigned();
-            $table->timestamps();
-
-            $table->engine = 'InnoDB';
-            $table->collation = 'utf8_unicode_ci';
-            $table->charset = 'utf8';
-            $table->primary(['permission_id', 'role_id']);
-            //$table->foreign('permission_id')->references('id')->on('permissions');
-            //$table->foreign('role_id')->references('id')->on('roles');
-            $table->index('permission_id');
-            $table->index('role_id');
-        });
-
-        echo "Created table 'alt_permission_roles'..." . PHP_EOL;
-    } else {
-        echo "Table 'alt_permission_roles' already exists.  Skipping..." . PHP_EOL;
     }
 
     /**
@@ -87,6 +65,30 @@
     }
 
     /**
+     * Many-to-many mapping between permissions and roles.
+     */
+    if (!$schema->hasTable('alt_permission_roles')) {
+        $schema->create('alt_permission_roles', function (Blueprint $table) {
+            $table->integer('permission_id')->unsigned();
+            $table->integer('role_id')->unsigned();
+            $table->timestamps();
+
+            $table->engine = 'InnoDB';
+            $table->collation = 'utf8_unicode_ci';
+            $table->charset = 'utf8';
+            $table->primary(['permission_id', 'role_id']);
+            $table->foreign('permission_id')->references('id')->on('alt_permissions');
+            $table->foreign('role_id')->references('id')->on('alt_roles');
+            $table->index('permission_id');
+            $table->index('role_id');
+        });
+
+        echo "Created table 'alt_permission_roles'..." . PHP_EOL;
+    } else {
+        echo "Table 'alt_permission_roles' already exists.  Skipping..." . PHP_EOL;
+    }
+
+    /**
      * Many-to-many mapping between roles and users.
      */
     if (!$schema->hasTable('alt_role_users')) {
@@ -100,8 +102,8 @@
             $table->collation = 'utf8_unicode_ci';
             $table->charset = 'utf8';
             $table->primary(['user_id', 'role_id']);
-            //$table->foreign('user_id')->references('id')->on('users');
-            //$table->foreign('role_id')->references('id')->on('roles');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('role_id')->references('id')->on('alt_roles');
             $table->index('user_id');
             $table->index('role_id');
         });
