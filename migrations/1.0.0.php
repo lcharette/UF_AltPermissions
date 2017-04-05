@@ -96,6 +96,7 @@
             $table->integer('user_id')->unsigned();
             $table->integer('role_id')->unsigned();
             $table->integer('seeker_id')->unsigned();
+            $table->string('seeker_type');
             $table->timestamps();
 
             $table->engine = 'InnoDB';

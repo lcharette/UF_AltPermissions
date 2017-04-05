@@ -135,6 +135,11 @@ class AltRole extends UFModel
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = static::$ci->classMapper;
 
-        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id');
+        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id')->withPivot('seeker_id');
+    }
+
+    public function projects()
+    {
+        return $this->morphedByMany('UserFrosting\Sprinkle\Gaston\Model\Project', 'seeker', 'alt_role_users', 'role_id')->withPivot('user_id');
     }
 }
