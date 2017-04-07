@@ -6,7 +6,7 @@ use UserFrosting\Tests\TestCase;
 //use Illuminate\Foundation\Testing\DatabaseMigrations;
 //use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-use UserFrosting\Sprinkle\Account\Model\User;
+use UserFrosting\Sprinkle\AltPermissions\Model\User;
 use UserFrosting\Sprinkle\AltPermissions\Model\AltRole;
 use UserFrosting\Sprinkle\Gaston\Model\Project;
 
