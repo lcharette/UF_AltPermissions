@@ -13,7 +13,7 @@ use League\FactoryMuffin\Faker\Facade as Faker;
 /**
  * General factory for the User Model
  */
-$fm->define('UserFrosting\Sprinkle\AltPermissions\Model\AltRole')->setDefinitions([
+$fm->define('UserFrosting\Tests\Model\Foo')->setDefinitions([
     'name' => Faker::sentence(3),
     'description' => Faker::text()
 ]);

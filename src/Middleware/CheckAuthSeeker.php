@@ -30,6 +30,24 @@ class CheckAuthSeeker
     public function __construct($config)
     {
         $this->config = $config;
+
+        // First check that the config is valid
+        if (!is_array($this->config['seekers']))
+        {
+            throw new \InvalidArgumentException('The AltPermissions.seekers configuration value is not a valid array');
+        }
+    }
+
+    public function getSeekerModel($seeker)
+    {
+        if ($seeker == "" || !array_key_exists($seeker, $this->config['seekers']))
+        {
+            throw new \InvalidArgumentException("Seeker '$seeker' not found");
+        } else {
+            //!TODO : Check class exist
+            //!TODO : Get this out of Middleware namespace
+            return $this->config['seekers'][$seeker];
+        }
     }
 
     /**
@@ -43,12 +61,6 @@ class CheckAuthSeeker
      */
     public function __invoke($request, $response, $next)
     {
-        // First check that the config is valid
-        if (!is_array($this->config['seekers']))
-        {
-            throw new \InvalidArgumentException('The AltPermissions.seekers configuration value is not a valid array');
-        }
-
         // Get the seeker argument
         $route = $request->getAttribute('route');
         $seeker = $route->getArgument('seeker');

@@ -19,10 +19,16 @@ use UserFrosting\Sprinkle\Account\Model\User as CoreUser;
  */
 class User extends CoreUser
 {
-    public function projects()
+    public function auth($seeker)
     {
-        return $this->morphedByMany('UserFrosting\Sprinkle\Gaston\Model\Project', 'seeker', 'alt_role_users')->withPivot('role_id');
+        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+        return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users')->withPivot('role_id');
     }
+
+    /*public function scopeForAuth($query, $seeker)
+    {
+        return $query->where('seeker', $seeker);
+    }*/
 
     public function altRole()
     {

@@ -67,6 +67,26 @@ class AltRole extends UFModel
     }
 
     /**
+     * Get a list of users who have this role.
+     */
+    public function users()
+    {
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = static::$ci->classMapper;
+
+        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id')->withPivot('seeker_id');
+    }
+
+    /**
+     * Model relation for dynamic seeker
+     */
+    public function auth($seeker)
+    {
+        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+        return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users', 'role_id')->withPivot('user_id');
+    }
+
+    /**
      * Model's getter
      *
      */
@@ -107,7 +127,7 @@ class AltRole extends UFModel
      * @param string $seeker
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeForSeeker($query, $seeker)
+    public function scopeForAuth($query, $seeker)
     {
         return $query->where('seeker', $seeker);
     }
@@ -126,20 +146,4 @@ class AltRole extends UFModel
                  ->where('user_id', $userId);
         });
     }*/
-
-    /**
-     * Get a list of users who have this role.
-     */
-    public function users()
-    {
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = static::$ci->classMapper;
-
-        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id')->withPivot('seeker_id');
-    }
-
-    public function projects()
-    {
-        return $this->morphedByMany('UserFrosting\Sprinkle\Gaston\Model\Project', 'seeker', 'alt_role_users', 'role_id')->withPivot('user_id');
-    }
 }

@@ -20,6 +20,11 @@
             "UserFrosting\\Sprinkle\\AltPermissions\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "UserFrosting\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "installer-name": "AltPermissions"
     }

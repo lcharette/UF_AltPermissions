@@ -112,3 +112,22 @@
     } else {
         echo "Table 'alt_role_users' already exists.  Skipping..." . PHP_EOL;
     }
+
+    /**
+     * `alt_foo` table. For testing
+     */
+     if (!$schema->hasTable('alt_foo')) {
+        $schema->create('alt_foo', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+
+            $table->engine = 'InnoDB';
+            $table->collation = 'utf8_unicode_ci';
+            $table->charset = 'utf8';
+        });
+        echo "Created table 'alt_foo'..." . PHP_EOL;
+    } else {
+        echo "Table 'alt_foo' already exists.  Skipping..." . PHP_EOL;
+    }
