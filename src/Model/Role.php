@@ -19,7 +19,7 @@ use UserFrosting\Sprinkle\Core\Model\UFModel;
  * @property string name
  * @property string description
  */
-class AltRole extends UFModel
+class Role extends UFModel
 {
     /**
      * @var string The name of the table for the current model.
@@ -66,24 +66,17 @@ class AltRole extends UFModel
         return $this->belongsToMany($classMapper->getClassMapping('altPermission'), 'alt_permission_roles', 'role_id', 'permission_id')->withTimestamps();
     }
 
-    /**
-     * Get a list of users who have this role.
-     */
-    public function users()
+    public function auth($seeker = "")
     {
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = static::$ci->classMapper;
-
-        return $this->belongsToMany($classMapper->getClassMapping('user'), 'alt_role_users', 'role_id', 'user_id')->withPivot('seeker_id');
-    }
-
-    /**
-     * Model relation for dynamic seeker
-     */
-    public function auth($seeker)
-    {
-        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
-        return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users', 'role_id')->withPivot('user_id');
+        if ($seeker != "")
+        {
+            $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth')->where('seeker_type', $seekerClass)->get();
+        }
+        else
+        {
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth');
+        }
     }
 
     /**
@@ -127,23 +120,8 @@ class AltRole extends UFModel
      * @param string $seeker
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeForAuth($query, $seeker)
+    public function scopeForSeeker($query, $seeker)
     {
         return $query->where('seeker', $seeker);
     }
-
-    /**
-     * Query scope to get all roles assigned to a specific user.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $userId
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    /*public function scopeForUser($query, $userId)
-    {
-        return $query->join('role_users', function ($join) use ($userId) {
-            $join->on('role_users.role_id', 'roles.id')
-                 ->where('user_id', $userId);
-        });
-    }*/
 }

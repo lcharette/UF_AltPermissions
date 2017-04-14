@@ -31,7 +31,7 @@ class AltPermissionsServicesProvider
          * Mappings added: User, Group, Role, Permission, Activity, PasswordReset, Verification
          */
         $container->extend('classMapper', function ($classMapper, $c) {
-            $classMapper->setClassMapping('altRole', 'UserFrosting\Sprinkle\AltPermissions\Model\AltRole');
+            $classMapper->setClassMapping('altRole', 'UserFrosting\Sprinkle\AltPermissions\Model\Role');
             $classMapper->setClassMapping('altPermission', 'UserFrosting\Sprinkle\AltPermissions\Model\AltPermission');
             $classMapper->setClassMapping('altRole_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\RoleSprunje');
             $classMapper->setClassMapping('altRole_auth_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\RoleAuthSprunje');

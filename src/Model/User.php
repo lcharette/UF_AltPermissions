@@ -19,20 +19,27 @@ use UserFrosting\Sprinkle\Account\Model\User as CoreUser;
  */
 class User extends CoreUser
 {
-    public function auth($seeker)
+    public function seeker($seeker)
     {
         $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
         return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users')->withPivot('role_id');
     }
 
-    /*public function scopeForAuth($query, $seeker)
+    public function auth($seeker = "")
     {
-        return $query->where('seeker', $seeker);
-    }*/
+        if ($seeker != "")
+        {
+            $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth')->where('seeker_type', $seekerClass)->get();
+        }
+        else
+        {
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth');
+        }
+    }
 
-    public function altRole()
+    public function roleForSeeker($seeker, $seeker_id)
     {
-        $classMapper = static::$ci->classMapper;
-        return $this->belongsToMany($classMapper->getClassMapping('altRole'), 'alt_role_users', 'user_id', 'role_id')->withPivot('seeker_id');
+        return $this->auth($seeker)->where('seeker_id', $seeker_id)->first()->role;
     }
 }

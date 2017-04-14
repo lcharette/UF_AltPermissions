@@ -7,7 +7,7 @@ use UserFrosting\Tests\DatabaseTransactions;
 use League\FactoryMuffin\Faker\Facade as Faker;
 
 use UserFrosting\Sprinkle\AltPermissions\Model\User;
-use UserFrosting\Sprinkle\AltPermissions\Model\AltRole;
+use UserFrosting\Sprinkle\AltPermissions\Model\Role;
 
 abstract class AltPermissions extends TestCase
 {
@@ -16,7 +16,9 @@ abstract class AltPermissions extends TestCase
     /**
      * @var The test data we'll in each test
      */
-    protected $testData;
+    protected $users;
+    protected $roles;
+    protected $seekers;
 
     /**
      * @var The seeker that will be tested
@@ -28,17 +30,15 @@ abstract class AltPermissions extends TestCase
      */
     protected $seekerModel;
 
+    /**
+     * @var The seeker class. So we don't have to call a new one each time
+     */
     protected $seekerClass;
 
     /**
-     * setupSeeker function.
-     * This function can be used by other class extending this one to perform
-     * actions on the seeker before the test are run
-     *
-     * @access protected
-     * @return void
+     * @var Bool. Enabled/Disable verbose debugging
      */
-    protected function setupSeeker() {}
+    protected $debug = false;
 
     /**
      * setUp function.
@@ -52,40 +52,46 @@ abstract class AltPermissions extends TestCase
         // @var League\FactoryMuffin\FactoryMuffin
         $fm = $this->ci->factory;
 
-        // Setup the seeker
-        $this->setupSeeker();
-
         // Create 2 users
-        $users = collect($fm->seed(2, 'UserFrosting\Sprinkle\AltPermissions\Model\User'));
+        $users = collect([
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\User', ['user_name' => 'User 1']),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\User', ['user_name' => 'User 2'])
+        ]);
 
         // Create 4 seekers
         $seekers = collect($fm->seed(4, $this->seekerModel));
 
         // Create 3 roles
-        $roles =  collect($fm->seed(3, 'UserFrosting\Sprinkle\AltPermissions\Model\AltRole', ['seeker' => $this->seeker]));
+        $roles =  collect([
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 1"]),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 2"]),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 3"])
+        ]);
 
         // Assign them all together
-        $users[0]->auth($this->seeker)->sync([
+        $users[0]->seeker($this->seeker)->sync([
             $seekers[0]->id => ['role_id' => $roles[0]->id],
             $seekers[1]->id => ['role_id' => $roles[0]->id],
             $seekers[2]->id => ['role_id' => $roles[2]->id]
         ]);
-        $users[1]->auth($this->seeker)->sync([
+        $users[1]->seeker($this->seeker)->sync([
             $seekers[0]->id => ['role_id' => $roles[2]->id],
             $seekers[1]->id => ['role_id' => $roles[0]->id],
             $seekers[3]->id => ['role_id' => $roles[1]->id]
         ]);
 
         // Add everyone to the testData
-        $this->testData = (object) [
-            'users' => $users->pluck('id'),
-            'roles' => $roles->pluck('id'),
-            'seekers' => $seekers->pluck('id')
-        ];
+        $this->users = (object) $users->pluck('id');
+        $this->roles = (object) $roles->pluck('id');
+        $this->seekers = (object) $seekers->pluck('id');
 
+        // Se we don't have to call "new" each time
         $this->seekerClass = new $this->seekerModel;
     }
 
+    /**
+     * Test fetching a seeker config value (getSeekerModel function)
+     */
     public function test_config()
     {
         $config = $this->ci->config;
@@ -104,21 +110,30 @@ abstract class AltPermissions extends TestCase
     public function test_individualUser()
     {
         // Get user n° 1
-        $user = User::find($this->testData->users[0]);
+        $user = User::find($this->users[0]);
 
         // Get seeker n° 2 id
-        $seeker_id = $this->testData->seekers[1];
+        $seeker_id = $this->seekers[2];
 
-        // Get user n° 1 role for seeker n° 2
-        $role_id = $user->auth($this->seeker)->find($seeker_id)->pivot->role_id;
+        // Get user n° 1 auth data for seeker n° 2
+        $auth = $user->auth($this->seeker)->where('seeker_id', $seeker_id)->first();
 
         // User n° 1 role for seeker n° 2 should be n° 1
-        $this->assertEquals($this->testData->roles[0], $role_id);
+        $this->assertEquals($this->roles[2], $auth->role->id);
+
 
         // Same test, but on one line. We'll improove on that later ;)
         $this->assertEquals(
-            $this->testData->roles[0],
-            User::find($this->testData->users[0])->auth($this->seeker)->find($this->testData->seekers[1])->pivot->role_id
+            $this->roles[2],
+            User::find($this->users[0])->auth($this->seeker)->where('seeker_id', $seeker_id)->first()->role->id
+        );
+
+
+        // The one above is too long for nothing...
+        //$role = $user->roleForSeeker($this->seeker, $seeker_id)
+        $this->assertEquals(
+            $this->roles[2],
+            User::find($this->users[0])->roleForSeeker($this->seeker, $seeker_id)->id
         );
     }
 
@@ -126,100 +141,89 @@ abstract class AltPermissions extends TestCase
      * Test fetching a seeker's role for a user
      * Plus make sure we can get a role name too
      */
-    public function test_individuaSeeker()
+    public function test_individualSeeker()
     {
         // seeker 2 object
-        $seeker = $this->seekerClass->find($this->testData->seekers[1]);
+        $seeker = $this->seekerClass->find($this->seekers[1]);
 
         // User 1 real id
-        $user_id = $this->testData->users[0];
+        $user_id = $this->users[0];
 
         // Role 1 id and name for result comparaison
-        $role_id = $this->testData->roles[0];
-        $role_name = AltRole::find($role_id)->name;
+        $role_id = $this->roles[0];
+        $role_name = Role::find($role_id)->name;
 
         // Get the seeker roles, with the user as a pivot where
-        $user_role = $seeker->roles()->wherePivot('user_id', $user_id)->first();
-        $this->assertEquals($role_id, $user_role->id);
-        $this->assertEquals($role_name, $user_role->name);
+        $auth = $seeker->auth->where('user_id', $user_id)->first();
+        $this->assertEquals($role_id, $auth->role->id);
+        $this->assertEquals($role_name, $auth->role->name);
 
-        // Now get the seeker user. The role id is avaialable in the pivot.
-        // This requires the altRole to be queried again. This is not efficient,
-        // but we still test it works. Just to be sure
-        $user_role = $seeker->users($user_id)->first()->pivot->role_id;
-        $user_role = AltRole::find($user_role);
-        $this->assertEquals($role_id, $user_role->id);
-        $this->assertEquals($role_name, $user_role->name);
 
-        // Now we test the custom pivot.
-        //$user_role = $seeker->users($user_id)->first()->role;
-        //$this->assertEquals($role_id, $user_role->id);
-        //$this->assertEquals($role_name, $user_role->name);
+        // The one above is too long for nothing...
+        //$role = $seeker->roleForUser($user_id)
+        $this->assertEquals(
+            $role_id,
+            $this->seekerClass->find($this->seekers[1])->roleForUser($user_id)->id
+        );
+    }
+
+    /**
+     * test_relations function.
+     * Mother of all tests
+     *
+     * @access public
+     * @return void
+     */
+    public function test_relations()
+    {
+        $this->U_S_R();
+        $this->U_R_S();
+        $this->R_U_S();
+        $this->R_S_U();
+        $this->S_R_U();
+        $this->S_U_R();
     }
 
     /**
      * Test the Users => Seekers -> Role relations
+     * U    S   R
+     * 1    1   1
+     * 1    2   1
+     * 1    3   3
+     * 2    1   3
+     * 2    2   1
+     * 2    4   2
      */
-    public function test__U_S_R()
+    public function U_S_R()
     {
-        // U    S   R
-        // 1    1   1
-        // 1    2   1
-        // 1    3   3
-        // 2    1   3
-        // 2    2   1
-        // 2    4   2
-        $expected_results = collect([
-            [
-                "user" => $this->testData->users[0],
-                "seeker" => $this->testData->seekers[0],
-                "role" => $this->testData->roles[0]
+        $this->debug("\n ---- U => S -> R ---- ");
+
+        $expected_results = [
+            // User 1
+            $this->users[0] => [
+                $this->seekers[0] => $this->roles[0],
+                $this->seekers[1] => $this->roles[0],
+                $this->seekers[2] => $this->roles[2]
             ],
-            [
-                "user" => $this->testData->users[0],
-                "seeker" => $this->testData->seekers[1],
-                "role" => $this->testData->roles[0]
-            ],
-            [
-                "user" => $this->testData->users[0],
-                "seeker" => $this->testData->seekers[2],
-                "role" => $this->testData->roles[2]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[0],
-                "role" => $this->testData->roles[2]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[1],
-                "role" => $this->testData->roles[0]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[3],
-                "role" => $this->testData->roles[1]
+            // User 2
+            $this->users[1] => [
+                $this->seekers[0] => $this->roles[2],
+                $this->seekers[1] => $this->roles[0],
+                $this->seekers[3] => $this->roles[1]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $users = User::find($this->testData->users->toArray());
+        $users = User::find($this->users->toArray());
         foreach ($users as $user) {
 
-            $seekers = $user->auth($this->seeker)->get();
-            foreach ($seekers as $seeker) {
+            $this->debug("\n ---- " . $user->user_name . " ---- ");
 
-                //!TODO -> Custom pivot
-                $role_id = $seeker->pivot->role_id;
-                $role = AltRole::find($role_id);
-
-                $collect = [
-                    "user" => $user->id,
-                    "seeker" => $seeker->id,
-                    "role" => $role->id
-                ];
-                $results->push($collect);
+            foreach ($user->auth($this->seeker) as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->user->id][$auth->seeker->id] = $auth->role->id;
             }
         }
 
@@ -228,67 +232,53 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test the Users => Roles => Seekers relations
+     * U    R   S
+     * 1    1   1,2
+     * 1    3   3
+     * 2    1   2
+     * 2    2   7
+     * 2    3   1
      */
-    public function test__U_R_S()
+    public function U_R_S()
     {
-        // U    R   S
-        // 1    1   1,2
-        // 1    3   3
-        // 2    1   2
-        // 2    2   7
-        // 2    3   1
-        $expected_results = collect([
-            [
-                "user" => $this->testData->users[0],
-                "role" => $this->testData->roles[0],
-                "seeker" => $this->testData->seekers[0].",".$this->testData->seekers[1]
+        $this->debug("\n ---- U => R => S ---- ");
+
+        $expected_results = [
+            // User 1
+            $this->users[0] => [
+                $this->roles[0] => [
+                    $this->seekers[0],
+                    $this->seekers[1]
+                ],
+                $this->roles[2] => [
+                    $this->seekers[2]
+                ]
             ],
-            [
-                "user" => $this->testData->users[0],
-                "role" => $this->testData->roles[2],
-                "seeker" => $this->testData->seekers[2]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[2],
-                "seeker" => $this->testData->seekers[0]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[0],
-                "seeker" => $this->testData->seekers[1]
-            ],
-            [
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[1],
-                "seeker" => $this->testData->seekers[3]
+            // User 2
+            $this->users[1] => [
+                $this->roles[2] => [
+                    $this->seekers[0]
+                ],
+                $this->roles[0] => [
+                    $this->seekers[1]
+                ],
+                $this->roles[1] => [
+                    $this->seekers[3]
+                ]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $users = User::find($this->testData->users->toArray());
+        $users = User::find($this->users->toArray());
         foreach ($users as $user) {
 
-            $roles = $user->altRole->groupBy('id');
-            foreach ($roles as $role_collection) {
+            $this->debug("\n ---- " . $user->user_name . " ---- ");
 
-                $role = $role_collection->first();
-
-                $seekers = collect([]);
-                foreach($role_collection as $i) {
-
-                    $seeker_id = $i->pivot->seeker_id;
-                    $seeker = $this->seekerClass->find($seeker_id);
-                    $seekers->push($seeker);
-                }
-
-                $collect = [
-                    "user" => $user->id,
-                    "role" => $role->id,
-                    "seeker" => $seekers->implode("id", ",")
-                ];
-                $results->push($collect);
+            foreach ($user->auth($this->seeker) as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->user->id][$auth->role->id][] = $auth->seeker->id;
             }
         }
 
@@ -297,67 +287,56 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test the Roles => Users => Sekers relations
+     * R    U   S
+     * 1    1   1,2
+     * 1    2   2
+     * 2    2   4
+     * 3    1   3
+     * 3    2   1
      */
-    public function test__R_U_S()
+    public function R_U_S()
     {
-        // R    U   S
-        // 1    1   1,2
-        // 1    2   2
-        // 2    2   4
-        // 3    1   3
-        // 3    2   1
-        $expected_results = collect([
-            [
-                "role" => $this->testData->roles[0],
-                "user" => $this->testData->users[0],
-                "seeker" => $this->testData->seekers[0].",".$this->testData->seekers[1]
+        $this->debug("\n ---- R => U => S ---- ");
+
+        $expected_results = [
+            // Role 1
+            $this->roles[0] => [
+                $this->users[0] => [
+                    $this->seekers[0],
+                    $this->seekers[1]
+                ],
+                $this->users[1] => [
+                    $this->seekers[1]
+                ]
             ],
-            [
-                "role" => $this->testData->roles[0],
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[1]
+            // Role 2
+            $this->roles[1] => [
+                $this->users[1] => [
+                    $this->seekers[3]
+                ]
             ],
-            [
-                "role" => $this->testData->roles[1],
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[3]
-            ],
-            [
-                "role" => $this->testData->roles[2],
-                "user" => $this->testData->users[0],
-                "seeker" => $this->testData->seekers[2]
-            ],
-            [
-                "role" => $this->testData->roles[2],
-                "user" => $this->testData->users[1],
-                "seeker" => $this->testData->seekers[0]
+            // Role 3
+            $this->roles[2] => [
+                $this->users[0] => [
+                    $this->seekers[2]
+                ],
+                $this->users[1] => [
+                    $this->seekers[0]
+                ]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $roles = AltRole::find($this->testData->roles->toArray());
+        $roles = Role::find($this->roles->toArray());
         foreach ($roles as $role) {
 
-            $users = $role->users->groupBy('id');
-            foreach ($users as $user_collection) {
+            $this->debug("\n ---- " . $role->name . " ---- ");
 
-                $user = $user_collection->first();
-
-                $seekers = collect([]);
-                foreach($user_collection as $i) {
-
-                    $seeker_id = $i->pivot->seeker_id;
-                    $seeker = $this->seekerClass->find($seeker_id);
-                    $seekers->push($seeker);
-                }
-
-                $collect = [
-                    "role" => $role->id,
-                    "user" => $user->id,
-                    "seeker" => $seekers->implode("id", ",")
-                ];
-                $results->push($collect);
+            foreach ($role->auth($this->seeker) as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->role->id][$auth->user->id][] = $auth->seeker->id;
             }
         }
 
@@ -366,67 +345,56 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test the Roles => Seekers => Users relations
+     * R    S   U
+     * 1    1   1
+     * 1    2   1,2
+     * 2    4   2
+     * 3    1   2
+     * 3    3   1
      */
-    public function test__R_S_U()
+    public function R_S_U()
     {
-        // R    S   U
-        // 1    1   1
-        // 1    2   1,2
-        // 2    4   2
-        // 3    1   2
-        // 3    3   1
-        $expected_results = collect([
-            [
-                "role" => $this->testData->roles[0],
-                "seeker" => $this->testData->seekers[0],
-                "user" => $this->testData->users[0]
+        $this->debug("\n ---- R => S => U ---- ");
+
+        $expected_results = [
+            // Role 1
+            $this->roles[0] => [
+                $this->seekers[0] => [
+                    $this->users[0]
+                ],
+                $this->seekers[1] => [
+                    $this->users[0],
+                    $this->users[1]
+                ]
             ],
-            [
-                "role" => $this->testData->roles[0],
-                "seeker" => $this->testData->seekers[1],
-                "user" => $this->testData->users[0].",".$this->testData->users[1]
+            // Role 2
+            $this->roles[1] => [
+                $this->seekers[3] => [
+                    $this->users[1]
+                ]
             ],
-            [
-                "role" => $this->testData->roles[1],
-                "seeker" => $this->testData->seekers[3],
-                "user" => $this->testData->users[1]
-            ],
-            [
-                "role" => $this->testData->roles[2],
-                "seeker" => $this->testData->seekers[2],
-                "user" => $this->testData->users[0]
-            ],
-            [
-                "role" => $this->testData->roles[2],
-                "seeker" => $this->testData->seekers[0],
-                "user" => $this->testData->users[1]
+            // Role 3
+            $this->roles[2] => [
+                $this->seekers[2] => [
+                    $this->users[0]
+                ],
+                $this->seekers[0] => [
+                    $this->users[1]
+                ]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $roles = AltRole::find($this->testData->roles->toArray());
+        $roles = Role::find($this->roles->toArray());
         foreach ($roles as $role) {
 
-            $seekers = $role->auth($this->seeker)->get()->groupBy('id');
-            foreach ($seekers as $seeker_collection) {
+            $this->debug("\n ---- " . $role->name . " ---- ");
 
-                $seeker = $seeker_collection->first();
-
-                $users = collect([]);
-                foreach($seeker_collection as $i) {
-
-                    $user_id = $i->pivot->user_id;
-                    $user = User::find($user_id);
-                    $users->push($user);
-                }
-
-                $collect = [
-                    "role" => $role->id,
-                    "seeker" => $seeker->id,
-                    "user" => $users->implode("id", ",")
-                ];
-                $results->push($collect);
+            foreach ($role->auth($this->seeker) as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->role->id][$auth->seeker->id][] = $auth->user->id;
             }
         }
 
@@ -435,67 +403,59 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test the Seekers => Roles => Users relations
+     * S    R   U
+     * 1    1   1
+     * 1    3   2
+     * 2    1   1,2
+     * 3    3   1
+     * 4    2   2
      */
-    public function test__S_R_U()
+    public function S_R_U()
     {
-        // S    R   U
-        // 1    1   1
-        // 1    3   2
-        // 2    1   1,2
-        // 3    3   1
-        // 4    2   2
-        $expected_results = collect([
-            [
-                "seeker" => $this->testData->seekers[0],
-                "role" => $this->testData->roles[0],
-                "user" => $this->testData->users[0]
+        $this->debug("\n ---- S => R => U ---- ");
+
+        $expected_results = [
+            // Seeker 1
+            $this->seekers[0] => [
+                $this->roles[0] => [
+                    $this->users[0]
+                ],
+                $this->roles[2] => [
+                    $this->users[1]
+                ]
             ],
-            [
-                "seeker" => $this->testData->seekers[0],
-                "role" => $this->testData->roles[2],
-                "user" => $this->testData->users[1]
+            // Seeker 2
+            $this->seekers[1] => [
+                $this->roles[0] => [
+                    $this->users[0],
+                    $this->users[1]
+                ]
             ],
-            [
-                "seeker" => $this->testData->seekers[1],
-                "role" => $this->testData->roles[0],
-                "user" => $this->testData->users[0].",".$this->testData->users[1]
+            // Seeker 3
+            $this->seekers[2] => [
+                $this->roles[2] => [
+                    $this->users[0]
+                ]
             ],
-            [
-                "seeker" => $this->testData->seekers[2],
-                "role" => $this->testData->roles[2],
-                "user" => $this->testData->users[0]
-            ],
-            [
-                "seeker" => $this->testData->seekers[3],
-                "role" => $this->testData->roles[1],
-                "user" => $this->testData->users[1]
+            // Seeker 4
+            $this->seekers[3] => [
+                $this->roles[1] => [
+                    $this->users[1]
+                ]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $seekers = $this->seekerClass->find($this->testData->seekers->toArray());
+        $seekers = $this->seekerClass->find($this->seekers->toArray());
         foreach ($seekers as $seeker) {
 
-            $roles = $seeker->roles->groupBy('id');
-            foreach ($roles as $role_collection) {
+            $this->debug("\n ---- " . $seeker->id . " ---- ");
 
-                $role = $role_collection->first();
-
-                $users = collect([]);
-                foreach($role_collection as $i) {
-
-                    $user_id = $i->pivot->user_id;
-                    $user = User::find($user_id);
-                    $users->push($user);
-                }
-
-                $collect = [
-                    "seeker" => $seeker->id,
-                    "role" => $role->id,
-                    "user" => $users->implode("id", ",")
-                ];
-                $results->push($collect);
+            foreach ($seeker->auth as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->seeker->id][$auth->role->id][] = $auth->user->id;
             }
         }
 
@@ -504,70 +464,84 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test the Seekers => Users -> Role relations
+     * S    U   R
+     * 1    1   1
+     * 1    2   3
+     * 2    1   1
+     * 2    2   1
+     * 3    1   3
+     * 4    2   2
      */
-    public function test__S_U_R()
+    public function S_U_R()
     {
-        // S    U   R
-        // 1    1   1
-        // 1    2   3
-        // 2    1   1
-        // 2    2   1
-        // 3    1   3
-        // 4    2   2
-        $expected_results = collect([
-            [
-                "seeker" => $this->testData->seekers[0],
-                "user" => $this->testData->users[0],
-                "role" => $this->testData->roles[0]
+        $this->debug("\n ---- S => U -> R ---- ");
+
+        $expected_results = [
+            // Seeker 1
+            $this->seekers[0] => [
+                $this->users[0] => $this->roles[0],
+                $this->users[1] => $this->roles[2]
             ],
-            [
-                "seeker" => $this->testData->seekers[0],
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[2]
+            // Seeker 2
+            $this->seekers[1] => [
+                $this->users[0] => $this->roles[0],
+                $this->users[1] => $this->roles[0]
             ],
-            [
-                "seeker" => $this->testData->seekers[1],
-                "user" => $this->testData->users[0],
-                "role" => $this->testData->roles[0]
+            // Seeker 3
+            $this->seekers[2] => [
+                $this->users[0] => $this->roles[2]
             ],
-            [
-                "seeker" => $this->testData->seekers[1],
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[0]
-            ],
-            [
-                "seeker" => $this->testData->seekers[2],
-                "user" => $this->testData->users[0],
-                "role" => $this->testData->roles[2]
-            ],
-            [
-                "seeker" => $this->testData->seekers[3],
-                "user" => $this->testData->users[1],
-                "role" => $this->testData->roles[1]
+            // Seeker 4
+            $this->seekers[3] => [
+                $this->users[1] => $this->roles[1]
             ]
-        ]);
+        ];
 
-        $results = collect([]);
+        $results = [];
 
-        $seekers = $this->seekerClass->find($this->testData->seekers->toArray());
+        $seekers = $this->seekerClass->find($this->seekers->toArray());
         foreach ($seekers as $seeker) {
 
-            $users = $seeker->users;
-            foreach ($users as $user) {
+            $this->debug("\n ---- " . $seeker->id . " ---- ");
 
-                //!TODO -> Custom pivot
-                $role_id = $user->pivot->role_id;
-                $user->role = AltRole::find($role_id);
-
-                $collect = [
-                    "seeker" => $seeker->id,
-                    "role" => $user->role->id,
-                    "user" => $user->id
-                ];
-                $results->push($collect);
+            foreach ($seeker->auth as $auth)
+            {
+                $this->debugAuth($auth);
+                $results[$auth->seeker->id][$auth->user->id] = $auth->role->id;
             }
         }
 
         $this->assertEquals($expected_results, $results);
+    }
+
+
+    /**
+     * debug function.
+     *
+     * @access protected
+     * @param mixed $message
+     * @return void
+     */
+    protected function debug($message)
+    {
+        if ($this->debug)
+        {
+            echo "\n" . $message;
+        }
+    }
+
+    /**
+     * debugAuth function.
+     *
+     * @access protected
+     * @param mixed $auth
+     * @return void
+     */
+    protected function debugAuth($auth)
+    {
+        $seeker_name = isset($auth->seeker->name) ? " - " . $auth->seeker->name : ""; //Name might not exist
+        $this->debug("\n USER :: #" . $auth->user->id . " - " . $auth->user->user_name .
+                     "\n ROLE :: #" . $auth->role->id . " - " . $auth->role->name .
+                     "\n SEEKER :: #" . $auth->seeker->id . $seeker_name . "\n");
     }
 }

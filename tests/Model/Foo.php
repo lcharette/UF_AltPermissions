@@ -10,7 +10,7 @@ namespace UserFrosting\Tests\Model;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use UserFrosting\Sprinkle\Core\Model\UFModel;
-use UserFrosting\Sprinkle\AltPermissions\Model\Traits\AltPermissions;
+use UserFrosting\Sprinkle\AltPermissions\Model\Traits\Auth;
 
 /**
  * Project class.
@@ -19,7 +19,7 @@ use UserFrosting\Sprinkle\AltPermissions\Model\Traits\AltPermissions;
  */
 class Foo extends UFModel {
 
-    use AltPermissions;
+    use Auth;
 
     /**
      * @var string The name of the table for the current model.
