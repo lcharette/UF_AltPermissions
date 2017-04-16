@@ -655,6 +655,14 @@ class RoleController extends SimpleController
         return $sprunje->toResponse($response);
     }
 
+    /**
+     * Returns a list of auth data
+     *
+     * Generates a list of auth data, optionally paginated, sorted and/or filtered.
+     * This page requires authentication.
+     * Request type: GET
+     * OK
+     */
     public function getAuthList($request, $response, $args)
     {
         // GET parameters
@@ -674,8 +682,17 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        $seeker_id = isset($args['seeker_id']) ? $args['seeker_id'] : false;
-        $sprunje = $classMapper->createInstance('altRole_auth_sprunje', $classMapper, $params, $args['seeker'], $seeker_id);
+        // Look up what route data we have
+        //$params = explode('/', $request->getAttribute('options'));
+        //Debug::debug(print_r($params, true));
+        $options = [
+            "seeker_id" => isset($args['seeker_id']) ? $args['seeker_id'] : false,
+            "role_id" => isset($args['role_id']) ? $args['role_id'] : false,
+            "user_id" => isset($args['user_id']) ? $args['user_id'] : false
+        ];
+
+        // Get the sprunje
+        $sprunje = $classMapper->createInstance('altRole_auth_sprunje', $classMapper, $params, $args['seeker'], $options);
 
         // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
         // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).

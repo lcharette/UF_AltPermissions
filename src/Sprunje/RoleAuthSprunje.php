@@ -31,15 +31,21 @@ class RoleAuthSprunje extends Sprunje
 
 
     protected $seeker = "";
-    protected $seeker_id;
+    protected $auth_options = [];
 
     /**
      * {@inheritDoc}
      */
-    public function __construct($classMapper, $options, $seeker, $seeker_id = false)
+    public function __construct($classMapper, $options, $seeker, $auth_options = [])
     {
         $this->seeker = $seeker;
-        $this->seeker_id = $seeker_id;
+        $this->auth_options = array_merge([
+            "seeker_id" => 0,
+            "role_id" => 0,
+            "user_id" => 0
+        ], $auth_options);
+
+        // Run parent method
         parent::__construct($classMapper, $options);
     }
 
@@ -48,7 +54,11 @@ class RoleAuthSprunje extends Sprunje
      */
     protected function baseQuery()
     {
-        $query = $this->classMapper->createInstance('altAuth')->forSeeker($this->seeker, $this->seeker_id)->with(['user', 'role', 'seeker']);
+        //Debug::debug(print_r($this->auth_options, true));
+        $query = $this->classMapper->createInstance('altAuth')                  // Get Auth model
+                                   ->forSeeker($this->seeker)                   // With the seeker key
+                                   ->with(['user', 'role', 'seeker'])           // Eager load the relations for Handlebar
+                                   ->where(array_filter($this->auth_options));  // Apply where contraints, using only non false (0) key
         return $query;
     }
 

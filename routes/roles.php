@@ -26,7 +26,14 @@ $app->group('/api/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList')
          ->setName('api.roles.sprunje');
 
-    $this->get('/auth[/{seeker_id}]', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
+    // Auth route. For Auth Sprunje. Load all, for seeker, user or role
+    $this->get('/auth', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
+         ->setName('api.roles.auth.sprunje');
+    $this->get('/auth/s/{seeker_id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
+         ->setName('api.roles.auth.sprunje');
+    $this->get('/auth/u/{user_id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
+         ->setName('api.roles.auth.sprunje');
+    $this->get('/auth/r/{role_id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList')
          ->setName('api.roles.auth.sprunje');
 
     $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions')
