@@ -458,7 +458,7 @@ class RoleController extends SimpleController
         }*/
 
         // Check if there are any users associated with this role
-        $countUsers = $role->users()->count();
+        $countUsers = $role->auth->count();
         if ($countUsers > 0) {
             $e = new BadRequestException();
             $e->addUserMessage('ROLE.HAS_USERS');
@@ -582,8 +582,7 @@ class RoleController extends SimpleController
             'role' => $role,
             'permissions' => $permissions,
             'uri' => [
-                'edit'      => $role->getRoute('modal.roles.edit'),
-                'addUsers'  => $role->getRoute('modal.roles.addUsers')
+                'edit'      => $role->getRoute('modal.roles.edit')
             ]
         ]);
     }

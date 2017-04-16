@@ -168,6 +168,38 @@ abstract class AltPermissions extends TestCase
     }
 
     /**
+     * Basic test, just to make sure.
+     * N.B.: Couting on the `auth` table for a given role will return the number
+     * of times the role is in uses which can be higher than the number of users
+     * (one user could have this role more than once). But counting on the seeker
+     * will return the number of users this seeker has because a user, for a
+     * given seeker, can only have one role.
+     */
+    public function test_count()
+    {
+        // Seeker 1 should have 2 users and seeker 2 should have one
+        $seeker_1 = $this->seekerClass->find($this->seekers[1]);
+        $seeker_2 = $this->seekerClass->find($this->seekers[2]);
+
+        $this->assertEquals(2, $seeker_1->auth->count());
+        $this->assertEquals(1, $seeker_2->auth->count());
+
+        // We try the same with the roles
+        // Role 0 has 3 users and role 1 has 1
+        // Note here that we only have 2 users defined for the tests
+        $role_0 = Role::find($this->roles[0]);
+        $role_1 = Role::find($this->roles[1]);
+
+        $this->assertEquals(3, $role_0->auth->count());
+        $this->assertEquals(1, $role_1->auth->count());
+
+        // To get unique users, group_by can help. We can't group_by `users` (the relation),
+        // but we can groupBy the underlying `user_id`
+        $this->assertEquals(2, $role_0->auth->groupBy('user_id')->count());
+        $this->assertEquals(1, $role_1->auth->groupBy('user_id')->count());
+    }
+
+    /**
      * test_relations function.
      * Mother of all tests
      *

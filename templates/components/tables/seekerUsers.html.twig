@@ -33,13 +33,13 @@
     {% verbatim %}
     <script id="role-table-column-info" type="text/x-handlebars-template">
         <td>
-            <strong>{{ row.first_name }} {{ row.last_name }}</strong>
+            <strong>{{ row.user.first_name }} {{ row.user.last_name }}</strong>
         </td>
     </script>
 
     <script id="role-table-column-description" type="text/x-handlebars-template">
         <td>
-            {{ row.description }}
+            {{ row.role.localeName }} - {{ row.role.name }}
         </td>
     </script>
 

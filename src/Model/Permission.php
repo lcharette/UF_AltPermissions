@@ -20,7 +20,7 @@ use UserFrosting\Sprinkle\Core\Model\UFModel;
  * @property string conditions
  * @property string description
  */
-class AltPermission extends UFModel
+class Permission extends UFModel
 {
     /**
      * @var string The name of the table for the current model.

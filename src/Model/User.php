@@ -19,6 +19,7 @@ use UserFrosting\Sprinkle\Account\Model\User as CoreUser;
  */
 class User extends CoreUser
 {
+    //!TODO : Check if this is necessary
     public function seeker($seeker)
     {
         $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);

@@ -46,8 +46,7 @@ class RoleAuthSprunje extends Sprunje
      */
     protected function baseQuery()
     {
-        $query = $this->classMapper->createInstance('altRole')->forSeeker($this->seeker)->with('users');
-
+        $query = $this->classMapper->createInstance('altAuth')->forSeeker($this->seeker)->with(['user', 'role', 'seeker']);
         //Debug::debug(print_r($query->get(), true));
         return $query;
     }
