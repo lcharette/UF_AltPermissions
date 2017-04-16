@@ -31,13 +31,15 @@ class RoleAuthSprunje extends Sprunje
 
 
     protected $seeker = "";
+    protected $seeker_id;
 
     /**
      * {@inheritDoc}
      */
-    public function __construct($classMapper, $options, $seeker)
+    public function __construct($classMapper, $options, $seeker, $seeker_id = false)
     {
         $this->seeker = $seeker;
+        $this->seeker_id = $seeker_id;
         parent::__construct($classMapper, $options);
     }
 
@@ -46,8 +48,7 @@ class RoleAuthSprunje extends Sprunje
      */
     protected function baseQuery()
     {
-        $query = $this->classMapper->createInstance('altAuth')->forSeeker($this->seeker)->with(['user', 'role', 'seeker']);
-        //Debug::debug(print_r($query->get(), true));
+        $query = $this->classMapper->createInstance('altAuth')->forSeeker($this->seeker, $this->seeker_id)->with(['user', 'role', 'seeker']);
         return $query;
     }
 
@@ -56,22 +57,23 @@ class RoleAuthSprunje extends Sprunje
      */
     protected function applyTransformations($collection)
     {
-        /*$collection = $collection->map(function ($item, $key) {
+        $collection = $collection->map(function ($item, $key) {
 
-            // Replace the name and description for the translated version
-            $item->name = $item->getLocaleName();
-            $item->description = $item->getLocaleDescription();
+            // Replace the name and description for the translated version of the role name and description
+            // Since we are loading into Handlebar and not Twig, the GetMutator can't be used in template
+            $item->role->name = $item->role->getLocaleName();
+            $item->role->description = $item->role->getLocaleDescription();
 
-            // Routes
-            $item->uri = [
-                'view'   => $item->getRoute('alt_uri_roles.view'),
-                'delete' => $item->getRoute('api.roles.delete'),
-                'edit'   => $item->getRoute('modal.roles.edit'),
-                'permissions' => $item->getRoute('modal.roles.permissions')
-            ];
+            // Add routes
+            /*$role->uri = [
+                'view'   => $role->getRoute('alt_uri_roles.view'),
+                'delete' => $role->getRoute('api.roles.delete'),
+                'edit'   => $role->getRoute('modal.roles.edit'),
+                'permissions' => $role->getRoute('modal.roles.permissions')
+            ];*/
 
-            return $item;
-        });*/
+            return $role;
+        });
 
         return $collection;
     }

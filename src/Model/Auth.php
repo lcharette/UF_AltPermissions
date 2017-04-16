@@ -43,9 +43,16 @@ class Auth extends UFModel
         return $this->belongsTo($classMapper->getClassMapping('altRole'));
     }
 
-    public function scopeForSeeker($query, $seeker)
+    public function scopeForSeeker($query, $seeker, $seeker_id = false)
     {
         $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
-        return $query->where('seeker_type', $seekerClass);
+        $query = $query->where('seeker_type', $seekerClass);
+
+        // Add the seeker id if we have it
+        if ($seeker_id) {
+           $query = $query->where('seeker_id', $seeker_id);
+        }
+
+        return $query;
     }
 }
