@@ -20,7 +20,7 @@ use UserFrosting\Sprinkle\AltPermissions\AltRoleUsers;
  *
  * @author Louis Charette (https://github.com/lcharette)
  */
-class RoleAuthSprunje extends Sprunje
+class AuthSprunje extends Sprunje
 {
     protected $name = 'rolesAuth';
 
@@ -29,21 +29,23 @@ class RoleAuthSprunje extends Sprunje
     protected $sortable = [];
     protected $filterable = [];
 
-
+    /*
+     * @var Seeker. The seeker we will be looking for
+     */
     protected $seeker = "";
-    protected $auth_options = [];
+
+    /*
+     * @var where The attribute we'll be doing a where on
+     */
+    protected $where;
 
     /**
      * {@inheritDoc}
      */
-    public function __construct($classMapper, $options, $seeker, $auth_options = [])
+    public function __construct($classMapper, $options, $seeker, $where = [])
     {
         $this->seeker = $seeker;
-        $this->auth_options = array_merge([
-            "seeker_id" => 0,
-            "role_id" => 0,
-            "user_id" => 0
-        ], $auth_options);
+        $this->where = $where;
 
         // Run parent method
         parent::__construct($classMapper, $options);
@@ -54,11 +56,15 @@ class RoleAuthSprunje extends Sprunje
      */
     protected function baseQuery()
     {
-        //Debug::debug(print_r($this->auth_options, true));
         $query = $this->classMapper->createInstance('altAuth')                  // Get Auth model
                                    ->forSeeker($this->seeker)                   // With the seeker key
-                                   ->with(['user', 'role', 'seeker'])           // Eager load the relations for Handlebar
-                                   ->where(array_filter($this->auth_options));  // Apply where contraints, using only non false (0) key
+                                   ->with(['user', 'role', 'seeker']);          // Eager load the relations for Handlebar
+
+        // Apply where contraints if any
+        if (!empty($this->where)) {
+            $query = $query->where($this->where);
+        }
+
         return $query;
     }
 
@@ -75,11 +81,9 @@ class RoleAuthSprunje extends Sprunje
             $item->role->description = $item->role->getLocaleDescription();
 
             // Add routes
-            /*$role->uri = [
-                'view'   => $role->getRoute('alt_uri_roles.view'),
-                'delete' => $role->getRoute('api.roles.delete'),
-                'edit'   => $role->getRoute('modal.roles.edit'),
-                'permissions' => $role->getRoute('modal.roles.permissions')
+            /*$item->uri = [
+                'delete' => $role->getRoute('api.auth.delete'),
+                'edit'   => $role->getRoute('modal.auth.edit'),
             ];*/
 
             return $role;

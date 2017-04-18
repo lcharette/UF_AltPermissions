@@ -30,7 +30,7 @@
                     <h3 class="box-title"><i class="fa fa-fw fa-users"></i> {{ translate('ALT_ROLE.USERS') }}</h3>
                 </div>
                 <div class="box-body">
-                    {% include "components/tables/seekerUsers.html.twig" %}
+                    {% include "components/tables/roleUsers.html.twig" %}
                 </div>
             </div><!-- /.box -->
         </div>
@@ -93,7 +93,7 @@
         });
 
          $("#table-users-role").ufTable({
-            dataUrl: site.uri.public + "/api/roles/project/auth/r/{{role.id}}"
+            dataUrl: site.uri.public + "/api/roles/project/auth/role/{{role.id}}"
         });
     </script>
 
