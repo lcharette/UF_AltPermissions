@@ -20,7 +20,6 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
-use UserFrosting\Sprinkle\Account\Model\Role;
 use UserFrosting\Sprinkle\Account\Model\User;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
@@ -222,7 +221,7 @@ class AuthController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id'])->first())
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
         {
             throw new NotFoundException($request, $response);
         }
@@ -241,12 +240,21 @@ class AuthController extends SimpleController
         $schema = new RequestSchema('schema://altRole/auth-edit.json');
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
-        // Generate the form
-        $schema->initForm($auth);
+        // Generate the form. The value will be set manually later
+        $schema->initForm();
 
         // Fill in the roles
-        Debug::debug(print_r($auth, true));
-        //$possibleRoles = Role::forSeeker($auth->seeker_type)->get();
+        $possibleRoles = $classMapper->staticMethod('altRole', 'where', 'seeker', $auth->seeker_type)->get();
+
+        // Create the select association. Don't need to translate, FormGenerator does it automatically
+        $roleSelect = $possibleRoles->pluck('name', 'id');
+
+        // We pass the compagnie as the option of the selects
+        $schema->setInputArgument("role", "options", $roleSelect);
+
+        // We need to the the value manually. If we pass the relation, it will associate the relation
+        // as the value of the select
+        $schema->setValue("role", $auth->role_id);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
