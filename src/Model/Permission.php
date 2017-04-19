@@ -90,7 +90,8 @@ class Permission extends UFModel
      */
     public function scopeForSeeker($query, $seeker)
     {
-        return $query->where('seeker', $seeker);
+        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+        return $query->where('seeker', $seekerClass);
     }
 
     /**

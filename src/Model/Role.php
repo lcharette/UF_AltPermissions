@@ -110,7 +110,13 @@ class Role extends UFModel
      */
     public function getRoute($routeName)
     {
-        return static::$ci->router->pathFor($routeName, $this->toArray());
+        $data = $this->toArray();
+
+        // Need to translate the seeker back into it's key value
+        $data['seeker'] = static::$ci->checkAuthSeeker->getSeekerKey($this->seeker);
+
+
+        return static::$ci->router->pathFor($routeName, $data);
     }
 
     /**
@@ -122,6 +128,7 @@ class Role extends UFModel
      */
     public function scopeForSeeker($query, $seeker)
     {
-        return $query->where('seeker', $seeker);
+        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+        return $query->where('seeker', $seekerClass);
     }
 }
