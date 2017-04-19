@@ -81,12 +81,10 @@ class AuthSprunje extends Sprunje
             $item->role->description = $item->role->getLocaleDescription();
 
             // Add routes
-            /*$item->uri = [
-                'delete' => $role->getRoute('api.auth.delete'),
-                'edit'   => $role->getRoute('modal.auth.edit'),
-            ];*/
-
-            return $role;
+            $item->uri = [
+                //'delete' => $item->getRoute('api.auth.delete'),
+                'edit'   => $item->getRoute('modal.roles.link.edit', ['seeker' => $this->seeker]),
+            ];
         });
 
         return $collection;

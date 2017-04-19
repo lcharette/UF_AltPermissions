@@ -53,7 +53,7 @@ $app->group('/modals/roles/{seeker}', function () {
     $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions')
          ->setName('modal.roles.permissions');
 
-    /*$this->get('/addUsers', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalAddUser')
-         ->setName('modal.roles.addUsers');*/
+    $this->get('/link/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditLink')
+         ->setName('modal.roles.link.edit');
 
 })->add('checkAuthSeeker')->add('authGuard');

@@ -24,15 +24,6 @@
                     <button type="button" class="btn btn-primary js-displayForm" data-id="{{ role.id }}" data-formUrl="{{ uri.edit }}">{{ translate('EDIT') }}</button>
                 </div>
             </div><!-- /.box -->
-
-            <div class="box box-primary">
-                <div class="box-header">
-                    <h3 class="box-title"><i class="fa fa-fw fa-users"></i> {{ translate('ALT_ROLE.USERS') }}</h3>
-                </div>
-                <div class="box-body">
-                    {% include "components/tables/roleUsers.html.twig" %}
-                </div>
-            </div><!-- /.box -->
         </div>
         <div class="col-lg-8">
             <div class="box box-primary">
@@ -90,10 +81,6 @@
         }).on("submitSuccess.ufForm", function() {
             // Forward to settings page on success
             window.location.reload(true);
-        });
-
-         $("#table-users-role").ufTable({
-            dataUrl: site.uri.public + "/api/roles/project/auth/role/{{role.id}}"
         });
     </script>
 

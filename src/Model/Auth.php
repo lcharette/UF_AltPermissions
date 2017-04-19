@@ -55,4 +55,19 @@ class Auth extends UFModel
 
         return $query;
     }
+
+    /**
+     * getRoute function.
+     * Helper function for when the $ci is not directly avaiable
+     *
+     * @access public
+     * @param string $routeName
+     * @param mixed $args (default: [])
+     * @return Route for the designated route name
+     */
+    public function getRoute($routeName, $args = [])
+    {
+        $args = (empty($args)) ? $this->toArray() : $args;
+        return static::$ci->router->pathFor($routeName, $args);
+    }
 }

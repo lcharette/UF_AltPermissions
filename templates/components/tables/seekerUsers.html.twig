@@ -52,12 +52,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li>
-                        <a href="{{ row.uri.view }}">
-                        <i class="fa fa-key"></i> {% endverbatim %}{{ translate("PERMISSION.MANAGE") }}{% verbatim %}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="js-displayForm" data-id="{{ row.id }}" data-formUrl="{{ row.uri.edit }}">
+                        <a href="#" class="js-displayForm" data-user="{{ row.user.id }}" data-role="{{ row.role.id }}" data-formUrl="{{ row.uri.edit }}">
                         <i class="fa fa-edit"></i> {% endverbatim %}{{ translate("ROLE.EDIT") }}{% verbatim %}
                         </a>
                     </li>

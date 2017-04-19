@@ -772,7 +772,7 @@ class RoleController extends SimpleController
         return $response->withStatus(200);
     }
 
-    public function getModalAddUser($request, $response, $args)
+    public function getModalEditLink($request, $response, $args)
     {
         // GET parameters
         $params = $request->getQueryParams();
@@ -789,8 +789,10 @@ class RoleController extends SimpleController
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        Debug::debug(print_r($params, true));
+
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first())
+        if (!$auth = $classMapper->staticMethod('altAuth', 'where', ['user_id' => $params['user'], 'role_id' => $params['role']])->first())
         {
             throw new NotFoundException($request, $response);
         }
