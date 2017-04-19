@@ -17,23 +17,27 @@ $app->group('/api/auth/{seeker}', function () {
     $this->get('/{group}/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getList')
          ->setName('api.auth.sprunje');
 
-    $this->delete('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:delete')
-         ->setName('api.auth.delete');
-
     $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:create')
          ->setName('api.auth.create');
 
-    $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:updateInfo')
-         ->setName('api.auth.edit');
-
 })->add('checkAuthSeeker')->add('authGuard');
 
-$app->group('/modals/auth/{seeker}', function () {
+$app->group('/api/auth', function () {
+
+    $this->delete('/id/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:delete')
+         ->setName('api.auth.delete');
+
+    $this->put('/id/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:updateInfo')
+         ->setName('api.auth.edit');
+
+})->add('authGuard');
+
+$app->group('/modals/auth', function () {
 
     $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalCreate')
          ->setName('modal.auth.create');
 
-    $this->get('/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalEdit')
+    $this->get('/edit/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalEdit')
          ->setName('modal.auth.edit');
 
-})->add('checkAuthSeeker')->add('authGuard');
+})->add('authGuard');

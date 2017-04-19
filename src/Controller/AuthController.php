@@ -222,7 +222,7 @@ class AuthController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first())
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id'])->first())
         {
             throw new NotFoundException($request, $response);
         }
@@ -231,28 +231,28 @@ class AuthController extends SimpleController
         // !TODO
         /*$fieldNames = ['name', 'slug', 'description'];
         if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
-            'role' => $role,
+            'role' => $auth,
             'fields' => $fieldNames
         ])) {
             throw new ForbiddenException();
         }*/
 
         // Load validation rules
-        $schema = new RequestSchema('schema://altRole/create.json');
+        $schema = new RequestSchema('schema://altRole/auth-edit.json');
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form
-        $schema->initForm($role);
+        $schema->initForm($auth);
 
-        // Add info box about the language keys
-        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
+        // Fill in the roles
+        Debug::debug(print_r($auth, true));
+        //$possibleRoles = Role::forSeeker($auth->seeker_type)->get();
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
             "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.put', [
-                'seeker' => $args['seeker'],
-                'id' => $params['id']
+            "form_action" => $this->ci->get('router')->pathFor('api.auth.edit', [
+                'id' => $args['id']
             ]),
             "form_method" => "PUT",
             "fields" => $schema->generateForm(),

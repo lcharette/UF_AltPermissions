@@ -93,6 +93,7 @@
      */
     if (!$schema->hasTable('alt_role_users')) {
         $schema->create('alt_role_users', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('role_id')->unsigned();
             $table->integer('seeker_id')->unsigned();
