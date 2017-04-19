@@ -9,6 +9,7 @@
 
 /**
  * Routes for administrative role management.
+ * Route anything related to the RoleController
  */
 $app->group('/admin/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageList')
@@ -25,9 +26,6 @@ $app->group('/api/roles/{seeker}', function () {
 
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getList')
          ->setName('api.roles.sprunje');
-
-    // Auth route. For Auth Sprunje. Load all, for seeker, user or role
-    $this->get('/auth/{group}/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getAuthList');
 
     $this->get('/r/{slug}/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getPermissions')
          ->setName('api.roles.get.permissions');
@@ -52,8 +50,5 @@ $app->group('/modals/roles/{seeker}', function () {
 
     $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions')
          ->setName('modal.roles.permissions');
-
-    $this->get('/link/edit', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditLink')
-         ->setName('modal.roles.link.edit');
 
 })->add('checkAuthSeeker')->add('authGuard');
