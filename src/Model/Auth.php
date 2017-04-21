@@ -26,6 +26,15 @@ class Auth extends UFModel
      */
     protected $table = "alt_role_users";
 
+    /**
+     * @var array The fields of the table for the current model.
+     * N.B.: The only field that is allowed to change it the role, AKA the only one
+     * that leads to a single element. You won't change a user of seeker.
+     */
+    protected $fillable = [
+        "role_id"
+    ];
+
     public function seeker()
     {
         return $this->morphTo();

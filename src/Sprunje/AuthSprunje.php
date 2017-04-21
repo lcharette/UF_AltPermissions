@@ -82,7 +82,7 @@ class AuthSprunje extends Sprunje
 
             // Add routes
             $item->uri = [
-                //'delete' => $item->getRoute('api.auth.delete'),
+                'delete' => $item->getRoute('api.auth.delete'),
                 'edit'   => $item->getRoute('modal.auth.edit'),
             ];
         });

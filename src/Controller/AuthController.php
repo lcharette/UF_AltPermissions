@@ -20,7 +20,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
-use UserFrosting\Sprinkle\Account\Model\User;
+use UserFrosting\Sprinkle\AltPermissions\Model\User;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
 use UserFrosting\Support\Exception\BadRequestException;
@@ -74,36 +74,42 @@ class AuthController extends SimpleController
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
         // Request GET data
         $get = $request->getQueryParams();
 
         // Access-controlled page
+        /*
+        //!TODO
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
             throw new ForbiddenException();
-        }
+        }*/
 
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        // Create a dummy role to prepopulate fields
-        $role = $classMapper->createInstance('altRole', []);
-
         // Load validation rules
-        $schema = new RequestSchema('schema://altRole/create.json');
+        $schema = new RequestSchema('schema://altRole/auth-create.json');
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form
-        $schema->initForm($role);
+        $schema->initForm();
 
-        // Add info box about the language keys
-        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
+        // Fill in the possibles roles.
+        $possibleRoles = $classMapper->staticMethod('altRole', 'forSeeker', $args['seeker'])->get();
+
+        // Create the select association. Don't need to translate, FormGenerator does it automatically
+        $roleSelect = $possibleRoles->pluck('name', 'id');
+
+        // We pass the compagnie as the option of the selects
+        $schema->setInputArgument("role", "options", $roleSelect);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $get['box_id'],
-            "box_title" => "ROLE.CREATE",
-            "form_action" => $this->ci->get('router')->pathFor('api.roles.create.post', $args),
+            "box_title" => "AUTH.ROLE.ADD",
+            "form_action" => $this->ci->get('router')->pathFor('api.auth.create', $args),
             "fields" => $schema->generateForm(),
             "validators" => $validator->rules()
         ]);
@@ -296,82 +302,61 @@ class AuthController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
-        // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
-        {
-            throw new NotFoundException($request, $response);
-        }
-
-        // Load the request schema
-        $schema = new RequestSchema('schema://altRole/create.json');
-
-        // Whitelist and set parameter defaults
-        $transformer = new RequestDataTransformer($schema);
-        $data = $transformer->transform($params);
-
-        $error = false;
-
-        // Validate request data
-        $validator = new ServerSideValidator($schema, $translator);
-        if (!$validator->validate($data)) {
-            $ms->addValidationErrors($validator);
-            $error = true;
-        }
-
-        // Determine targeted fields
-        $fieldNames = [];
-        foreach ($data as $name => $value) {
-            $fieldNames[] = $name;
-        }
-
         // Access-controlled resource - check that currentUser has permission to edit submitted fields for this role
         // !TODO
-        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+        /*if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
             'role' => $role,
             'fields' => array_values(array_unique($fieldNames))
         ])) {
             throw new ForbiddenException();
+        }*/
+
+        // Get the auth data from the id in the route
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
+        {
+            throw new NotFoundException($request, $response);
         }
 
-        // Check if name or slug already exists
-        if (
-            isset($data['name']) &&
-            $data['name'] != $role->name &&
-            $classMapper->staticMethod('altRole', 'where', 'name', $data['name'])->forSeeker($args['seeker'])->first()
-        ) {
-            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
-            $error = true;
+        // We won't require the schema here. We (should) know we have something
+        // Plus, schema or not, we do need to check the role exist manually
+        $newRole = $classMapper->staticMethod('altRole', 'find', $params['role']);
+
+        // 1° Check it exist
+        if (!$newRole) {
+            $ms->addMessageTranslated('danger', 'AUTH.ROLE.NOT_FOUND');
+            return $response->withStatus(400);
         }
 
-        if ($error) {
+        // 2° Make sure the role is for the same seeker
+        if ($newRole->seeker != $auth->seeker_type) {
+            $ms->addMessageTranslated('danger', 'AUTH.ROLE.BAD_SEEKER');
             return $response->withStatus(400);
         }
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($data, $role, $currentUser) {
+        Capsule::transaction( function() use ($currentUser, $auth, $newRole) {
             // Update the role and generate success messages
-            foreach ($data as $name => $value) {
-                if ($value != $role->$name){
-                    $role->$name = $value;
-                }
-            }
-
-            $role->save();
+            // We are allowed to change the `auth` relation directly for the role
+            // (It's expected to change for a given user/seeker combo)
+            $auth->role_id = $newRole->id;
+            $auth->save();
 
             // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated details for role {$role->name}.", [
+            /*$this->ci->userActivityLogger->info("User {$currentUser->user_name} defined the role {$newRole->name} for user....", [
                 'type' => 'role_update_info',
                 'user_id' => $currentUser->id
-            ]);
+            ]);*/
         });
 
-        $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
-            'name' => $translator->translate($role->name)
+        $ms->addMessageTranslated('success', 'AUTH.ROLE.UPDATED', [
+            'role_name' => $translator->translate($newRole->name),
+            'user_name' => $auth->user->user_name
         ]);
 
         return $response->withStatus(200);
@@ -401,56 +386,40 @@ class AuthController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
+        $translator = $this->ci->translator;
+
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
         {
             throw new NotFoundException($request, $response);
         }
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'delete_role', [
+        /*if (!$authorizer->checkAccess($currentUser, 'delete_role', [
             'role' => $role
         ])) {
             throw new ForbiddenException();
-        }
-
-        // Check that we are not deleting a default role
-        //$defaultRoleSlugs = $classMapper->staticMethod('altRole', 'getDefaultSlugs');
-
-        // Need to use loose comparison for now, because some DBs return `id` as a string
-        /*if (in_array($role->slug, $defaultRoleSlugs)) {
-            $e = new BadRequestException();
-            $e->addUserMessage('ROLE.DELETE_DEFAULT');
-            throw $e;
         }*/
 
-        // Check if there are any users associated with this role
-        $countUsers = $role->auth->count();
-        if ($countUsers > 0) {
-            $e = new BadRequestException();
-            $e->addUserMessage('ROLE.HAS_USERS');
-            throw $e;
-        }
-
-        $roleName = $role->getLocaleName();
-
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($role, $roleName, $currentUser) {
-            $role->delete();
-            unset($role);
+        Capsule::transaction( function() use ($auth, $currentUser) {
+
+            $auth->delete();
 
             // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$roleName}.", [
+            /*$this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$roleName}.", [
                 'type' => 'role_delete',
                 'user_id' => $currentUser->id
-            ]);
+            ]);*/
         });
 
-        $ms->addMessageTranslated('success', 'ROLE.DELETION_SUCCESSFUL', [
-            'name' => $roleName
+        $ms->addMessageTranslated('success', 'AUTH.ROLE.DELETED', [
+            'role_name' => $translator->translate($auth->role->name),
+            'user_name' => $auth->user->user_name
         ]);
 
         return $response->withStatus(200);

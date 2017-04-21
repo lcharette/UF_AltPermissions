@@ -22,5 +22,15 @@ return [
 
         "ADD_USER" => "Add user",
         "USERS" => "Role user's"
+    ],
+
+    "AUTH" => [
+        "ROLE" => [
+            "BAD_SEEKER" => "The selected role seeker is invalid",
+            "NOT_FOUND" => "The selected role doesn't exist",
+            "UPDATED" => "Role <strong>{{role_name}}</strong> successfully defined for <strong>{{user_name}}</strong>",
+
+            "DELETED" => "Role <strong>{{role_name}}</strong> successfully removed for <strong>{{user_name}}</strong>",
+        ]
     ]
 ];

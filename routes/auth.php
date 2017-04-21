@@ -17,7 +17,7 @@ $app->group('/api/auth/{seeker}', function () {
     $this->get('/{group}/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getList')
          ->setName('api.auth.sprunje');
 
-    $this->post('', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:create')
+    $this->post('/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:create')
          ->setName('api.auth.create');
 
 })->add('checkAuthSeeker')->add('authGuard');
@@ -34,7 +34,7 @@ $app->group('/api/auth', function () {
 
 $app->group('/modals/auth', function () {
 
-    $this->get('/create', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalCreate')
+    $this->get('/create/{seeker}/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalCreate')
          ->setName('modal.auth.create');
 
     $this->get('/edit/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalEdit')

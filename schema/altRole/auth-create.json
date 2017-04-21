@@ -1,0 +1,28 @@
+{
+    "user" : {
+        "validators" : {
+            "required" : {
+                "label" : "&NAME",
+                "message" : "VALIDATE.REQUIRED"
+            }
+        },
+        "form" : {
+            "type" : "text",
+            "label" : "USERNAME",
+            "icon" : "fa-user"
+        }
+    },
+    "role" : {
+        "validators" : {
+            "required" : {
+                "label" : "&NAME",
+                "message" : "VALIDATE.REQUIRED"
+            }
+        },
+        "form" : {
+            "type" : "select",
+            "label" : "ROLE.NAME",
+            "icon" : "fa-drivers-license"
+        }
+    }
+}
