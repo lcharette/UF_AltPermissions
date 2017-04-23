@@ -20,17 +20,17 @@ return [
         "PAGE_DESCRIPTION"  => "A listing of the roles for the <em>{{seeker}}</em> seeker.  Provides management tools for editing and deleting roles for this seeker.",
         "PAGE_TITLE" => "Roles for {{seeker}}",
 
-        "ADD_USER" => "Add user",
         "USERS" => "Role user's"
     ],
 
     "AUTH" => [
-        "ROLE" => [
-            "BAD_SEEKER" => "The selected role seeker is invalid",
-            "NOT_FOUND" => "The selected role doesn't exist",
-            "UPDATED" => "Role <strong>{{role_name}}</strong> successfully defined for <strong>{{user_name}}</strong>",
+        "BAD_SEEKER" => "The selected role seeker is invalid",
+        "NOT_FOUND" => "The selected role doesn't exist",
+        "UPDATED" => "Role <strong>{{role_name}}</strong> successfully defined for <strong>{{user_name}}</strong>",
 
-            "DELETED" => "Role <strong>{{role_name}}</strong> successfully removed for <strong>{{user_name}}</strong>",
-        ]
+        "DELETED" => "Role <strong>{{role_name}}</strong> successfully removed for <strong>{{user_name}}</strong>",
+
+        "ADD_USER" => "Add user",
+        "SELECT_USER" => "Select {{&USER}}"
     ]
 ];

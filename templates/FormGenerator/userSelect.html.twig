@@ -1,0 +1,31 @@
+{% extends "FormGenerator/modal.html.twig" %}
+
+{% block modal %}
+{{ parent() }}
+
+{# This contains a series of <script> blocks, each of which is a client-side Handlebars template.
+ # Note that these are NOT Twig templates, although the syntax is similar.  We wrap them in the `verbatim` tag,
+ # so that Twig will output them directly into the DOM instead of trying to treat them like Twig templates.
+ #
+ # These templates require handlebars-helpers.js, moment.js
+#}
+{% verbatim %}
+<script id="user-select-option" type="text/x-handlebars-template">
+    <div class="row">
+        <div class="col-sm-1"><img src="{{ avatar }}" class="img-circle user-image" alt="User Image" style="height: 40px"></div>
+        <div class="col-sm-11"><strong> {{first_name}} {{last_name}}</strong><br />(<em>{{user_name}}</em>)</div>
+    </div>
+</script>
+{% endverbatim %}
+{% endblock %}
+
+
+{% block scripts_page %}
+    {{ parent() }}
+
+    <script>
+        $('#{{box_id}}').find('.js-select-user').userSelect({
+            url: "{{collection_api}}"
+        });
+    </script>
+{% endblock %}

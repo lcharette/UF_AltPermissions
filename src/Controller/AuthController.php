@@ -62,9 +62,6 @@ class AuthController extends SimpleController
      */
     public function getModalCreate($request, $response, $args)
     {
-        // GET parameters
-        $params = $request->getQueryParams();
-
         /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
@@ -77,6 +74,12 @@ class AuthController extends SimpleController
         /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        /** @var UserFrosting\Sprinkle\Core\Router $router */
+        $router = $this->ci->router;
+
         // Request GET data
         $get = $request->getQueryParams();
 
@@ -86,9 +89,6 @@ class AuthController extends SimpleController
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
             throw new ForbiddenException();
         }*/
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
 
         // Load validation rules
         $schema = new RequestSchema('schema://altRole/auth-create.json');
@@ -106,13 +106,48 @@ class AuthController extends SimpleController
         // We pass the compagnie as the option of the selects
         $schema->setInputArgument("role", "options", $roleSelect);
 
-        return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
+        // Get the modal title. Depend if the seeker specific key is define
+        $seekerTitle = "AUTH.".strtoupper($args['seeker']).".ADD_USER";
+        $boxTitle = $translator->has($seekerTitle) ? $seekerTitle : "AUTH.ADD_USER";
+
+        // Using custom form here to add the javascript we need fo Typeahead.
+        $this->ci->view->render($response, "FormGenerator/userSelect.html.twig", [
             "box_id" => $get['box_id'],
-            "box_title" => "AUTH.ROLE.ADD",
-            "form_action" => $this->ci->get('router')->pathFor('api.auth.create', $args),
+            "box_title" => $boxTitle,
+            "form_action" => $router->pathFor('api.auth.create', $args),
             "fields" => $schema->generateForm(),
+            "collection_placeholder" => 'USER.SELECT',
+            "collection_api" => $router->pathFor('api.autocomplete.auth.username', $args),
             "validators" => $validator->rules()
         ]);
+    }
+
+    public function getUserList($request, $response, $args) {
+
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        // Access-controlled page
+        // !TODO
+        /*if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
+            throw new ForbiddenException();
+        }*/
+
+        // Get the sprunje
+        $sprunje = $classMapper->createInstance('authUser_sprunje', $classMapper, $params, $args['seeker'], $args['id']);
+
+        // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
+        // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).
+        return $sprunje->toResponse($response);
     }
 
     /**
@@ -329,13 +364,13 @@ class AuthController extends SimpleController
 
         // 1° Check it exist
         if (!$newRole) {
-            $ms->addMessageTranslated('danger', 'AUTH.ROLE.NOT_FOUND');
+            $ms->addMessageTranslated('danger', 'AUTH.NOT_FOUND');
             return $response->withStatus(400);
         }
 
         // 2° Make sure the role is for the same seeker
         if ($newRole->seeker != $auth->seeker_type) {
-            $ms->addMessageTranslated('danger', 'AUTH.ROLE.BAD_SEEKER');
+            $ms->addMessageTranslated('danger', 'AUTH.BAD_SEEKER');
             return $response->withStatus(400);
         }
 
@@ -354,7 +389,7 @@ class AuthController extends SimpleController
             ]);*/
         });
 
-        $ms->addMessageTranslated('success', 'AUTH.ROLE.UPDATED', [
+        $ms->addMessageTranslated('success', 'AUTH.UPDATED', [
             'role_name' => $translator->translate($newRole->name),
             'user_name' => $auth->user->user_name
         ]);
@@ -417,7 +452,7 @@ class AuthController extends SimpleController
             ]);*/
         });
 
-        $ms->addMessageTranslated('success', 'AUTH.ROLE.DELETED', [
+        $ms->addMessageTranslated('success', 'AUTH.DELETED', [
             'role_name' => $translator->translate($auth->role->name),
             'user_name' => $auth->user->user_name
         ]);

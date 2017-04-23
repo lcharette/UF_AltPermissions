@@ -1,0 +1,16 @@
+{
+    "bundle": {
+        "js/userSelect": {
+            "scripts": [
+                "js/widget-userSelect.js"
+            ],
+            "options": {
+                "result": {
+                    "type": {
+                      "styles": "plain"
+                    }
+                }
+            }
+        }
+    }
+}

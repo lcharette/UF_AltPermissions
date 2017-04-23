@@ -20,6 +20,9 @@ $app->group('/api/auth/{seeker}', function () {
     $this->post('/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:create')
          ->setName('api.auth.create');
 
+    $this->get('/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getUserList')
+         ->setName('api.autocomplete.auth.username');
+
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/api/auth', function () {

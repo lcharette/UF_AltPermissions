@@ -7,9 +7,10 @@
             }
         },
         "form" : {
-            "type" : "text",
-            "label" : "USERNAME",
-            "icon" : "fa-user"
+            "type" : "select",
+            "label" : "USER",
+            "placeholder": "AUTH.SELECT_USER",
+            "class" : "form-control js-select-user"
         }
     },
     "role" : {
