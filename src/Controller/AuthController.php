@@ -122,6 +122,16 @@ class AuthController extends SimpleController
         ]);
     }
 
+    /**
+     * getUserList function.
+     * Function for the custom sprunje returning the list of user NOT in the Seeker
+     *
+     * @access public
+     * @param mixed $request
+     * @param mixed $response
+     * @param mixed $args
+     * @return void
+     */
     public function getUserList($request, $response, $args) {
 
         // GET parameters
@@ -173,22 +183,23 @@ class AuthController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var Config $config */
-        $config = $this->ci->config;
-
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'create_role')) {
-            throw new ForbiddenException();
-        }
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
+        $translator = $this->ci->translator;
 
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        // Access-controlled page
+        //!TODO
+        /*if (!$authorizer->checkAccess($currentUser, 'create_role')) {
+            throw new ForbiddenException();
+        }*/
+
         // Load the request schema
-        $schema = new RequestSchema('schema://altRole/create.json');
+        $schema = new RequestSchema('schema://altRole/auth-create.json');
 
         // Whitelist and set parameter defaults
         $transformer = new RequestDataTransformer($schema);
@@ -203,9 +214,21 @@ class AuthController extends SimpleController
             $error = true;
         }
 
-        // Check if name or slug already exists
-        if ($classMapper->staticMethod('altRole', 'where', 'name', $data['name'])->forSeeker($args['seeker'])->first()) {
-            $ms->addMessageTranslated('danger', 'ROLE.NAME_IN_USE', $data);
+        // User must exist
+        if (!$user = $classMapper->staticMethod('altUser', 'find', $data['user'])) {
+            $ms->addMessageTranslated('danger', 'USER_ID_INVALID');
+            $error = true;
+        }
+
+        // Check the selected role exist
+        if (!$role = $classMapper->staticMethod('altRole', 'find', $data['role'])) {
+            $ms->addMessageTranslated('danger', 'AUTH.NOT_FOUND');
+            $error = true;
+        }
+
+        // Check if the user already has a role for this seeker
+        if ($user->roleForSeeker($args['seeker'], $args['id'])) {
+            $ms->addMessageTranslated('danger', 'AUTH.USER_HAS_ROLE');
             $error = true;
         }
 
@@ -213,26 +236,26 @@ class AuthController extends SimpleController
             return $response->withStatus(400);
         }
 
-        // Insert the seeker
-        $data['seeker'] = $args['seeker'];
-
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($classMapper, $data, $ms, $config, $currentUser) {
-            // Create the role
-            $role = $classMapper->createInstance('altRole', $data);
+        Capsule::transaction( function() use ($classMapper, $data, $ms, $args, $currentUser, $user, $role) {
 
-            // Store new role to database
-            $role->save();
-
-            // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} created role {$role->name}.", [
-                'type' => 'role_create',
-                'user_id' => $currentUser->id
+            // Assign the role
+            $user->seeker($args['seeker'])->sync([
+                $args['id'] => ['role_id' => $role->id]
             ]);
 
-            $ms->addMessageTranslated('success', 'ROLE.CREATION_SUCCESSFUL', $data);
+            // Create activity record
+            /*$this->ci->userActivityLogger->info("User {$currentUser->user_name} created role {$role->name}.", [
+                'type' => 'role_create',
+                'user_id' => $currentUser->id
+            ]);*/
         });
+
+        $ms->addMessageTranslated('success', 'AUTH.CREATED', [
+            'role_name' => $translator->translate($role->name),
+            'user_name' => $user->user_name
+        ]);
 
         return $response->withStatus(200);
     }
@@ -322,9 +345,6 @@ class AuthController extends SimpleController
      */
     public function updateInfo($request, $response, $args)
     {
-        /** @var Config $config */
-        $config = $this->ci->config;
-
         // Get PUT parameters: (name, slug, description)
         $params = $request->getParsedBody();
 
@@ -379,6 +399,7 @@ class AuthController extends SimpleController
             // Update the role and generate success messages
             // We are allowed to change the `auth` relation directly for the role
             // (It's expected to change for a given user/seeker combo)
+            // The sync method on the user could also have been used
             $auth->role_id = $newRole->id;
             $auth->save();
 

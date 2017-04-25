@@ -34,6 +34,7 @@ class AltPermissionsServicesProvider
             $classMapper->setClassMapping('altRole', 'UserFrosting\Sprinkle\AltPermissions\Model\Role');
             $classMapper->setClassMapping('altPermission', 'UserFrosting\Sprinkle\AltPermissions\Model\Permission');
             $classMapper->setClassMapping('altAuth', 'UserFrosting\Sprinkle\AltPermissions\Model\Auth');
+            $classMapper->setClassMapping('altUser', 'UserFrosting\Sprinkle\AltPermissions\Model\User');
             $classMapper->setClassMapping('altRole_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\RoleSprunje');
             $classMapper->setClassMapping('auth_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\AuthSprunje');
             $classMapper->setClassMapping('authUser_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\AuthUsersSprunje');
