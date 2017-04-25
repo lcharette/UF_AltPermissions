@@ -10,13 +10,12 @@ namespace UserFrosting\Sprinkle\AltPermissions\Sprunje;
 
 use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
-
-use UserFrosting\Sprinkle\AltPermissions\AltRoleUsers;
+use UserFrosting\Sprinkle\AltPermissions\Model\Auth;
 
 /**
- * RoleSprunje
+ * AuthSprunje
  *
- * Implements Sprunje for the roles API.
+ * Sprunje displaying the
  *
  * @author Louis Charette (https://github.com/lcharette)
  */
@@ -26,8 +25,17 @@ class AuthSprunje extends Sprunje
 
     /* Nb.: Since the language key is stored in the db, the db can't be
        used for sorting and filtering at this time */
-    protected $sortable = [];
-    protected $filterable = [];
+    protected $sortable = [
+        'user'
+    ];
+    protected $filterable = [
+        'user'
+    ];
+
+    /**
+     * @var bool Keep track of whether the users table has already been joined on the query.
+     */
+    protected $joinedUsers = false;
 
     /*
      * @var Seeker. The seeker we will be looking for
@@ -88,5 +96,50 @@ class AuthSprunje extends Sprunje
         });
 
         return $collection;
+    }
+
+    /**
+     * Filter LIKE the user info.
+     *
+     * @param Builder $query
+     * @param mixed $value
+     * @return Builder
+     */
+    protected function filterUser($query, $value)
+    {
+        if (!$this->joinedUsers) {
+            $query = $query->joinUser();
+        }
+
+        $this->joinedUsers = true;
+
+        // Split value on separator for OR queries
+        $values = explode($this->orSeparator, $value);
+        return $query->where(function ($query) use ($values) {
+            foreach ($values as $value) {
+                $query = $query->orLike('users.first_name', $value)
+                                ->orLike('users.last_name', $value)
+                                ->orLike('users.user_name', $value);
+            }
+            return $query;
+        });
+    }
+
+    /**
+     * Sort based on user last name.
+     *
+     * @param Builder $query
+     * @param string $direction
+     * @return Builder
+     */
+    protected function sortUser($query, $direction)
+    {
+        if (!$this->joinedUsers) {
+            $query = $query->joinUser();
+        }
+
+        $this->joinedUsers = true;
+
+        return $query->orderBy('users.first_name', $direction);
     }
 }

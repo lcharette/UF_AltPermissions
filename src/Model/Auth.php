@@ -66,6 +66,15 @@ class Auth extends UFModel
     }
 
     /**
+     * Joins the user, so we can do things like sort, search, paginate, etc.
+     */
+    public function scopeJoinUser($query)
+    {
+        $query = $query->leftJoin('users', $this->table.'.user_id', '=', 'users.id');
+        return $query;
+    }
+
+    /**
      * getRoute function.
      * Helper function for when the $ci is not directly avaiable
      *

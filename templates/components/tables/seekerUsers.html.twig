@@ -12,9 +12,9 @@
         <table class="tablesorter table table-bordered table-hover table-striped">
             <thead>
                 <tr>
-                    <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-info" data-sorter="false" data-filter="false">{{ translate('USER') }}</th>
-                    <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description" data-sorter="false" data-filter="false">{{ translate('ROLE') }}</th>
-                    <th data-column-template="#role-table-column-actions" data-sorter="false" data-filter="false">{{ translate('ACTIONS') }}</th>
+                    <th data-column-name="user" data-column-template="#auth-table-column-info">{{ translate('USER') }}</th>
+                    <th data-column-name="description" data-column-template="#auth-table-column-description" data-sorter="false" data-filter="false">{{ translate('ROLE') }}</th>
+                    <th data-column-template="#auth-table-column-actions" data-sorter="false" data-filter="false">{{ translate('ACTIONS') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,19 +31,19 @@
      # These templates require handlebars-helpers.js, moment.js
     #}
     {% verbatim %}
-    <script id="role-table-column-info" type="text/x-handlebars-template">
+    <script id="auth-table-column-info" type="text/x-handlebars-template">
         <td>
             <strong>{{ row.user.first_name }} {{ row.user.last_name }}</strong>
         </td>
     </script>
 
-    <script id="role-table-column-description" type="text/x-handlebars-template">
+    <script id="auth-table-column-description" type="text/x-handlebars-template">
         <td>
             {{ row.role.name }}
         </td>
     </script>
 
-    <script id="role-table-column-actions" type="text/x-handlebars-template">
+    <script id="auth-table-column-actions" type="text/x-handlebars-template">
         <td>
             <div class="btn-group">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
