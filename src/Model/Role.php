@@ -79,9 +79,15 @@ class Role extends UFModel
         }
     }
 
-    public function locale()
+    public function locale($all = false)
     {
-        return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\RoleLocale');
+        $query = $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\RoleLocale');
+
+        if ($all) {
+            return $query;
+        } else {
+            return $query->where('locale', $this->currentLocale());
+        }
     }
 
     /**
@@ -151,6 +157,19 @@ class Role extends UFModel
         /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = static::$ci->translator;
 
+        // Define the data
+        $data = [
+            'locale' => $this->currentLocale(),
+            'name' => $translator->translate($this->name),
+            'description' => $translator->translate($this->description)
+        ];
+
+        // update or create it
+        $this->locale(true)->updateOrCreate($data, $data);
+    }
+
+    private function currentLocale()
+    {
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = static::$ci->currentUser;
 
@@ -160,19 +179,9 @@ class Role extends UFModel
         // Get the current locale. Make sure to get the default (config) one if
         // there's no defined user yet
         if ($currentUser == null) {
-            $currentLocale = $config['site.locales.default'];
+            return $config['site.locales.default'];
         } else {
-            $currentLocale = $currentUser->locale;
+            return $currentUser->locale;
         }
-
-        // Define the data
-        $data = [
-            'locale' => $currentLocale,
-            'name' => $translator->translate($this->name),
-            'description' => $translator->translate($this->description)
-        ];
-
-        // update or create it
-        $this->locale()->updateOrCreate($data, $data);
     }
 }

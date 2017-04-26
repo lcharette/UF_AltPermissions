@@ -36,31 +36,4 @@ class RoleLocale extends UFModel
      * @var bool Enable timestamps for this class.
      */
     public $timestamps = true;
-
-    /**
-     * scopeForCurrentLocale function.
-     * Return the value for the current locale (either user or default locale)
-     *
-     * @access public
-     * @param mixed $query
-     * @return void
-     */
-    public function scopeForCurrentLocale($query)
-    {
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = static::$ci->currentUser;
-
-        /** @var UserFrosting\Config\Config $config */
-        $config = static::$ci->config;
-
-        // Get the current locale. Make sure to get the default (config) one if
-        // there's no defined user yet
-        if ($currentUser == null) {
-            $currentLocale = $config['site.locales.default'];
-        } else {
-            $currentLocale = $currentUser->locale;
-        }
-
-        return $query->where('locale', $currentLocale);
-    }
 }

@@ -65,7 +65,7 @@ class RoleLocaleTest extends TestCase
         $newRole = Role::find($role->id);
 
         // Get the locale, and make sure it return the english one
-        $roleLocale = $newRole->locale()->forCurrentLocale()->first();
+        $roleLocale = $newRole->locale->first();
         $this->assertEquals("The selected role doesn't exist", $roleLocale->name);
         $this->assertEquals("The selected role seeker is invalid", $roleLocale->description);
 
@@ -79,7 +79,7 @@ class RoleLocaleTest extends TestCase
 
         // Test the french locale. Make sure to fetch again
         $frenchRole = Role::find($role->id);
-        $roleLocale = $frenchRole->locale()->forCurrentLocale()->first();
+        $roleLocale = $frenchRole->locale->first();
         $this->assertEquals("Le rôle sélectionné n'existe pas", $roleLocale->name);
         $this->assertEquals("Le demandeur de rôle sélectionné n'est pas valide", $roleLocale->description);
     }
