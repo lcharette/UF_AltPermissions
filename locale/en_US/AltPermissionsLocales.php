@@ -15,12 +15,12 @@
 return [
 
     "ALT_ROLE" => [
-        "INFO_LANGUAGE" => "<strong>Tip: </strong> Language keys can also be used to display internationalized role name and description.",
+        "INFO_LANGUAGE" => "<strong>Tip:</strong> Language keys can also be used to display internationalized role name and description.",
 
         "PAGE_DESCRIPTION"  => "A listing of the roles for the <em>{{seeker}}</em> seeker.  Provides management tools for editing and deleting roles for this seeker.",
         "PAGE_TITLE" => "Roles for {{seeker}}",
 
-        "USERS" => "Role user's"
+        "USERS" => "Role users"
     ],
 
     "AUTH" => [
@@ -31,7 +31,7 @@ return [
         "UPDATED" => "Role <strong>{{role_name}}</strong> successfully defined for <strong>{{user_name}}</strong>",
         "DELETED" => "Role <strong>{{role_name}}</strong> successfully removed for <strong>{{user_name}}</strong>",
 
-        "ADD_USER" => "Add user",
+        "ADD_USER" => "Add {{&USER}}",
         "SELECT_USER" => "Select {{&USER}}",
         "USER_HAS_ROLE" => "The selected {{&USER}} already has a role defined for this seeker"
     ]

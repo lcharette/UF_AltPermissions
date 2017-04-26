@@ -3,9 +3,6 @@
 namespace UserFrosting\Tests\Unit;
 
 use UserFrosting\Tests\Unit\AltPermissions;
-use League\FactoryMuffin\Faker\Facade as Faker;
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Illuminate\Database\Schema\Blueprint;
 
 class AltPermissionsTest extends AltPermissions
 {
