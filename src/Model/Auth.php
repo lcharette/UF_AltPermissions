@@ -74,6 +74,12 @@ class Auth extends UFModel
         return $query;
     }
 
+    public function scopeJoinRole($query)
+    {
+        $query = $query->leftJoin('alt_roles', $this->table.'.role_id', '=', 'alt_roles.id');
+        return $query;
+    }
+
     /**
      * getRoute function.
      * Helper function for when the $ci is not directly avaiable

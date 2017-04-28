@@ -26,16 +26,19 @@ class AuthSprunje extends Sprunje
     /* Nb.: Since the language key is stored in the db, the db can't be
        used for sorting and filtering at this time */
     protected $sortable = [
-        'user'
+        'user',
+        'role'
     ];
     protected $filterable = [
-        'user'
+        'user',
+        'role'
     ];
 
     /**
      * @var bool Keep track of whether the users table has already been joined on the query.
      */
     protected $joinedUsers = false;
+    protected $joinedRoles = false;
 
     /*
      * @var Seeker. The seeker we will be looking for
@@ -119,6 +122,23 @@ class AuthSprunje extends Sprunje
             return $query;
         });
     }
+    protected function filterRole($query, $value)
+    {
+        if (!$this->joinedRoles) {
+            $query = $query->joinRole();
+        }
+
+        $this->joinedRoles = true;
+
+        // Split value on separator for OR queries
+        $values = explode($this->orSeparator, $value);
+        return $query->where(function ($query) use ($values) {
+            foreach ($values as $value) {
+                $query = $query->orLike('alt_roles.name', $value);
+            }
+            return $query;
+        });
+    }
 
     /**
      * Sort based on user last name.
@@ -136,5 +156,15 @@ class AuthSprunje extends Sprunje
         $this->joinedUsers = true;
 
         return $query->orderBy('users.first_name', $direction);
+    }
+    protected function sortRole($query, $direction)
+    {
+        if (!$this->joinedRoles) {
+            $query = $query->joinRole();
+        }
+
+        $this->joinedRoles = true;
+
+        return $query->orderBy('alt_roles.name', $direction);
     }
 }

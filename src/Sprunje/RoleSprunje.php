@@ -23,8 +23,14 @@ class RoleSprunje extends Sprunje
 
     /* Nb.: Since the language key is stored in the db, the db can't be
        used for sorting and filtering at this time */
-    protected $sortable = [];
-    protected $filterable = [];
+    protected $sortable = [
+        'name',
+        'description'
+    ];
+    protected $filterable = [
+        'name',
+        'description'
+    ];
 
 
     protected $seeker = "";

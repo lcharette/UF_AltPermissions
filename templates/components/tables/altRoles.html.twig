@@ -11,8 +11,8 @@
     <table id="{{ table.id }}" class="tablesorter table table-bordered table-hover table-striped">
         <thead>
             <tr>
-                <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-info" data-sorter="false" data-filter="false">{{ translate('ROLE') }}</th>
-                <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description" data-sorter="false" data-filter="false">{{ translate('DESCRIPTION') }}</th>
+                <th class="sorter-metatext" data-column-name="name" data-column-template="#role-table-column-name">{{ translate('ROLE') }}</th>
+                <th class="sorter-metatext" data-column-name="description" data-column-template="#role-table-column-description">{{ translate('DESCRIPTION') }}</th>
                 <th data-column-template="#role-table-column-actions" data-sorter="false" data-filter="false">{{ translate('ACTIONS') }}</th>
             </tr>
         </thead>
@@ -29,7 +29,7 @@
      # These templates require handlebars-helpers.js, moment.js
     #}
     {% verbatim %}
-    <script id="role-table-column-info" type="text/x-handlebars-template">
+    <script id="role-table-column-name" type="text/x-handlebars-template">
         <td>
             <strong><a href="{{ row.uri.view }}">{{ row.name }}</a></strong>
         </td>
