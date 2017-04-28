@@ -46,9 +46,6 @@ class Role extends UFModel
         // Remove all permission associations
         //$this->permissions()->detach();
 
-        // Remove all user associations
-        $this->locale()->delete();
-
         // Delete the role
         $result = parent::delete();
 
@@ -79,38 +76,10 @@ class Role extends UFModel
         }
     }
 
-    public function locale($all = false)
-    {
-        $query = $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\RoleLocale');
-
-        if ($all) {
-            return $query;
-        } else {
-            return $query->where('locale', $this->currentLocale());
-        }
-    }
-
     /**
      * Model's getter
      *
      */
-
-    /**
-     * getStatusTxt function.
-     * Prend le code de status et retourne la version localisé que le code représente
-     *
-     * @access public
-     * @return void
-     */
-    public function getLocaleName()
-    {
-        return static::$ci->translator->translate($this->name);
-    }
-
-    public function getLocaleDescription()
-    {
-        return static::$ci->translator->translate($this->description);
-    }
 
     /**
      * getRoute function.
@@ -146,42 +115,5 @@ class Role extends UFModel
     {
         $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
         return $query->where('seeker', $seekerClass);
-    }
-
-    /**
-     * Misc
-     */
-
-    public function updateLocaleCache()
-    {
-        /** @var UserFrosting\I18n\MessageTranslator $translator */
-        $translator = static::$ci->translator;
-
-        // Define the data
-        $data = [
-            'locale' => $this->currentLocale(),
-            'name' => $translator->translate($this->name),
-            'description' => $translator->translate($this->description)
-        ];
-
-        // update or create it
-        $this->locale(true)->updateOrCreate($data, $data);
-    }
-
-    private function currentLocale()
-    {
-        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
-        $currentUser = static::$ci->currentUser;
-
-        /** @var UserFrosting\Config\Config $config */
-        $config = static::$ci->config;
-
-        // Get the current locale. Make sure to get the default (config) one if
-        // there's no defined user yet
-        if ($currentUser == null) {
-            return $config['site.locales.default'];
-        } else {
-            return $currentUser->locale;
-        }
     }
 }

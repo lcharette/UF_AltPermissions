@@ -98,9 +98,6 @@ class RoleController extends SimpleController
         // Generate the form
         $schema->initForm($role);
 
-        // Add info box about the language keys
-        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
-
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $get['box_id'],
             "box_title" => "ROLE.CREATE",
@@ -139,13 +136,13 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
             throw new ForbiddenException();
         }
-
-        /** @var MessageStream $ms */
-        $ms = $this->ci->alerts;
 
         // Load the request schema
         $schema = new RequestSchema('schema://altRole/create.json');
@@ -244,9 +241,6 @@ class RoleController extends SimpleController
         // Generate the form
         $schema->initForm($role);
 
-        // Add info box about the language keys
-        $ms->addMessageTranslated('info', 'ALT_ROLE.INFO_LANGUAGE');
-
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
             "box_title" => "ROLE.EDIT",
@@ -269,21 +263,19 @@ class RoleController extends SimpleController
      */
     public function getModalEditPermissions($request, $response, $args)
     {
-        // GET parameters
-        $params = $request->getQueryParams();
-
-        $role = $this->getRoleFromParams($params);
-
-        // If the role doesn't exist, return 404
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
         /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
+
+        // GET parameters
+        $params = $request->getQueryParams();
+
+        // If the role doesn't exist, return 404
+        if (!$role = $this->getRoleFromParams($params)) {
+            throw new NotFoundException($request, $response);
+        }
 
         // Access-controlled resource - check that currentUser has permission to edit "permissions" field for this role
         if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
@@ -465,22 +457,20 @@ class RoleController extends SimpleController
             throw $e;
         }
 
-        $roleName = $role->getLocaleName();
-
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($role, $roleName, $currentUser) {
+        Capsule::transaction( function() use ($role, $currentUser) {
             $role->delete();
             unset($role);
 
             // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$roleName}.", [
+            $this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$role->name}.", [
                 'type' => 'role_delete',
                 'user_id' => $currentUser->id
             ]);
         });
 
         $ms->addMessageTranslated('success', 'ROLE.DELETION_SUCCESSFUL', [
-            'name' => $roleName
+            'name' => $role->name
         ]);
 
         return $response->withStatus(200);
@@ -495,13 +485,6 @@ class RoleController extends SimpleController
      */
     public function getPermissions($request, $response, $args)
     {
-        $role = $this->getRoleFromParams($args);
-
-        // If the role no longer exists, forward to main role listing page
-        if (!$role) {
-            throw new NotFoundException($request, $response);
-        }
-
         // GET parameters
         $params = $request->getQueryParams();
 
@@ -511,6 +494,14 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        // If the role no longer exists, forward to main role listing page
+        if (!$role = $this->getRoleFromParams($args)) {
+            throw new NotFoundException($request, $response);
+        }
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'view_role_field', [
             'role' => $role,
@@ -518,9 +509,6 @@ class RoleController extends SimpleController
         ])) {
             throw new ForbiddenException();
         }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
 
         $sprunje = $classMapper->createInstance('permission_sprunje', $classMapper, $params);
         $sprunje->extendQuery(function ($query) use ($role) {
@@ -582,7 +570,7 @@ class RoleController extends SimpleController
             'role' => $role,
             'permissions' => $permissions,
             'uri' => [
-                'edit'      => $role->getRoute('modal.roles.edit')
+                'edit' => $role->getRoute('modal.roles.edit')
             ]
         ]);
     }
@@ -640,13 +628,13 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
             throw new ForbiddenException();
         }
-
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
-        $classMapper = $this->ci->classMapper;
 
         $sprunje = $classMapper->createInstance('altRole_sprunje', $classMapper, $params, $args['seeker']);
 
@@ -666,6 +654,9 @@ class RoleController extends SimpleController
      */
     public function updatePermissions($request, $response, $args)
     {
+        // Get PUT parameters: value
+        $put = $request->getParsedBody();
+
         /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
@@ -696,9 +687,6 @@ class RoleController extends SimpleController
             throw new ForbiddenException();
         }*/
 
-        // Get PUT parameters: value
-        $put = $request->getParsedBody();
-
         if (!isset($put['permissions'])) {
             throw new BadRequestException();
         }
@@ -708,16 +696,13 @@ class RoleController extends SimpleController
             return $value == 1;
         })->keys();
 
-        // Role name for later use
-        $roleName = $role->getLocaleName();
-
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($newPermissions, $role, $currentUser, $roleName) {
+        Capsule::transaction( function() use ($newPermissions, $role, $currentUser) {
 
             $role->permissions()->sync($newPermissions);
 
             // Create activity record
-            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated permissions for role {$roleName}.", [
+            $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated permissions for role {$role->name}.", [
                 'type' => 'role_update_field',
                 'user_id' => $currentUser->id
             ]);
@@ -725,7 +710,7 @@ class RoleController extends SimpleController
 
         // Add success messages
         $ms->addMessageTranslated('success', 'ROLE.PERMISSIONS_UPDATED', [
-            'name' => $roleName
+            'name' => $role->name
         ]);
 
         return $response->withStatus(200);

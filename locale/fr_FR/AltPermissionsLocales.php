@@ -15,8 +15,6 @@
 return [
 
     "ALT_ROLE" => [
-        "INFO_LANGUAGE" => "<strong>Astuce:</strong> Les clés de langue peuvent également être utilisées pour afficher la version internationalisés du nom et de la description du rôle.",
-
         "PAGE_DESCRIPTION"  => "Une liste des rôles pour le demandeur <em>{{seeker}}</em>. Fournit des outils de gestion pour l'édition et la suppression de rôles pour ce chercheur.",
         "PAGE_TITLE" => "Rôles pour {{seeker}}",
 

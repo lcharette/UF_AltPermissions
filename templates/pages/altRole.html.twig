@@ -1,9 +1,9 @@
 {% extends "layouts/dashboard.html.twig" %}
 
 {# Overrides blocks in head of base template #}
-{% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }} | {{ role.localeName }}{% endblock %}
+{% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }} | {{ role.name }}{% endblock %}
 
-{% block page_description %}{{ translate("ROLE.INFO_PAGE", {name: role.localeName}) }}{% endblock %}
+{% block page_description %}{{ translate("ROLE.INFO_PAGE", {name: role.name}) }}{% endblock %}
 
 {% block body_matter %}
     <div class="row">
@@ -15,9 +15,9 @@
                 <div class="box-body">
                     <dl>
                         <dt>{{ translate('ROLE.NAME') }}</dt>
-                        <dd><p>{{ role.localeName }}</p></dd>
+                        <dd><p>{{ role.name }}</p></dd>
                         <dt>{{ translate('DESCRIPTION') }}</dt>
-                        <dd><p>{{ role.localeDescription }}</p></dd>
+                        <dd><p>{{ role.description }}</p></dd>
                     </dl>
                 </div>
                 <div class="box-footer text-center">

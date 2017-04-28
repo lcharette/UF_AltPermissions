@@ -60,7 +60,6 @@ class AuthUsersSprunje extends Sprunje
         $auths = $this->classMapper->staticMethod('altAuth', 'forSeeker', $this->seeker_type, $this->seeker_id)->get();
         $definedUsers = $auths->pluck('user_id')->toArray();
 
-
         $query = $this->classMapper->createInstance('user')->whereNotIn('id', $definedUsers);
 
         return $query;

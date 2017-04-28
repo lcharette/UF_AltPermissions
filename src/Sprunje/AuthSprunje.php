@@ -83,11 +83,6 @@ class AuthSprunje extends Sprunje
     {
         $collection = $collection->map(function ($item, $key) {
 
-            // Replace the name and description for the translated version of the role name and description
-            // Since we are loading into Handlebar and not Twig, the GetMutator can't be used in template
-            $item->role->name = $item->role->getLocaleName();
-            $item->role->description = $item->role->getLocaleDescription();
-
             // Add routes
             $item->uri = [
                 'delete' => $item->getRoute('api.auth.delete'),

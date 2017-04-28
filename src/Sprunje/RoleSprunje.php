@@ -53,10 +53,6 @@ class RoleSprunje extends Sprunje
     {
         $collection = $collection->map(function ($item, $key) {
 
-            // Replace the name and description for the translated version
-            $item->name = $item->getLocaleName();
-            $item->description = $item->getLocaleDescription();
-
             // Routes
             $item->uri = [
                 'view'   => $item->getRoute('alt_uri_roles.view'),

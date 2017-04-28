@@ -32,28 +32,6 @@
     }
 
     /**
-     * `alt_roles_locale` table that contain all the roles definitions
-     */
-    if (!$schema->hasTable('alt_roles_locale')) {
-        $schema->create('alt_roles_locale', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('role_id')->unsigned();
-            $table->string('locale');
-            $table->text('name');
-            $table->text('description');
-            $table->timestamps();
-
-            $table->engine = 'InnoDB';
-            $table->collation = 'utf8_unicode_ci';
-            $table->charset = 'utf8';
-        });
-
-        echo "Created table 'alt_roles_locale'..." . PHP_EOL;
-    } else {
-        echo "Table 'alt_roles_locale' already exists.  Skipping..." . PHP_EOL;
-    }
-
-    /**
      * `alt_permissions` that contains the actual permissions slugs
      */
     if (!$schema->hasTable('alt_permissions')) {
