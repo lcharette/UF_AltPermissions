@@ -29,7 +29,9 @@ class Role extends UFModel
     protected $fillable = [
         "seeker",
         "name",
-        "description"
+        "description",
+        "default",
+        "lock"
     ];
 
     /**

@@ -18,7 +18,17 @@ return [
         "PAGE_DESCRIPTION"  => "A listing of the roles for the <em>{{seeker}}</em> seeker.  Provides management tools for editing and deleting roles for this seeker.",
         "PAGE_TITLE" => "Roles for {{seeker}}",
 
-        "USERS" => "Role users"
+        "USERS" => "Role users",
+
+        "DEFAULT" => [
+            "@TRANSLATION" => "Default role",
+            "CONFIRM" => "Are you sure you want to set this role as the default role? User without a role will inherit this role.",
+            "CONFIRM_UNSET" => "Are you sure you want to remove the default role status from the selected role? User without a role will have no permissions (all permissions off).",
+            "UPDATED" => "Role <strong>{{role_name}}</strong> set as default for the <em>{{seeker}}</em> seeker",
+            "UPDATED_UNSET" => "Role <strong>{{role_name}}</strong> unset as default for the <em>{{seeker}}</em> seeker",
+            "SET" => "Set as default role",
+            "UNSET" => "Remove as the default role"
+        ]
     ],
 
     "AUTH" => [

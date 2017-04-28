@@ -39,6 +39,9 @@ $app->group('/api/roles/{seeker}', function () {
     $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo')
          ->setName('api.roles.edit.put');
 
+    $this->post('/r/{id}/default', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateDefault')
+         ->setName('api.roles.set.default');
+
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/modals/roles/{seeker}', function () {

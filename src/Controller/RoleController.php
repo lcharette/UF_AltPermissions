@@ -75,6 +75,7 @@ class RoleController extends SimpleController
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
         // Request GET data
@@ -318,6 +319,7 @@ class RoleController extends SimpleController
         /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
         /** @var MessageStream $ms */
@@ -395,6 +397,81 @@ class RoleController extends SimpleController
         $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
             'name' => $translator->translate($role->name)
         ]);
+
+        return $response->withStatus(200);
+    }
+
+    public function updateDefault($request, $response, $args)
+    {
+        // Get PUT parameters: (name, slug, description)
+        $params = $request->getParsedBody();
+
+        /** @var Config $config */
+        $config = $this->ci->config;
+
+        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        $authorizer = $this->ci->authorizer;
+
+        /** @var UserFrosting\Sprinkle\Account\Model\User $currentUser */
+        $currentUser = $this->ci->currentUser;
+
+        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        $classMapper = $this->ci->classMapper;
+
+        /** @var UserFrosting\I18n\MessageTranslator $translator */
+        $translator = $this->ci->translator;
+
+        /** @var MessageStream $ms */
+        $ms = $this->ci->alerts;
+
+        // Get the role
+        if (!$role = $classMapper->staticMethod('altRole', 'find', $args['id']))
+        {
+            throw new NotFoundException($request, $response);
+        }
+
+        // Access-controlled resource - check that currentUser has permission to edit submitted fields for this role
+        // !TODO
+        /*if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+            'role' => $role,
+            'fields' => array_values(array_unique($fieldNames))
+        ])) {
+            throw new ForbiddenException();
+        }*/
+
+        // Begin transaction - DB will be rolled back if an exception occurs
+        Capsule::transaction( function() use ($role, $currentUser, $classMapper, $args, $ms, $translator) {
+
+            // Remove all the other role their default status
+            $classMapper->createInstance('altRole')->forSeeker($args['seeker'])->where('default', '1')->update([
+                'default' => 0
+            ]);
+
+            // If the selected role wasn't already defined as the default one, we set it as the default one.
+            // (This work because $role is not affected by the above update)
+            if (!$role->default) {
+                $role->default = true;
+                $role->save();
+
+                $ms->addMessageTranslated('success', 'ALT_ROLE.DEFAULT.UPDATED', [
+                    'role_name' => $translator->translate($role->name),
+                    'seeker' => $args['seeker']
+                ]);
+            } else {
+                $ms->addMessageTranslated('success', 'ALT_ROLE.DEFAULT.UPDATED_UNSET', [
+                    'role_name' => $translator->translate($role->name),
+                    'seeker' => $args['seeker']
+                ]);
+            }
+
+            // Create activity record
+            $this->ci->userActivityLogger->info("User {$currentUser->user_name} set role {$role->name} as the default role details for role .", [
+                'type' => 'role_set_default',
+                'user_id' => $currentUser->id
+            ]);
+        });
+
+
 
         return $response->withStatus(200);
     }
