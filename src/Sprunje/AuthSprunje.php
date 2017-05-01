@@ -53,7 +53,7 @@ class AuthSprunje extends Sprunje
     /**
      * {@inheritDoc}
      */
-    public function __construct($classMapper, $options, $seeker, $where = [])
+    public function __construct($classMapper, $options, $seeker = "", $where = [])
     {
         $this->seeker = $seeker;
         $this->where = $where;
