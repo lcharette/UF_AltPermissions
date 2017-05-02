@@ -33,15 +33,16 @@ class AuthManager
         $this->ci = $ci;
     }
 
-    /**
-     * Checks whether or not a user has access on a particular permission slug.
-     *
-     * Determine if this user has access to the given $hook under the given $params.
-     * @param string $hook The authorization hook to check for access.
-     * @param array $params[optional] An array of field names => values, specifying any additional data to provide the authorization module
-     * when determining whether or not this user has access.
-     * @return boolean True if the user has access, false otherwise.
-     */
+    /*
+      NOTES:
+      - To make it even more efficient, all user "ON" permission could be put in cache. We fetch the roles for a user, then cache the result based on seeker id?
+
+      PHPBB
+      - function acl_get($opt, $f = 0) Look up an option
+      - function acl_getf($opt, $clean = false) Get forums with the specified permission setting
+      - function acl_gets() Get permission settings (more than one)
+      - function acl_get_list($user_id = false, $opts = false, $forum_id = false) Get permission listing based on user_id/options/forum_ids
+    */
     public function check($user, $slug, $seeker_id)
     {
         $debug = $this->ci->config['debug.auth'];
