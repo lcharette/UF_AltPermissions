@@ -1,5 +1,5 @@
 {
-    "name": "lcharette/UF-AltPermissions ",
+    "name": "lcharette/uf_altpermissions",
     "type": "userfrosting-sprinkle",
     "description": "Alternate/complementary permission system for UserFrosting V4",
     "keywords": ["permissions", "roles", "userfrosting"],
