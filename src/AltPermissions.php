@@ -8,8 +8,7 @@
  */
 namespace UserFrosting\Sprinkle\AltPermissions;
 
-use UserFrosting\Sprinkle\AltPermissions\ServicesProvider\AltPermissionsServicesProvider;
-use UserFrosting\Sprinkle\Core\Initialize\Sprinkle;
+use UserFrosting\System\Sprinkle\Sprinkle;
 
 /**
  * Bootstrapper class for the 'AltPermissions' sprinkle.
@@ -18,12 +17,5 @@ use UserFrosting\Sprinkle\Core\Initialize\Sprinkle;
  */
 class AltPermissions extends Sprinkle
 {
-    /**
-     * Register AltPermissions services.
-     */
-    public function init()
-    {
-        $serviceProvider = new AltPermissionsServicesProvider();
-        $serviceProvider->register($this->ci);
-    }
+
 }

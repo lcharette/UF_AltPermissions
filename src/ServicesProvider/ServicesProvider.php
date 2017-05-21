@@ -16,7 +16,7 @@ use UserFrosting\Sprinkle\AltPermissions\AuthManager;
  *
  * @author Louis Charette (https://github.com/lcharette)
  */
-class AltPermissionsServicesProvider
+class ServicesProvider
 {
     /**
      * Register UserFrosting's account services.
