@@ -1,4 +1,4 @@
-{% extends "layouts/dashboard.html.twig" %}
+{% extends "pages/abstract/dashboard.html.twig" %}
 
 {# Overrides blocks in head of base template #}
 {% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }} | {{ role.name }}{% endblock %}
@@ -28,7 +28,7 @@
         <div class="col-lg-8">
             <div class="box box-primary">
                 <form method="PUT" action="{{site.uri.public}}/api/roles/{{seeker}}/r/{{role.id}}/permissions" id="role-permissions">
-                    {% include "components/csrf.html.twig" %}
+                    {% include "forms/csrf.html.twig" %}
                     <div class="box-header">
                         <h3 class="box-title"><i class="fa fa-fw fa-key"></i> {{ translate('PERMISSION', 2) }}</h3>
                     </div>

@@ -1,4 +1,4 @@
-{% extends "layouts/dashboard.html.twig" %}
+{% extends "pages/abstract/dashboard.html.twig" %}
 
 {# Overrides blocks in head of base template #}
 {% block page_title %}{{ translate("ALT_ROLE.PAGE_TITLE", {'seeker' : seeker}) }}{% endblock %}
@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    {% include "components/tables/altRoles.html.twig" with {
+                    {% include "tables/altRoles.html.twig" with {
                             "table" : {
                                 "id" : "table-roles"
                             }
