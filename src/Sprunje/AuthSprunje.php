@@ -10,7 +10,7 @@ namespace UserFrosting\Sprinkle\AltPermissions\Sprunje;
 
 use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
-use UserFrosting\Sprinkle\AltPermissions\Model\Auth;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth;
 
 /**
  * AuthSprunje

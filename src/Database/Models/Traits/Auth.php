@@ -7,7 +7,7 @@
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 
-namespace UserFrosting\Sprinkle\AltPermissions\Model\Traits;
+namespace UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits;
 
 /**
  * AltPermissions Trait
@@ -19,7 +19,7 @@ Trait Auth
 {
     public function auth()
     {
-        return $this->morphMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth', 'seeker');
+        return $this->morphMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth', 'seeker');
     }
 
     public function roleForUser($user_id)

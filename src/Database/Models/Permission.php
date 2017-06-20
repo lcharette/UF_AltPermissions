@@ -6,9 +6,9 @@
  * @copyright Copyright (c) 2016 Louis Charette
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
-namespace UserFrosting\Sprinkle\AltPermissions\Model;
+namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
-use UserFrosting\Sprinkle\Core\Model\UFModel;
+use UserFrosting\Sprinkle\Core\Models\UFModel;
 
 /**
  * Permission Class.

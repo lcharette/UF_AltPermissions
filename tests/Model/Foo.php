@@ -9,8 +9,8 @@
 namespace UserFrosting\Tests\Model;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
-use UserFrosting\Sprinkle\Core\Model\UFModel;
-use UserFrosting\Sprinkle\AltPermissions\Model\Traits\Auth;
+use UserFrosting\Sprinkle\Core\Models\UFModel;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits\Auth;
 
 /**
  * Project class.

@@ -6,9 +6,9 @@
  * @copyright Copyright (c) 2016 Louis Charette
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
-namespace UserFrosting\Sprinkle\AltPermissions\Model;
+namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
-use UserFrosting\Sprinkle\Core\Model\UFModel;
+use UserFrosting\Sprinkle\Core\Models\UFModel;
 
 /**
  * Role Class
@@ -70,11 +70,11 @@ class Role extends UFModel
         if ($seeker != "")
         {
             $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
-            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth')->where('seeker_type', $seekerClass)->get();
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth')->where('seeker_type', $seekerClass)->get();
         }
         else
         {
-            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Model\Auth');
+            return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth');
         }
     }
 

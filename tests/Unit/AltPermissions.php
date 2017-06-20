@@ -6,8 +6,8 @@ use UserFrosting\Tests\TestCase;
 use UserFrosting\Tests\DatabaseTransactions;
 use League\FactoryMuffin\Faker\Facade as Faker;
 
-use UserFrosting\Sprinkle\AltPermissions\Model\User;
-use UserFrosting\Sprinkle\AltPermissions\Model\Role;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
 
 abstract class AltPermissions extends TestCase
 {
@@ -54,8 +54,8 @@ abstract class AltPermissions extends TestCase
 
         // Create 2 users
         $users = collect([
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\User', ['user_name' => 'User 1']),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\User', ['user_name' => 'User 2'])
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\User', ['user_name' => 'User 1']),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\User', ['user_name' => 'User 2'])
         ]);
 
         // Create 4 seekers
@@ -63,9 +63,9 @@ abstract class AltPermissions extends TestCase
 
         // Create 3 roles
         $roles =  collect([
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 1"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 2"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Model\Role', ['seeker' => $this->seeker, 'name' => "Role 3"])
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 1"]),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 2"]),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 3"])
         ]);
 
         // Assign them all together

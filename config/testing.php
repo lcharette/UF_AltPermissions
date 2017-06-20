@@ -8,7 +8,7 @@
     return [
         'AltPermissions' => [
             'seekers' => [
-                'foo' => 'UserFrosting\Tests\Model\Foo'
+                'foo' => 'UserFrosting\Tests\Models\Foo'
             ]
         ]
     ];

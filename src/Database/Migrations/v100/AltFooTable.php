@@ -6,28 +6,26 @@
  * @copyright Copyright (c) 2016 Louis Charette
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
-namespace UserFrosting\Sprinkle\AltPermissions\Model\Migrations\v100;
+namespace UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100;
 
-use UserFrosting\System\Bakery\Migrations\Migration;
+use UserFrosting\System\Bakery\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Builder;
 
 /**
- * altPermissions table migration
+ * altFoo table migration
  * @extends Migration
  */
-class AltPermissionsTable extends Migration
+class AltFooTable extends Migration
 {
     /**
      * {@inheritDoc}
      */
     public function up()
     {
-        if (!$this->schema->hasTable('alt_permissions')) {
-            $this->schema->create('alt_permissions', function (Blueprint $table) {
+        if (!$this->schema->hasTable('alt_foo')) {
+            $this->schema->create('alt_foo', function (Blueprint $table) {
                 $table->increments('id');
-                $table->string('slug');
-                $table->string('seeker');
                 $table->string('name');
                 $table->text('description')->nullable();
                 $table->timestamps();
@@ -44,6 +42,6 @@ class AltPermissionsTable extends Migration
      */
     public function down()
     {
-        $this->schema->drop('alt_permissions');
+        $this->schema->drop('alt_foo');
     }
 }

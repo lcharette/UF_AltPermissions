@@ -8,7 +8,7 @@
  */
 namespace UserFrosting\Sprinkle\AltPermissions;
 
-use UserFrosting\Sprinkle\AltPermissions\Model\Permission;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
 
 /**
