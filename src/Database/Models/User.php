@@ -7,7 +7,7 @@
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 
-namespace UserFrosting\Sprinkle\AltPermissions\Database\Model;
+namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
 use UserFrosting\Sprinkle\Account\Database\Models\User as CoreUser;
 

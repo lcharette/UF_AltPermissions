@@ -8,7 +8,7 @@
  */
 namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
-use UserFrosting\Sprinkle\Core\Models\UFModel;
+use UserFrosting\Sprinkle\Core\Database\Models\Model;
 
 /**
  * Role Class
@@ -19,7 +19,7 @@ use UserFrosting\Sprinkle\Core\Models\UFModel;
  * @property string name
  * @property string description
  */
-class Auth extends UFModel
+class Auth extends Model
 {
     /**
      * @var string The name of the table for the current model.

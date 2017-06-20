@@ -6,10 +6,10 @@
  * @link https://github.com/lcharette
  * @copyright Copyright (c) 2016 Louis Charette
  */
-namespace UserFrosting\Tests\Model;
+namespace UserFrosting\Tests\Models;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
-use UserFrosting\Sprinkle\Core\Models\UFModel;
+use UserFrosting\Sprinkle\Core\Database\Models\Model;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits\Auth;
 
 /**
@@ -17,7 +17,7 @@ use UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits\Auth;
  *
  * @extends UFModel
  */
-class Foo extends UFModel {
+class Foo extends Model {
 
     use Auth;
 
