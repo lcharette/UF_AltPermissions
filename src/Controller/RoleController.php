@@ -286,7 +286,7 @@ class RoleController extends SimpleController
             throw new ForbiddenException();
         }
 
-        return $this->ci->view->render($response, 'components/modals/role-manage-permissions.html.twig', [
+        return $this->ci->view->render($response, 'modals/role-manage-permissions.html.twig', [
             'role' => $role
         ]);
     }
