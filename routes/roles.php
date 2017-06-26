@@ -11,7 +11,7 @@
  * Routes for administrative role management.
  * Route anything related to the RoleController
  */
-$app->group('/admin/roles/{seeker}', function () {
+$app->group('/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageList')
         ->setName('alt_uri_roles');
 

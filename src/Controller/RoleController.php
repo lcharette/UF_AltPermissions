@@ -104,7 +104,7 @@ class RoleController extends SimpleController
             "box_title" => "ROLE.CREATE",
             "form_action" => $this->ci->get('router')->pathFor('api.roles.create.post', $args),
             "fields" => $schema->generateForm(),
-            "validators" => $validator->rules()
+            "validators" => $validator->rules('json', true)
         ]);
     }
 
@@ -251,7 +251,7 @@ class RoleController extends SimpleController
             ]),
             "form_method" => "PUT",
             "fields" => $schema->generateForm(),
-            "validators" => $validator->rules()
+            "validators" => $validator->rules('json', true)
         ]);
     }
 
@@ -714,6 +714,7 @@ class RoleController extends SimpleController
         }
 
         $sprunje = $classMapper->createInstance('altRole_sprunje', $classMapper, $params, $args['seeker']);
+        //Debug::debug(print_r($sprunje, true));
 
         // Be careful how you consume this data - it has not been escaped and contains untrusted user-supplied content.
         // For example, if you plan to insert it into an HTML DOM, you must escape it on the client side (or use client-side templating).

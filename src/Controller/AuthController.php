@@ -118,7 +118,7 @@ class AuthController extends SimpleController
             "fields" => $schema->generateForm(),
             "collection_placeholder" => 'USER.SELECT',
             "collection_api" => $router->pathFor('api.autocomplete.auth.username', $args),
-            "validators" => $validator->rules()
+            "validators" => $validator->rules('json', true)
         ]);
     }
 
@@ -328,7 +328,7 @@ class AuthController extends SimpleController
             ]),
             "form_method" => "PUT",
             "fields" => $schema->generateForm(),
-            "validators" => $validator->rules()
+            "validators" => $validator->rules('json', true)
         ]);
     }
 
