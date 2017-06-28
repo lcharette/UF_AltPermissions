@@ -8,24 +8,22 @@
  */
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
-use Interop\Container\ContainerInterface;
-use UserFrosting\Sprinkle\FormGenerator\RequestSchema;
-use UserFrosting\Fortress\RequestDataTransformer;
-use UserFrosting\Fortress\ServerSideValidator;
-use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
-
-use Carbon\Carbon;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
-use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
-use UserFrosting\Sprinkle\Core\Controller\SimpleController;
-use UserFrosting\Sprinkle\Core\Facades\Debug;
+use Interop\Container\ContainerInterface;
+use UserFrosting\Fortress\RequestSchema;
+use UserFrosting\Fortress\RequestDataTransformer;
+use UserFrosting\Fortress\ServerSideValidator;
+use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
 use UserFrosting\Support\Exception\BadRequestException;
 use UserFrosting\Support\Exception\ForbiddenException;
 use UserFrosting\Support\Exception\HttpException;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
+use UserFrosting\Sprinkle\Core\Controller\SimpleController;
+use UserFrosting\Sprinkle\Core\Facades\Debug;
+use UserFrosting\Sprinkle\FormGenerator\Form;
 
 /**
  * Controller class for role-related requests, including listing roles, CRUD for roles, etc.
@@ -45,11 +43,6 @@ class AuthController extends SimpleController
      */
     public function __construct(ContainerInterface $ci) {
         $this->ci = $ci;
-
-        // This Sprinkle required FormGenerator Sprinkle. Make sure it's there, otherwise error will be thrown later
-        if (!$this->ci->sprinkleManager->isAvailable("FormGenerator")) {
-            throw new \Exception("Sprinkle dependencies not met. FormGenerator Sprinkle is not available");
-        }
     }
 
     /**
@@ -95,7 +88,7 @@ class AuthController extends SimpleController
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form
-        $schema->initForm();
+        $form = new Form($schema);
 
         // Fill in the possibles roles.
         $possibleRoles = $classMapper->staticMethod('altRole', 'forSeeker', $args['seeker'])->get();
@@ -104,7 +97,7 @@ class AuthController extends SimpleController
         $roleSelect = $possibleRoles->pluck('name', 'id');
 
         // We pass the roles as the option of the selects
-        $schema->setInputArgument("role", "options", $roleSelect);
+        $form->setInputArgument("role", "options", $roleSelect);
 
         // Get the modal title. Depend if the seeker specific key is define
         $seekerTitle = "AUTH.".strtoupper($args['seeker']).".ADD_USER";
@@ -115,7 +108,7 @@ class AuthController extends SimpleController
             "box_id" => $get['box_id'],
             "box_title" => $boxTitle,
             "form_action" => $router->pathFor('api.auth.create', $args),
-            "fields" => $schema->generateForm(),
+            "fields" => $form->generate(),
             "collection_placeholder" => 'USER.SELECT',
             "collection_api" => $router->pathFor('api.autocomplete.auth.username', $args),
             "validators" => $validator->rules('json', true)
@@ -305,7 +298,7 @@ class AuthController extends SimpleController
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form. The value will be set manually later
-        $schema->initForm();
+        $form = new Form($schema);
 
         // Fill in the roles
         $possibleRoles = $classMapper->staticMethod('altRole', 'where', 'seeker', $auth->seeker_type)->get();
@@ -314,11 +307,11 @@ class AuthController extends SimpleController
         $roleSelect = $possibleRoles->pluck('name', 'id');
 
         // We pass the role as the option of the selects
-        $schema->setInputArgument("role", "options", $roleSelect);
+        $form->setInputArgument("role", "options", $roleSelect);
 
         // We need to the the value manually. If we pass the relation, it will associate the relation
         // as the value of the select
-        $schema->setValue("role", $auth->role_id);
+        $form->setValue("role", $auth->role_id);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
@@ -327,7 +320,7 @@ class AuthController extends SimpleController
                 'id' => $args['id']
             ]),
             "form_method" => "PUT",
-            "fields" => $schema->generateForm(),
+            "fields" => $form->generate(),
             "validators" => $validator->rules('json', true)
         ]);
     }

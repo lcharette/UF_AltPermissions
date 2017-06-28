@@ -43,6 +43,7 @@ class AuthManager
       - function acl_gets() Get permission settings (more than one)
       - function acl_get_list($user_id = false, $opts = false, $forum_id = false) Get permission listing based on user_id/options/forum_ids
     */
+    //!TODO : The slug must accept an array
     public function check($user, $slug, $seeker_id)
     {
         $debug = $this->ci->config['debug.auth'];

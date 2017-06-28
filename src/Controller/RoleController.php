@@ -9,24 +9,23 @@
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
 use Interop\Container\ContainerInterface;
-use UserFrosting\Sprinkle\FormGenerator\RequestSchema;
-use UserFrosting\Fortress\RequestDataTransformer;
-use UserFrosting\Fortress\ServerSideValidator;
-use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
-
-use Carbon\Carbon;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
+use UserFrosting\Fortress\RequestSchema;
+use UserFrosting\Fortress\RequestSchema\RequestSchemaRepository;
+use UserFrosting\Fortress\RequestDataTransformer;
+use UserFrosting\Fortress\ServerSideValidator;
+use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
+use UserFrosting\Support\Exception\BadRequestException;
+use UserFrosting\Support\Exception\ForbiddenException;
+use UserFrosting\Support\Exception\HttpException;
 use UserFrosting\Sprinkle\Account\Database\Models\Role;
 use UserFrosting\Sprinkle\Account\Database\Models\User;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
-use UserFrosting\Support\Exception\BadRequestException;
-use UserFrosting\Support\Exception\ForbiddenException;
-use UserFrosting\Support\Exception\HttpException;
+use UserFrosting\Sprinkle\FormGenerator\Form;
 
 /**
  * Controller class for role-related requests, including listing roles, CRUD for roles, etc.
@@ -97,13 +96,13 @@ class RoleController extends SimpleController
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form
-        $schema->initForm($role);
+        $form = new Form($schema, $role);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $get['box_id'],
             "box_title" => "ROLE.CREATE",
             "form_action" => $this->ci->get('router')->pathFor('api.roles.create.post', $args),
-            "fields" => $schema->generateForm(),
+            "fields" => $form->generate(),
             "validators" => $validator->rules('json', true)
         ]);
     }
@@ -240,7 +239,7 @@ class RoleController extends SimpleController
         $validator = new JqueryValidationAdapter($schema, $this->ci->translator);
 
         // Generate the form
-        $schema->initForm($role);
+        $form = new Form($schema, $role);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
@@ -250,7 +249,7 @@ class RoleController extends SimpleController
                 'id' => $params['id']
             ]),
             "form_method" => "PUT",
-            "fields" => $schema->generateForm(),
+            "fields" => $form->generate(),
             "validators" => $validator->rules('json', true)
         ]);
     }

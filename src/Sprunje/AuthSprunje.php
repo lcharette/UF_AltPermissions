@@ -34,12 +34,6 @@ class AuthSprunje extends Sprunje
         'role'
     ];
 
-    /**
-     * @var bool Keep track of whether the users table has already been joined on the query.
-     */
-    protected $joinedUsers = false;
-    protected $joinedRoles = false;
-
     /*
      * @var Seeker. The seeker we will be looking for
      */
@@ -76,7 +70,7 @@ class AuthSprunje extends Sprunje
             $query = $query->where($this->where);
         }
 
-        return $query;
+        return $query->joinUser()->joinRole();
     }
 
     /**
@@ -105,12 +99,6 @@ class AuthSprunje extends Sprunje
      */
     protected function filterUser($query, $value)
     {
-        if (!$this->joinedUsers) {
-            $query = $query->joinUser();
-        }
-
-        $this->joinedUsers = true;
-
         // Split value on separator for OR queries
         $values = explode($this->orSeparator, $value);
         return $query->where(function ($query) use ($values) {
@@ -124,12 +112,6 @@ class AuthSprunje extends Sprunje
     }
     protected function filterRole($query, $value)
     {
-        if (!$this->joinedRoles) {
-            $query = $query->joinRole();
-        }
-
-        $this->joinedRoles = true;
-
         // Split value on separator for OR queries
         $values = explode($this->orSeparator, $value);
         return $query->where(function ($query) use ($values) {
@@ -149,22 +131,10 @@ class AuthSprunje extends Sprunje
      */
     protected function sortUser($query, $direction)
     {
-        if (!$this->joinedUsers) {
-            $query = $query->joinUser();
-        }
-
-        $this->joinedUsers = true;
-
         return $query->orderBy('users.first_name', $direction);
     }
     protected function sortRole($query, $direction)
     {
-        if (!$this->joinedRoles) {
-            $query = $query->joinRole();
-        }
-
-        $this->joinedRoles = true;
-
         return $query->orderBy('alt_roles.name', $direction);
     }
 }
