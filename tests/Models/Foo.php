@@ -15,7 +15,7 @@ use UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits\Auth;
 /**
  * Project class.
  *
- * @extends UFModel
+ * @extends Model
  */
 class Foo extends Model {
 
