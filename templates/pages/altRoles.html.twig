@@ -24,7 +24,7 @@
                     %}
                 </div>
                 <div class="box-footer">
-                    <button type="button" class="btn btn-success js-createForm" data-formUrl="{{ site.uri.public }}/modals/roles/{{seeker}}/create/">
+                    <button type="button" class="btn btn-success js-displayForm" data-formUrl="{{ site.uri.public }}/modals/roles/{{seeker}}/create/">
                         <i class="fa fa-plus-square"></i> {{ translate("ROLE.CREATE") }}
                     </button>
                 </div>
@@ -38,16 +38,14 @@
     {{ assets.js('js/FormGenerator') | raw }}
 
     <script>
-        $(".js-createForm").formGenerator();
-
         $("#widget-roles").ufTable({
             dataUrl: site.uri.public + "/api/roles/{{seeker}}"
         });
 
         // Bind table buttons
         $("#widget-roles").on("pagerComplete.ufTable", function () {
-            $(".js-displayForm").formGenerator();
-            $(".js-displayConfirm").formGenerator('confirm');
+            $("#widget-roles > .panel-body").find(".js-displayForm").formGenerator();
+            $("#widget-roles > .panel-body").find(".js-displayConfirm").formGenerator('confirm');
         });
     </script>
 {% endblock %}
