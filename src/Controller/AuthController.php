@@ -280,7 +280,9 @@ class AuthController extends SimpleController
         // Get the role
         if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
         {
-            throw new NotFoundException($request, $response);
+            $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
+            $e->addUserMessage("AUTH.NOT_FOUND");
+            throw $e;
         }
 
         // Access-controlled resource - check that currentUser has permission to edit basic fields "name", "slug", "description" for this role
@@ -368,7 +370,9 @@ class AuthController extends SimpleController
         // Get the auth data from the id in the route
         if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
         {
-            throw new NotFoundException($request, $response);
+            $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
+            $e->addUserMessage("AUTH.NOT_FOUND");
+            throw $e;
         }
 
         // We won't require the schema here. We (should) know we have something
@@ -444,7 +448,9 @@ class AuthController extends SimpleController
         // Get the role
         if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
         {
-            throw new NotFoundException($request, $response);
+            $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
+            $e->addUserMessage("AUTH.NOT_FOUND");
+            throw $e;
         }
 
         // Access-controlled page
