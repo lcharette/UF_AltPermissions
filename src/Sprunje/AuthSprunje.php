@@ -61,16 +61,32 @@ class AuthSprunje extends Sprunje
      */
     protected function baseQuery()
     {
-        $query = $this->classMapper->createInstance('altAuth')                  // Get Auth model
-                                   ->forSeeker($this->seeker)                   // With the seeker key
-                                   ->with(['user', 'role', 'seeker']);          // Eager load the relations for Handlebar
+        // Get the base altAuth Model from classmapper. Keep it for later
+        $baseModel = $this->classMapper->createInstance('altAuth');
+
+        // Get the base query
+        $query = $baseModel                             // Get Auth model
+                 ->forSeeker($this->seeker)             // With the seeker key
+                 ->with(['user', 'role', 'seeker']);    // Eager load the relations for Handlebar
 
         // Apply where contraints if any
         if (!empty($this->where)) {
             $query = $query->where($this->where);
         }
 
-        return $query->joinUser()->joinRole();
+        // Add the join for both user and Role so sort/fitler can work
+        $query = $query->joinUser()->joinRole();
+
+        // Select only what we really need from role and users for the filter/sort to work
+        $query = $query->select(
+            $baseModel->getTable().".*",
+            'users.first_name',
+            'users.last_name',
+            'users.user_name',
+            'alt_roles.name'
+        );
+
+        return $query;
     }
 
     /**
