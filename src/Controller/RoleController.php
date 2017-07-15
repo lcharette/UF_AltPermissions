@@ -540,7 +540,6 @@ class RoleController extends SimpleController
         // Begin transaction - DB will be rolled back if an exception occurs
         Capsule::transaction( function() use ($role, $currentUser) {
             $role->delete();
-            unset($role);
 
             // Create activity record
             $this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$role->name}.", [

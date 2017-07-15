@@ -46,7 +46,7 @@ class Role extends Model
     public function delete()
     {
         // Remove all permission associations
-        //$this->permissions()->detach();
+        $this->permissions()->detach();
 
         // Delete the role
         $result = parent::delete();
