@@ -139,6 +139,9 @@ class RoleController extends SimpleController
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
+        /** @var UserFrosting\Sprinkle\AltPermissions\Middleware\CheckAuthSeeker $checkAuthSeeker */
+        $checkAuthSeeker = $this->ci->checkAuthSeeker;
+
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
             throw new ForbiddenException();
@@ -170,12 +173,13 @@ class RoleController extends SimpleController
             return $response->withStatus(400);
         }
 
-        // Insert the seeker
-        $data['seeker'] = $args['seeker'];
+        // Insert the seeker class
+        $data['seeker'] = $checkAuthSeeker->getSeekerModel($args['seeker']);
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
         Capsule::transaction( function() use ($classMapper, $data, $ms, $config, $currentUser) {
+
             // Create the role
             $role = $classMapper->createInstance('altRole', $data);
 
