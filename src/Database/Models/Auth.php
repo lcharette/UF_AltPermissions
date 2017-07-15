@@ -27,12 +27,20 @@ class Auth extends Model
     protected $table = "alt_role_users";
 
     /**
+     * @var bool Enable timestamps for this class.
+     */
+    public $timestamps = true;
+
+    /**
      * @var array The fields of the table for the current model.
      * N.B.: The only field that is allowed to change it the role, AKA the only one
      * that leads to a single element. You won't change a user of seeker.
      */
     protected $fillable = [
-        "role_id"
+        "role_id",
+        "user_id",
+        "seeker_id",
+        "seeker_type"
     ];
 
     public function seeker()

@@ -182,6 +182,9 @@ class AuthController extends SimpleController
         /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
+        /** @var UserFrosting\Sprinkle\AltPermissions\Middleware\CheckAuthSeeker $checkAuthSeeker */
+        $checkAuthSeeker = $this->ci->checkAuthSeeker;
+
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
@@ -198,6 +201,7 @@ class AuthController extends SimpleController
         $transformer = new RequestDataTransformer($schema);
         $data = $transformer->transform($params);
 
+        // Bool to detect errors later
         $error = false;
 
         // Validate request data
@@ -225,18 +229,28 @@ class AuthController extends SimpleController
             $error = true;
         }
 
+        // Check for errors
         if ($error) {
             return $response->withStatus(400);
         }
 
+        // Get seeker class
+        $seekerClass = $checkAuthSeeker->getSeekerModel($args['seeker']);
+
+        // Create the auth
+        $auth = $classMapper->createInstance('altAuth', [
+            "role_id" => $role->id,
+            "user_id" => $user->id,
+            "seeker_id" => $args['id'],
+            "seeker_type" => $seekerClass
+        ]);
+
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($classMapper, $data, $ms, $args, $currentUser, $user, $role) {
+        Capsule::transaction( function() use ($classMapper, $auth, $currentUser, $user, $role) {
 
-            // Assign the role
-            $user->seeker($args['seeker'])->sync([
-                $args['id'] => ['role_id' => $role->id]
-            ]);
+            // Save the auth data
+            $auth->save();
 
             // Create activity record
             /*$this->ci->userActivityLogger->info("User {$currentUser->user_name} created role {$role->name}.", [

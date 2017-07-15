@@ -41,6 +41,10 @@ class User extends CoreUser
 
     public function roleForSeeker($seeker, $seeker_id)
     {
-        return $this->auth($seeker)->where('seeker_id', $seeker_id)->first()->role;
+        // Get the auth for the requested seeker
+        $auth = $this->auth($seeker)->where('seeker_id', $seeker_id)->first();
+
+        // If we found something, return the role. Otherwise, return false
+        return ($auth) ? $auth->role : false;
     }
 }
