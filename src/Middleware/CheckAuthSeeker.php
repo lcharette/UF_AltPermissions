@@ -38,32 +38,6 @@ class CheckAuthSeeker
         }
     }
 
-    public function getSeekerModel($seeker)
-    {
-        if ($seeker == "" || !array_key_exists($seeker, $this->config['seekers']))
-        {
-            throw new \InvalidArgumentException("Seeker '$seeker' not found");
-        } else {
-            //!TODO : Check class exist
-            //!TODO : Get this out of Middleware namespace
-            return $this->config['seekers'][$seeker];
-        }
-    }
-
-    public function getSeekerKey($seekerModel)
-    {
-        $config = array_flip($this->config['seekers']);
-
-        if ($seekerModel == "" || !array_key_exists($seekerModel, $config))
-        {
-            throw new \InvalidArgumentException("Seeker '$seekerModel' not found");
-        } else {
-            //!TODO : Check class exist
-            //!TODO : Get this out of Middleware namespace
-            return $config[$seekerModel];
-        }
-    }
-
     /**
      * Invoke the CheckAuthSeeker middleware, making sure the `seeker` argument from the route is autorized in the config files.
      *

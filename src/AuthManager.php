@@ -22,7 +22,7 @@ class AuthManager
     /**
      * @var ContainerInterface The global container object, which holds all your services.
      */
-    protected $ci;
+    protected $config;
 
     /**
      * @var bool Is the auth debug config is on.
@@ -34,26 +34,48 @@ class AuthManager
      *
      * @param ContainerInterface $ci The global container object, which holds all your services.
      */
-    public function __construct($ci)
+    public function __construct($config)
     {
-        $this->ci = $ci;
-
-        // Set debug state
-        $this->debug = $this->ci->config['debug.auth'];
+        $this->config = $config;
+        $this->debug = $this->config['debug.auth'];
     }
 
-    /*
-      NOTES:
-      - To make it even more efficient, all user "ON" permission could be put in cache. We fetch the roles for a user, then cache the result based on seeker id?
+    /**
+     * getSeekerModel function.
+     * Returns the model associated with a seeker name
+     *
+     * @access public
+     * @param string $seeker The Seeker name
+     * @return string The seeker full class name
+     */
+    public function getSeekerModel($seeker)
+    {
+        if ($seeker == "" || !array_key_exists($seeker, $this->config['AltPermissions.seekers'])) {
+            throw new \InvalidArgumentException("Seeker '$seeker' not found");
+        } else {
+            //!TODO : Check class exist
+            return $this->config['AltPermissions.seekers'][$seeker];
+        }
+    }
 
-      PHPBB
-      - function acl_get($opt, $f = 0) Look up an option
-      - function acl_getf($opt, $clean = false) Get forums with the specified permission setting
-      - function acl_gets() Get permission settings (more than one)
-      - function acl_get_list($user_id = false, $opts = false, $forum_id = false) Get permission listing based on user_id/options/forum_ids
-    */
+    /**
+     * getSeekerKey function.
+     * Returns the model associated with a seeker name
+     *
+     * @access public
+     * @param string $seekerModel The seeker full class name
+     * @return string The Seeker name
+     */
+    public function getSeekerKey($seekerModel)
+    {
+        $config = array_flip($this->config['AltPermissions.seekers']);
 
-
+        if ($seekerModel == "" || !array_key_exists($seekerModel, $config)) {
+            throw new \InvalidArgumentException("Seeker '$seekerModel' not found");
+        } else {
+            return $config[$seekerModel];
+        }
+    }
 
     /**
      * hasPermission function.
@@ -96,7 +118,7 @@ class AuthManager
         // If the above query returned something, then it's a match!
         // Otherwise, might be because the slug doesn't exist, the user is bad, the seeker is bad, etc.
         // In any of those cases, it will be false anyway
-        return ($permission ? true : false);
+        return $permission ? true : false;
 
     }
 
@@ -172,7 +194,7 @@ class AuthManager
 
         // Get full seeker class name
         if ($getSeekerClass) {
-            $seeker_type = $this->ci->checkAuthSeeker->getSeekerModel($seeker_type);
+            $seeker_type = $this->getSeekerModel($seeker_type);
         }
 
         // Query the `Auth` Model. We start by getting the rows specific to the

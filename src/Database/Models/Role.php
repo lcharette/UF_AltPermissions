@@ -69,7 +69,7 @@ class Role extends Model
     {
         if ($seeker != "")
         {
-            $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+            $seekerClass = static::$ci->auth->getSeekerModel($seeker);
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth')->where('seeker_type', $seekerClass)->get();
         }
         else
@@ -96,7 +96,7 @@ class Role extends Model
         $data = $this->toArray();
 
         // Need to translate the seeker back into it's key value
-        $data['seeker'] = static::$ci->checkAuthSeeker->getSeekerKey($this->seeker);
+        $data['seeker'] = static::$ci->auth->getSeekerKey($this->seeker);
 
         return static::$ci->router->pathFor($routeName, $data);
     }
@@ -115,7 +115,7 @@ class Role extends Model
      */
     public function scopeForSeeker($query, $seeker)
     {
-        $seekerClass = static::$ci->checkAuthSeeker->getSeekerModel($seeker);
+        $seekerClass = static::$ci->auth->getSeekerModel($seeker);
         return $query->where('seeker', $seekerClass);
     }
 }

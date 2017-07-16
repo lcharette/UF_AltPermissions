@@ -53,7 +53,7 @@ class ServicesProvider
         };
 
         $container['auth'] = function ($c) {
-            return new AuthManager($c);
+            return new AuthManager($c->config);
         };
     }
 }
