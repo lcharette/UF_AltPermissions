@@ -182,6 +182,11 @@ class AuthManager
 
         // !TODO : Cache the result
 
+        // Make sure the query returned something
+        if (!$auth) {
+            return collect([]);
+        }
+
         // Dive down to the permissions collection
         $permissions = $auth->role->permissions;
 

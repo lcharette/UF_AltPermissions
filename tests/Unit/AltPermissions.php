@@ -4,7 +4,6 @@ namespace UserFrosting\Tests\Unit;
 
 use UserFrosting\Tests\TestCase;
 use UserFrosting\Tests\DatabaseTransactions;
-use League\FactoryMuffin\Faker\Facade as Faker;
 
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
