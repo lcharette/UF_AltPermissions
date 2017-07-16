@@ -129,7 +129,7 @@ class AuthManagerTest extends TestCase
         $result = $auth->getSeekersForPermission($user, $slug);
 
         // The above returns a seekers collection. We need to pluck those id to form a list
-        $resultIds = $result->pluck('seeker_id')->toArray();
+        $resultIds = $result->pluck('id')->toArray();
 
         // We should have only the two seekers the user have a role for: 1 & 3
         $expected = [
@@ -146,14 +146,14 @@ class AuthManagerTest extends TestCase
 
         // Ask AuthManager for the list of seekers with that permission
         $result = $auth->getSeekersForPermission($user, $slug);
-        $resultIds = $result->pluck('seeker_id')->toArray();
+        $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals($expected, $resultIds);
 
 
         // Now we try with the 2nd permission slug. Result should be empty
         $slug = $this->permissions[1]->slug;
         $result = $auth->getSeekersForPermission($user, $slug);
-        $resultIds = $result->pluck('seeker_id')->toArray();
+        $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals([], $resultIds);
     }
 

@@ -127,7 +127,7 @@ class AuthManager
         // done on the `whereHas` function on the `Auth` relation (ask permission relation throught the `role` relation)
         $authorizedSeekers = Auth::where('user_id', $user->id)->whereHas('role.permissions', function ($query) use ($slug) {
             $query->where(['slug' => $slug]);
-        })->select(['seeker_id', 'seeker_type'])->get();
+        })->get();
 
         // !TODO : Cache the result
 
@@ -135,6 +135,11 @@ class AuthManager
         if ($this->debug) {
             $this->ci->authLogger->debug("Autorisation for seekers id {$authorizedSeekers->pluck('seeker_id')}");
         }
+
+        // We loop each result from `Auth` and change it to the seeker collection using the MorphTo relation
+        $authorizedSeekers->transform(function ($auth) {
+            return $auth->seeker;
+        });
 
         // Done !
         return $authorizedSeekers;
