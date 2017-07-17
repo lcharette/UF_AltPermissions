@@ -48,6 +48,9 @@ class Role extends Model
         // Remove all permission associations
         $this->permissions()->detach();
 
+        // Remove all user associated to this role. We delete the whole `auth` entry
+        $this->auth()->delete();
+
         // Delete the role
         $result = parent::delete();
 
