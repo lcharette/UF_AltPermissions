@@ -31,7 +31,7 @@
     {% verbatim %}
     <script id="role-table-column-name" type="text/x-handlebars-template">
         <td>
-            <strong><a href="{{ row.uri.view }}">{{ row.name }}</a></strong>{{#if row.default}}<br /><em>{% endverbatim %}{{ translate("ALT_ROLE.DEFAULT") }}{% verbatim %}</em>{{/if}}
+            <strong><a href="{{ row.uri.view }}">{{ row.name }}</a></strong>
         </td>
     </script>
 
@@ -52,20 +52,6 @@
                     <li>
                         <a href="{{ row.uri.view }}">
                         <i class="fa fa-key"></i> {% endverbatim %}{{ translate("PERMISSION.MANAGE") }}{% verbatim %}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="js-displayConfirm"
-                            data-confirm-title="{{#if row.default}}ALT_ROLE.DEFAULT.UNSET{{else}}ALT_ROLE.DEFAULT.SET{{/if}}"
-                            data-confirm-message="{{#if row.default}}ALT_ROLE.DEFAULT.CONFIRM_UNSET{{else}}ALT_ROLE.DEFAULT.CONFIRM{{/if}}"
-                            data-confirm-warning=" "
-                            data-post-url="{{ row.uri.default }}"
-                            data-post-method="POST">
-                        {{#if row.default}}
-                            <i class="fa fa-star-o"></i> {% endverbatim %}{{ translate("ALT_ROLE.DEFAULT.UNSET") }}{% verbatim %}
-                        {{else}}
-                            <i class="fa fa-star"></i> {% endverbatim %}{{ translate("ALT_ROLE.DEFAULT.SET") }}{% verbatim %}
-                        {{/if}}
                         </a>
                     </li>
                     <li>

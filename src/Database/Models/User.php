@@ -19,13 +19,19 @@ use UserFrosting\Sprinkle\Account\Database\Models\User as CoreUser;
  */
 class User extends CoreUser
 {
-    //!TODO : Check if this is necessary
+    /**
+     * seeker relation. Link to the seeker model using the polymorphic relation.
+     */
     public function seeker($seeker)
     {
         $seekerClass = static::$ci->auth->getSeekerModel($seeker);
         return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users')->withPivot('role_id');
     }
 
+    /**
+     * auth relation. Link to the auth model (man-to-many) relation. User $seeker to restrict rows to a specific seeker class.
+     * @param string $seeker (default: "") seeker name
+     */
     public function auth($seeker = "")
     {
         if ($seeker != "")
@@ -39,6 +45,13 @@ class User extends CoreUser
         }
     }
 
+    /**
+     * roleForSeeker. Use it to get the user role for a specific seeker
+     *
+     * @param string $seeker
+     * @param int $seeker_id
+     * @return Role Model or false if no role found
+     */
     public function roleForSeeker($seeker, $seeker_id)
     {
         // Get the auth for the requested seeker

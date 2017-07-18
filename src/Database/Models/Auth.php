@@ -43,24 +43,41 @@ class Auth extends Model
         "seeker_type"
     ];
 
+    /**
+     * Seeker relation. Morph back to the seeker model
+     */
     public function seeker()
     {
         return $this->morphTo();
     }
 
+    /**
+     * User relation. Link back to the user Model.
+     */
     public function user()
     {
         $classMapper = static::$ci->classMapper;
         return $this->belongsTo($classMapper->getClassMapping('user'));
     }
 
+    /**
+     * Role relation. Link back to the AltRole model
+     */
     public function role()
     {
         $classMapper = static::$ci->classMapper;
         return $this->belongsTo($classMapper->getClassMapping('altRole'));
     }
 
-    public function scopeForSeeker($query, $seeker, $seeker_id = false)
+    /**
+     * forSeeker scope. Use it to get rows for a specific seeker
+     *
+     * @param mixed $query
+     * @param string $seeker
+     * @param int $seeker_id (default: 0)
+     * @return $query
+     */
+    public function scopeForSeeker($query, $seeker, $seeker_id = 0)
     {
         $seekerClass = static::$ci->auth->getSeekerModel($seeker);
         $query = $query->where('seeker_type', $seekerClass);
@@ -75,6 +92,8 @@ class Auth extends Model
 
     /**
      * Joins the user, so we can do things like sort, search, paginate, etc.
+     * @param mixed $query
+     * @return $query
      */
     public function scopeJoinUser($query)
     {
@@ -82,6 +101,11 @@ class Auth extends Model
         return $query;
     }
 
+    /**
+     * Joins the role, so we can do things like sort, search, paginate, etc.
+     * @param mixed $query
+     * @return $query
+     */
     public function scopeJoinRole($query)
     {
         $query = $query->leftJoin('alt_roles', $this->table.'.role_id', '=', 'alt_roles.id');

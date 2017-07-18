@@ -30,7 +30,6 @@ class AltRolesTable extends Migration
                 $table->string('name');
                 $table->text('description')->nullable();
                 $table->boolean('locked')->default(0);
-                $table->boolean('default')->default(0);
                 $table->timestamps();
 
                 $table->engine = 'InnoDB';

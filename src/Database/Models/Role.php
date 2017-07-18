@@ -30,7 +30,6 @@ class Role extends Model
         "seeker",
         "name",
         "description",
-        "default",
         "lock"
     ];
 

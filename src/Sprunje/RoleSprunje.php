@@ -32,7 +32,6 @@ class RoleSprunje extends Sprunje
         'description'
     ];
 
-
     protected $seeker = "";
 
     /**
@@ -64,7 +63,6 @@ class RoleSprunje extends Sprunje
                 'view'   => $item->getRoute('alt_uri_roles.view'),
                 'delete' => $item->getRoute('api.roles.delete'),
                 'edit'   => $item->getRoute('modal.roles.edit'),
-                'default' => $item->getRoute('api.roles.set.default'),
                 'permissions' => $item->getRoute('modal.roles.permissions')
             ];
 
