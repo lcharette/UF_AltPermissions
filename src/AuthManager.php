@@ -108,10 +108,21 @@ class AuthManager
             return Permission::with('roles')->where('slug', $slug)->first();
         });*/
 
-        // Super mighty query
-        $permission = Permission::whereHas('roles.auth', function ($query) use ($user, $seeker_id) {
+        // Build the Eloquent query
+        // We start by limiting the slug. This will limit the number of relation we query next
+        // The `orWhere` need to be in a bracket, otherwise it will create false positivewith `wherehas`
+        // See http://laraveldaily.com/and-or-and-brackets-with-eloquent/
+        $query = Permission::where(function ($query) use ($slug) {
+            $query->where('slug', $slug)->orWhere('slug', 'like', $slug . '.%');
+        });
+
+        // We query the role.auth relation for the user and correct seeker
+        $query->whereHas('roles.auth', function ($query) use ($user, $seeker_id) {
             $query->where(['user_id' => $user->id, 'seeker_id' => $seeker_id]);
-        })->where('slug', $slug)->first();
+        });
+
+        // Run query
+        $permission = $query->first();
 
         // !TODO :: This result should be cached
 
@@ -143,13 +154,21 @@ class AuthManager
             $this->ci->authLogger->debug("Getting all seekers for user {$user->id} ('{$user->user_name}') on permission '$slug'...");
         }
 
+        // Build the Eloquent query
         // Query the `Auth` Model. We start by getting all the rows specific to this user
+        // Strating with this limits the numbers of rows to check the relation on and should be more efficient
+        $query = Auth::where('user_id', $user->id);
+
         // Once we have a list of auth for that user, we only get the auth that contain
         // a role containing the permission slug we are after. This last part is
         // done on the `whereHas` function on the `Auth` relation (ask permission relation throught the `role` relation)
-        $authorizedSeekers = Auth::where('user_id', $user->id)->whereHas('role.permissions', function ($query) use ($slug) {
-            $query->where(['slug' => $slug]);
-        })->get();
+        $query->whereHas('role.permissions', function ($query) use ($slug) {
+            $query->where('slug', $slug)
+                  ->orWhere('slug', 'like', $slug . '.%');
+        });
+
+        // Run query
+        $authorizedSeekers = $query->get();
 
         // !TODO : Cache the result
 
@@ -216,6 +235,9 @@ class AuthManager
 
         // Dive down to the permissions collection
         $permissions = $auth->role->permissions;
+
+        // We have the permissions. We only need to add the inherit one
+        // !TODO
 
         // We send the result to the debug
         if ($this->debug) {
