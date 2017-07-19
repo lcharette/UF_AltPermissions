@@ -74,6 +74,7 @@ class AuthManagerTest extends TestCase
             $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "Permission Foo Bar", 'slug' => "permission.foo.bar"]),
             $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "PermissionFooBar", 'slug' => "permissionFooBar"]),
             $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "PermissionFoo", 'slug' => "permissionFoo"]),
+            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "TestFoorBar", 'slug' => "test.foo.bar"])
         ]);
 
         // Assign users to role and seeker
@@ -86,7 +87,8 @@ class AuthManagerTest extends TestCase
         $this->role->permissions()->sync([
             $this->permissions[0]->id,
             $this->permissions[3]->id,
-            $this->permissions[4]->id
+            $this->permissions[4]->id,
+            $this->permissions[6]->id
         ]);
     }
 
@@ -101,13 +103,21 @@ class AuthManagerTest extends TestCase
         // We try with the seeker 1.
         $seeker_id = $this->seekers[0]->id;
 
-        // For seeker 1, user should have : permission, permission.foo., permission.foo.bar, permissionthat
-        $this->assertTrue($auth->hasPermission($this->user, "permission", $seeker_id)); // Direct true
-        $this->assertFalse($auth->hasPermission($this->user, "permission.test", $seeker_id)); // False
+        // For seeker 1, user should have...
+        $this->assertTrue($auth->hasPermission($this->user, "permission", $seeker_id));
         $this->assertTrue($auth->hasPermission($this->user, "permission.foo", $seeker_id)); // Inherit from `permission.foo.bar`
-        $this->assertTrue($auth->hasPermission($this->user, "permission.foo.bar", $seeker_id)); // Direct true
-        $this->assertTrue($auth->hasPermission($this->user, "permissionFooBar", $seeker_id)); // Direct true
-        $this->assertFalse($auth->hasPermission($this->user, "permissionFoo", $seeker_id)); // False
+        $this->assertTrue($auth->hasPermission($this->user, "permission.foo.bar", $seeker_id));
+        $this->assertTrue($auth->hasPermission($this->user, "permissionFooBar", $seeker_id));
+
+        // Those should be false
+        $this->assertFalse($auth->hasPermission($this->user, "permission.test", $seeker_id));
+        $this->assertFalse($auth->hasPermission($this->user, "permissionFoo", $seeker_id));
+
+        // Testing fake permissions
+        $this->assertTrue($auth->hasPermission($this->user, "test.foo.bar", $seeker_id)); // Direct true
+        $this->assertTrue($auth->hasPermission($this->user, "test.foo", $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertTrue($auth->hasPermission($this->user, "test", $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertFalse($auth->hasPermission($this->user, "testme", $seeker_id)); // False
     }
 
     /**
@@ -184,32 +194,47 @@ class AuthManagerTest extends TestCase
         // Ask AuthManager for the list of permission for that seeker
         $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
 
-        // The above returns a permissions collection. We need to pluck those id to form a list
-        $resultIds = $result->pluck('slug')->toArray();
-
         // We should have only 4 permissions slug
         $expected = [
-            $this->permissions[0]->slug, // permission
-            $this->permissions[2]->slug, // permission.foo (inherited)
-            $this->permissions[3]->slug, // permission.foo.bar
-            $this->permissions[4]->slug  // permissionthat
+            'permission',
+            'permission.foo', // (inherited)
+            'permission.foo.bar',
+            'permissionFooBar',
+            'test', // (inherited)
+            'test.foo', // (inherited)
+            'test.foo.bar'
         ];
 
         // Test asertion
-        $this->assertEquals($expected, $resultIds);
+        $this->assertEquals(array_values($expected), array_values($result));
 
 
         // With seeker 3, the result should be the same
         $seeker_id = $this->seekers[2]->id;
         $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
-        $resultIds = $result->pluck('id')->toArray();
-        $this->assertEquals($expected, $resultIds);
+        $this->assertEquals(array_values($expected), array_values($result));
 
 
         // With seeker 2, should be empty array
         $seeker_id = $this->seekers[1]->id;
         $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
-        $resultIds = $result->pluck('id')->toArray();
-        $this->assertEquals([], $resultIds);
+        $this->assertEquals([], array_values($result));
+    }
+
+    public function test_decomposeSlug()
+    {
+        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
+        $auth = $this->ci->auth;
+
+        $actual = $auth->decomposeSlug('test.foo.bar.blah');
+
+        $expected = [
+            'test',
+            'test.foo',
+            'test.foo.bar',
+            'test.foo.bar.blah'
+        ];
+
+        $this->assertEquals($expected, $actual);
     }
 }

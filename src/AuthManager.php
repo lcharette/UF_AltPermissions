@@ -200,7 +200,7 @@ class AuthManager
      * @param int $seeker_id The seeker id
      * @param string $seeker_type The seeker type (string slug or full class. See next params)
      * @param bool $getSeekerClass (default: false) Set to false if `$seeker_type` is already the full class
-     * @return Collection A collection
+     * @return Array an array of slugs as string
      */
     public function getPermissionsForSeeker($user, $seeker_id, $seeker_type, $getSeekerClass = true)
     {
@@ -230,22 +230,58 @@ class AuthManager
 
         // Make sure the query returned something
         if (!$auth) {
-            return collect([]);
+            return [];
         }
 
-        // Dive down to the permissions collection
-        $permissions = $auth->role->permissions;
+        // Dive down to the permissions collection and get the slugs
+        $permissions = $auth->role->permissions->pluck('slug');
 
-        // We have the permissions. We only need to add the inherit one
-        // !TODO
+        // We have the permissions. We only need to add the inherit one.
+        // We loop them all, decomposing each one and adding it to the result
+        $result = [];
+
+        foreach ($permissions as $slug) {
+
+            // Decompose the slug
+            $decomposedSlug = $this->decomposeSlug($slug);
+
+            // Merge the results and remove duplicated values
+            $result = array_merge($result, $decomposedSlug);
+            $result = array_unique($result);
+        }
 
         // We send the result to the debug
         if ($this->debug) {
-            $this->ci->authLogger->debug("Autorisation for seekers id {$permissions->pluck('slug')}");
+            $this->ci->authLogger->debug("Permissions granted: $result");
         }
 
         // Done !
-        return $permissions;
+        return $result;
+    }
+
+    /**
+     * Decompose a slug formated with dot notation to find all of the
+     * inherited permissions
+     *
+     * @access public
+     * @param string $slug
+     * @param string $separator (default: ".")
+     * @return array Decomposed slugs
+     */
+    public function decomposeSlug($slug, $separator = ".")
+    {
+        $decomposedSlug = explode($separator, $slug);
+        $result = [];
+
+        foreach ($decomposedSlug as $part) {
+            if (empty($result)) {
+                $result[] = $part;
+            } else {
+                $result[] = end($result) . $separator . $part;
+            }
+        }
+
+        return $result;
     }
 
     // !TODO
