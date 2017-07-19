@@ -36,23 +36,23 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ translate('PERMISSION', 2) }}</th>
                                     <th class="text-center">{{ translate('STATUS') }}</th>
+                                    <th>{{ translate('PERMISSION', 2) }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                             {% for permission in permissions %}
                                 <tr>
-                                    <td>
-                                        <p><strong>{{ permission.localeName }}</strong></p>
-                                        <small>{{ permission.localeDescription }}</small>
-                                    </td>
                                     <td class="text-center" nowrap="nowrap">
                                         <div class="checkbox icheck">
                                             <label>
                                               <input type="checkbox" class="js-icheck" name="permissions[{{ permission.id }}]"{% if permission.active %} checked="checked" {% endif %}>
                                             </label>
                                         </div>
+                                    </td>
+                                    <td>
+                                        <p><strong>{{ permission.localeName }}</strong></p>
+                                        <small>{{ permission.localeDescription }}</small>
                                     </td>
                                 </tr>
                             {% endfor %}
