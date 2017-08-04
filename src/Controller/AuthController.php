@@ -332,7 +332,7 @@ class AuthController extends SimpleController
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
             "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->get('router')->pathFor('api.auth.edit', [
+            "form_action" => $this->ci->router->pathFor('api.auth.edit', [
                 'id' => $args['id']
             ]),
             "form_method" => "PUT",

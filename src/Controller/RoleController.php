@@ -101,7 +101,7 @@ class RoleController extends SimpleController
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $get['box_id'],
             "box_title" => "ROLE.CREATE",
-            "form_action" => $this->ci->get('router')->pathFor('api.roles.create.post', $args),
+            "form_action" => $this->ci->router->pathFor('api.roles.create.post', $args),
             "fields" => $form->generate(),
             "validators" => $validator->rules('json', true)
         ]);
@@ -248,7 +248,7 @@ class RoleController extends SimpleController
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
             "box_id" => $params['box_id'],
             "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->get('router')->pathFor('api.roles.edit.put', [
+            "form_action" => $this->ci->router->pathFor('api.roles.edit.put', [
                 'seeker' => $args['seeker'],
                 'id' => $params['id']
             ]),
