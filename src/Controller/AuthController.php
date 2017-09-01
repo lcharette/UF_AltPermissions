@@ -182,8 +182,8 @@ class AuthController extends SimpleController
         /** @var UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $auth */
+        $acl = $this->ci->acl;
 
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
@@ -235,7 +235,7 @@ class AuthController extends SimpleController
         }
 
         // Get seeker class
-        $seekerClass = $auth->getSeekerModel($args['seeker']);
+        $seekerClass = $acl->getSeekerModel($args['seeker']);
 
         // Create the auth
         $auth = $classMapper->createInstance('altAuth', [

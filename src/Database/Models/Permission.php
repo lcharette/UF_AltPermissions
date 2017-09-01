@@ -90,7 +90,7 @@ class Permission extends Model
      */
     public function scopeForSeeker($query, $seeker)
     {
-        $seekerClass = static::$ci->auth->getSeekerModel($seeker);
+        $seekerClass = static::$ci->acl->getSeekerModel($seeker);
         return $query->where('seeker', $seekerClass);
     }
 

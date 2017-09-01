@@ -9,7 +9,7 @@
 namespace UserFrosting\Sprinkle\AltPermissions\ServicesProvider;
 
 use UserFrosting\Sprinkle\AltPermissions\Middleware\CheckAuthSeeker;
-use UserFrosting\Sprinkle\AltPermissions\AuthManager;
+use UserFrosting\Sprinkle\AltPermissions\AccessControlLayer;
 
 /**
  * Registers services for the AltPermissions sprinkle, such as classmapper, etc.
@@ -52,8 +52,8 @@ class ServicesProvider
             return $checkAuthSeeker;
         };
 
-        $container['auth'] = function ($c) {
-            return new AuthManager($c->config);
+        $container['acl'] = function ($c) {
+            return new AccessControlLayer($c->config);
         };
     }
 }

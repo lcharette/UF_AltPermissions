@@ -139,8 +139,8 @@ class RoleController extends SimpleController
         /** @var MessageStream $ms */
         $ms = $this->ci->alerts;
 
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $auth */
+        $acl = $this->ci->acl;
 
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'create_role')) {
@@ -174,7 +174,7 @@ class RoleController extends SimpleController
         }
 
         // Insert the seeker class
-        $data['seeker'] = $auth->getSeekerModel($args['seeker']);
+        $data['seeker'] = $acl->getSeekerModel($args['seeker']);
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs

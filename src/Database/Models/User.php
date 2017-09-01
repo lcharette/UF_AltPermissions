@@ -24,7 +24,7 @@ class User extends CoreUser
      */
     public function seeker($seeker)
     {
-        $seekerClass = static::$ci->auth->getSeekerModel($seeker);
+        $seekerClass = static::$ci->acl->getSeekerModel($seeker);
         return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users')->withPivot('role_id');
     }
 
@@ -36,7 +36,7 @@ class User extends CoreUser
     {
         if ($seeker != "")
         {
-            $seekerClass = static::$ci->auth->getSeekerModel($seeker);
+            $seekerClass = static::$ci->acl->getSeekerModel($seeker);
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth')->where('seeker_type', $seekerClass)->get();
         }
         else

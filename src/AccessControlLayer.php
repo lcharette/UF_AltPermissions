@@ -17,7 +17,7 @@ use UserFrosting\Sprinkle\Core\Facades\Debug;
  *
  * @author Louis Charette (https://github.com/lcharette)
  */
-class AuthManager
+class AccessControlLayer
 {
     /**
      * @var ContainerInterface The global container object, which holds all your services.

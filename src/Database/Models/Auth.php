@@ -79,7 +79,7 @@ class Auth extends Model
      */
     public function scopeForSeeker($query, $seeker, $seeker_id = 0)
     {
-        $seekerClass = static::$ci->auth->getSeekerModel($seeker);
+        $seekerClass = static::$ci->acl->getSeekerModel($seeker);
         $query = $query->where('seeker_type', $seekerClass);
 
         // Add the seeker id if we have it

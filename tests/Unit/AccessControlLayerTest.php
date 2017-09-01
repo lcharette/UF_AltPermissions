@@ -5,7 +5,7 @@ namespace UserFrosting\Tests\Unit;
 use UserFrosting\Tests\TestCase;
 use UserFrosting\Tests\DatabaseTransactions;
 
-class AuthManagerTest extends TestCase
+class AccessControlLayerTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -93,46 +93,46 @@ class AuthManagerTest extends TestCase
     }
 
     /**
-     * Test the hasPermission method from AuthManager.
+     * Test the hasPermission method from AccessControlLayer.
      */
     public function test_hasPermission()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        $acl = $this->ci->acl;
 
         // We try with the seeker 1.
         $seeker_id = $this->seekers[0]->id;
 
         // For seeker 1, user should have...
-        $this->assertTrue($auth->hasPermission($this->user, "permission", $seeker_id));
-        $this->assertTrue($auth->hasPermission($this->user, "permission.foo", $seeker_id)); // Inherit from `permission.foo.bar`
-        $this->assertTrue($auth->hasPermission($this->user, "permission.foo.bar", $seeker_id));
-        $this->assertTrue($auth->hasPermission($this->user, "permissionFooBar", $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, "permission", $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, "permission.foo", $seeker_id)); // Inherit from `permission.foo.bar`
+        $this->assertTrue($acl->hasPermission($this->user, "permission.foo.bar", $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, "permissionFooBar", $seeker_id));
 
         // Those should be false
-        $this->assertFalse($auth->hasPermission($this->user, "permission.test", $seeker_id));
-        $this->assertFalse($auth->hasPermission($this->user, "permissionFoo", $seeker_id));
+        $this->assertFalse($acl->hasPermission($this->user, "permission.test", $seeker_id));
+        $this->assertFalse($acl->hasPermission($this->user, "permissionFoo", $seeker_id));
 
         // Testing fake permissions
-        $this->assertTrue($auth->hasPermission($this->user, "test.foo.bar", $seeker_id)); // Direct true
-        $this->assertTrue($auth->hasPermission($this->user, "test.foo", $seeker_id)); // Fake inhererited from `test.foo.bar`
-        $this->assertTrue($auth->hasPermission($this->user, "test", $seeker_id)); // Fake inhererited from `test.foo.bar`
-        $this->assertFalse($auth->hasPermission($this->user, "testme", $seeker_id)); // False
+        $this->assertTrue($acl->hasPermission($this->user, "test.foo.bar", $seeker_id)); // Direct true
+        $this->assertTrue($acl->hasPermission($this->user, "test.foo", $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertTrue($acl->hasPermission($this->user, "test", $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertFalse($acl->hasPermission($this->user, "testme", $seeker_id)); // False
     }
 
     /**
-     * Test the getSeekersForPermission method from AuthManager.
+     * Test the getSeekersForPermission method from AccessControlLayer.
      */
     public function test_getSeekersForPermission()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        $acl = $this->ci->acl;
 
         // Get the first permission slug (permission)
         $slug = $this->permissions[0]->slug;
 
-        // Ask AuthManager for the list of seekers with that permission
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        // Ask AccessControlLayer for the list of seekers with that permission
+        $result = $acl->getSeekersForPermission($this->user, $slug);
 
         // The above returns a seekers collection. We need to pluck those id to form a list
         $resultIds = $result->pluck('id')->toArray();
@@ -150,49 +150,49 @@ class AuthManagerTest extends TestCase
         // With the 3rd permission (permission.foo), it should be the same result
         $slug = $this->permissions[2]->slug;
 
-        // Ask AuthManager for the list of seekers with that permission
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        // Ask AccessControlLayer for the list of seekers with that permission
+        $result = $acl->getSeekersForPermission($this->user, $slug);
         $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals($expected, $resultIds);
 
         // Same for fourth (permission.foo.bar)
         $slug = $this->permissions[3]->slug;
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        $result = $acl->getSeekersForPermission($this->user, $slug);
         $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals($expected, $resultIds);
 
         // And same for fifth (permisionthat)
         $slug = $this->permissions[4]->slug;
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        $result = $acl->getSeekersForPermission($this->user, $slug);
         $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals($expected, $resultIds);
 
         // Now we try with the 2nd permission slug (permission.test). Result should be empty
         $slug = $this->permissions[1]->slug;
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        $result = $acl->getSeekersForPermission($this->user, $slug);
         $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals([], $resultIds);
 
         // Same for the last permission (permissionthis)
         $slug = $this->permissions[5]->slug;
-        $result = $auth->getSeekersForPermission($this->user, $slug);
+        $result = $acl->getSeekersForPermission($this->user, $slug);
         $resultIds = $result->pluck('id')->toArray();
         $this->assertEquals([], $resultIds);
     }
 
     /**
-     * Test the getPermissionsForSeeker method from AuthManager.
+     * Test the getPermissionsForSeeker method from AccessControlLayer.
      */
     public function test_getPermissionsForSeeker()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        $acl = $this->ci->acl;
 
         // We start with seeker 1
         $seeker_id = $this->seekers[0]->id;
 
-        // Ask AuthManager for the list of permission for that seeker
-        $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
+        // Ask AccessControlLayer for the list of permission for that seeker
+        $result = $acl->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
 
         // We should have only 4 permissions slug
         $expected = [
@@ -211,22 +211,22 @@ class AuthManagerTest extends TestCase
 
         // With seeker 3, the result should be the same
         $seeker_id = $this->seekers[2]->id;
-        $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
+        $result = $acl->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
         $this->assertEquals(array_values($expected), array_values($result));
 
 
         // With seeker 2, should be empty array
         $seeker_id = $this->seekers[1]->id;
-        $result = $auth->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
+        $result = $acl->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
         $this->assertEquals([], array_values($result));
     }
 
     public function test_decomposeSlug()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AuthManager $auth */
-        $auth = $this->ci->auth;
+        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        $acl = $this->ci->acl;
 
-        $actual = $auth->decomposeSlug('test.foo.bar.blah');
+        $actual = $acl->decomposeSlug('test.foo.bar.blah');
 
         $expected = [
             'test',

@@ -99,7 +99,7 @@ abstract class AltPermissions extends TestCase
         $this->assertEquals($this->seekerModel, $config["AltPermissions.seekers"][$this->seeker]);
 
         // Test dynamic relation using the auth service
-        $seekerClass = $this->ci->auth->getSeekerModel($this->seeker);
+        $seekerClass = $this->ci->acl->getSeekerModel($this->seeker);
         $this->assertEquals($this->seekerModel, $seekerClass);
     }
 
