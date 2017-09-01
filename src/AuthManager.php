@@ -99,11 +99,20 @@ class AuthManager
     {
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            $this->ci->authLogger->debug("Authorization check requested at: ", $trace);
-            $this->ci->authLogger->debug("Checking authorization for user {$user->id} ('{$user->user_name}') on permission '$slug' and seeker id '$seeker_id'...");
+            Debug::debug("Authorization check requested at: ", $trace);
+            Debug::debug("Checking authorization for user {$user->id} ('{$user->user_name}') on permission '$slug' and seeker id '$seeker_id'...");
+        }
+
+        // The master (root) account has access to everything.
+        if ($user->id == $this->config['reserved_user_ids.master']) {
+            if ($debug) {
+                Debug::debug("User is the master (root) user.  Access granted.");
+            }
+            return true;
         }
 
         // We find the permission related to that slug
+        //!TODO : Do some caching
         /*$permission = $this->cache->rememberForever("auth.permissions.$slug", function () use ($slug) {
             return Permission::with('roles')->where('slug', $slug)->first();
         });*/
@@ -130,7 +139,6 @@ class AuthManager
         // Otherwise, might be because the slug doesn't exist, the user is bad, the seeker is bad, etc.
         // In any of those cases, it will be false anyway
         return $permission ? true : false;
-
     }
 
     /**
@@ -150,8 +158,8 @@ class AuthManager
         // Display initial debug statement
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            $this->ci->authLogger->debug("Seekers for permission authorization list requested at: ", $trace);
-            $this->ci->authLogger->debug("Getting all seekers for user {$user->id} ('{$user->user_name}') on permission '$slug'...");
+            Debug::debug("Seekers for permission authorization list requested at: ", $trace);
+            Debug::debug("Getting all seekers for user {$user->id} ('{$user->user_name}') on permission '$slug'...");
         }
 
         // Build the Eloquent query
@@ -174,7 +182,7 @@ class AuthManager
 
         // We send the result to the debug
         if ($this->debug) {
-            $this->ci->authLogger->debug("Autorisation for seekers id {$authorizedSeekers->pluck('seeker_id')}");
+            Debug::debug("Autorisation for seekers id {$authorizedSeekers->pluck('seeker_id')}");
         }
 
         // We loop each result from `Auth` and change it to the seeker collection using the MorphTo relation
@@ -207,8 +215,8 @@ class AuthManager
         // Display initial debug statement
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            $this->ci->authLogger->debug("Permissions for seeker authorization list requested at: ", $trace);
-            $this->ci->authLogger->debug("Getting all permissions for user {$user->id} ('{$user->user_name}') on seekers '$seeker_id' or type `$seeker_type`...");
+            Debug::debug("Permissions for seeker authorization list requested at: ", $trace);
+            Debug::debug("Getting all permissions for user {$user->id} ('{$user->user_name}') on seekers '$seeker_id' or type `$seeker_type`...");
         }
 
         // Get full seeker class name
@@ -252,7 +260,7 @@ class AuthManager
 
         // We send the result to the debug
         if ($this->debug) {
-            $this->ci->authLogger->debug("Permissions granted: $result");
+            Debug::debug("Permissions granted: $result");
         }
 
         // Done !
