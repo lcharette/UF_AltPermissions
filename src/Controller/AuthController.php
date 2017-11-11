@@ -264,7 +264,7 @@ class AuthController extends SimpleController
             'user_name' => $user->user_name
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -426,7 +426,7 @@ class AuthController extends SimpleController
             'user_name' => $auth->user->user_name
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -491,7 +491,7 @@ class AuthController extends SimpleController
             'user_name' => $auth->user->user_name
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**

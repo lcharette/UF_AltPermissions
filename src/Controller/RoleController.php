@@ -195,7 +195,7 @@ class RoleController extends SimpleController
             $ms->addMessageTranslated('success', 'ROLE.CREATION_SUCCESSFUL', $data);
         });
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -401,7 +401,7 @@ class RoleController extends SimpleController
             'name' => $translator->translate($role->name)
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
 
@@ -466,7 +466,7 @@ class RoleController extends SimpleController
             'name' => $role->name
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -707,6 +707,6 @@ class RoleController extends SimpleController
             'name' => $role->name
         ]);
 
-        return $response->withStatus(200);
+        return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 }
