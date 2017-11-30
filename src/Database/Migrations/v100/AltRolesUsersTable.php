@@ -34,20 +34,18 @@ class AltRolesUsersTable extends Migration
         if (!$this->schema->hasTable('alt_role_users')) {
             $this->schema->create('alt_role_users', function (Blueprint $table) {
                 $table->increments('id');
-                $table->integer('user_id')->unsigned();
-                $table->integer('role_id')->unsigned();
-                $table->integer('seeker_id')->unsigned();
+                $table->unsignedInteger('user_id');
+                $table->unsignedInteger('role_id');
+                $table->unsignedInteger('seeker_id');
                 $table->string('seeker_type');
-                $table->timestamps();
+                $table->nullableTimestamps();
 
                 $table->engine = 'InnoDB';
-                $table->collation = 'utf8_unicode_ci';
+                $table->collation = 'utf8_general_ci';
                 $table->charset = 'utf8';
-                $table->primary(['user_id', 'role_id']);
+                $table->index(['user_id', 'role_id']);
                 $table->foreign('user_id')->references('id')->on('users');
                 $table->foreign('role_id')->references('id')->on('alt_roles');
-                $table->index('user_id');
-                $table->index('role_id');
             });
         }
     }
