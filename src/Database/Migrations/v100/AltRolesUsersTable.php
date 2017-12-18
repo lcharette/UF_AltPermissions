@@ -23,7 +23,7 @@ class AltRolesUsersTable extends Migration
      */
     public $dependencies = [
         '\UserFrosting\Sprinkle\Account\Database\Migrations\v400\UsersTable',
-        '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltRolesTable'
+        '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsRolesTable'
     ];
 
     /**

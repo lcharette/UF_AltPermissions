@@ -21,6 +21,13 @@ class AltFooTable extends Migration
     /**
      * {@inheritDoc}
      */
+    public $dependencies = [
+        '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsRolesTable'
+    ];
+
+    /**
+     * {@inheritDoc}
+     */
     public function up()
     {
         if (!$this->schema->hasTable('alt_foo')) {
