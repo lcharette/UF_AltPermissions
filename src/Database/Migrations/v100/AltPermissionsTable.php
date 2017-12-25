@@ -10,11 +10,9 @@ namespace UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100;
 
 use UserFrosting\System\Bakery\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Schema\Builder;
 
 /**
  * altPermissions table migration
- * @extends Migration
  */
 class AltPermissionsTable extends Migration
 {

@@ -10,18 +10,16 @@ namespace UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100;
 
 use UserFrosting\System\Bakery\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Schema\Builder;
 
 /**
  * altPermissionsRole table migration
- * @extends Migration
  */
 class AltPermissionsRolesTable extends Migration
 {
     /**
      * {@inheritDoc}
      */
-    public $dependencies = [
+    static public $dependencies = [
         '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsTable',
         '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltRolesTable'
     ];

@@ -1,13 +1,30 @@
 <?php
+/**
+* UF AltPermissions
+*
+* @link      https://github.com/lcharette/UF-AltPermissions
+* @copyright Copyright (c) 2016 Louis Charette
+* @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+*/
+namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
 
-namespace UserFrosting\Tests\Unit;
-
-use UserFrosting\Tests\Unit\AltPermissions;
+use UserFrosting\Sprinkle\AltPermissions\Tests\Unit\AltPermissions;
+use UserFrosting\Sprinkle\AltPermissions\Tests\FooTableMigration;
 
 class AltPermissionsTest extends AltPermissions
 {
-    protected $seeker = "foo";
-    protected $seekerModel = "UserFrosting\Tests\Models\Foo";
+    use FooTableMigration;
 
-    //!TODO : Use migration to create the `alt_foo` table at run time
+    protected $seeker = "foo";
+    protected $seekerModel = "UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo";
+
+    /**
+     * setUp function.
+     * Run the Foo Table migration
+     */
+    protected function runTestMigrations()
+    {
+        // Run migrator to create the Foo table
+        $this->runFooTableMigration();
+    }
 }

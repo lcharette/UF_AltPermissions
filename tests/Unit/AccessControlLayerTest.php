@@ -1,34 +1,60 @@
 <?php
+/**
+* UF AltPermissions
+*
+* @link      https://github.com/lcharette/UF-AltPermissions
+* @copyright Copyright (c) 2016 Louis Charette
+* @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+*/
+namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
 
-namespace UserFrosting\Tests\Unit;
-
+use Illuminate\Database\Eloquent\Collection;
 use UserFrosting\Tests\TestCase;
-use UserFrosting\Tests\DatabaseTransactions;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission;
+use UserFrosting\Sprinkle\AltPermissions\Tests\FooTableMigration;
+use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
+use UserFrosting\Sprinkle\Core\Tests\RefreshDatabase;
 
 class AccessControlLayerTest extends TestCase
 {
-    use DatabaseTransactions;
+    use TestDatabase;
+    use RefreshDatabase;
+    use FooTableMigration;
 
     /**
-     * @var The seeker that will be tested
+     * @var string The seeker that will be tested
      */
     protected $seeker = "foo";
 
     /**
-     * @var The seeker model
+     * @var string The seeker model
      */
-    protected $seekerModel = "UserFrosting\Tests\Models\Foo";
+    protected $seekerModel = "UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo";
 
     /**
-     * @var The test data we'll in each test
+     * @var User The test user used in each test
      */
     protected $user;
+
+    /**
+     * @var Role The test role used in each test
+     */
     protected $role;
+
+    /**
+     * @var Collection Collection of permissions used in each test
+     */
     protected $permissions;
+
+    /**
+     * @var Collection Collection of seekers instance used in each test
+     */
     protected $seekers;
 
     /**
-     * @var Bool. Enabled/Disable verbose debugging
+     * @var bool Enabled/Disable verbose debugging
      */
     protected $debug = true;
 
@@ -41,8 +67,18 @@ class AccessControlLayerTest extends TestCase
         // Setup parent first to get access to the container
         parent::setUp();
 
+        // Setup test database
+        $this->setupTestDatabase();
+        $this->refreshDatabase();
+
+        // Run migrator to create the Foo table
+        $this->runFooTableMigration();
+
         // @var League\FactoryMuffin\FactoryMuffin
         $fm = $this->ci->factory;
+
+        // Create a first user. He will be master user and we don't want to test against him
+        $fm->create(User::class);
 
         /* Create the test permission structure
          *
@@ -57,24 +93,24 @@ class AccessControlLayerTest extends TestCase
          *   - Seeker 3 -> Role 1
          */
 
-        // Create users
-        $this->user = $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\User', ['user_name' => 'User 1']);
+        // Create test users
+        $this->user = $fm->create(User::class, ['user_name' => 'User 1']);
 
         // Create seekers
         $this->seekers = collect($fm->seed(3, $this->seekerModel));
 
         // Create roles
-        $this->role = $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 1"]);
+        $this->role = $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 1"]);
 
         // Creates permissions
         $this->permissions = collect([
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "Permission", 'slug' => "permission"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "Permission Test", 'slug' => "permission.test"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "Permission Foo", 'slug' => "permission.foo"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "Permission Foo Bar", 'slug' => "permission.foo.bar"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "PermissionFooBar", 'slug' => "permissionFooBar"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "PermissionFoo", 'slug' => "permissionFoo"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission', ['seeker' => $this->seeker, 'name' => "TestFoorBar", 'slug' => "test.foo.bar"])
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission", 'slug' => "permission"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Test", 'slug' => "permission.test"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Foo", 'slug' => "permission.foo"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Foo Bar", 'slug' => "permission.foo.bar"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "PermissionFooBar", 'slug' => "permissionFooBar"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "PermissionFoo", 'slug' => "permissionFoo"]),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "TestFoorBar", 'slug' => "test.foo.bar"])
         ]);
 
         // Assign users to role and seeker
@@ -97,7 +133,7 @@ class AccessControlLayerTest extends TestCase
      */
     public function test_hasPermission()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        /** @var \UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
         $acl = $this->ci->acl;
 
         // We try with the seeker 1.
@@ -125,7 +161,7 @@ class AccessControlLayerTest extends TestCase
      */
     public function test_getSeekersForPermission()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        /** @var \UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
         $acl = $this->ci->acl;
 
         // Get the first permission slug (permission)
@@ -185,7 +221,7 @@ class AccessControlLayerTest extends TestCase
      */
     public function test_getPermissionsForSeeker()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        /** @var \UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
         $acl = $this->ci->acl;
 
         // We start with seeker 1
@@ -221,9 +257,12 @@ class AccessControlLayerTest extends TestCase
         $this->assertEquals([], array_values($result));
     }
 
+    /**
+     * Test the decompose slug method
+     */
     public function test_decomposeSlug()
     {
-        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
+        /** @var \UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $acl */
         $acl = $this->ci->acl;
 
         $actual = $acl->decomposeSlug('test.foo.bar.blah');

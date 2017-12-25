@@ -105,7 +105,7 @@ class AccessControlLayer
 
         // The master (root) account has access to everything.
         if ($user->id == $this->config['reserved_user_ids.master']) {
-            if ($debug) {
+            if ($this->debug) {
                 Debug::debug("User is the master (root) user.  Access granted.");
             }
             return true;

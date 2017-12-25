@@ -1,41 +1,57 @@
 <?php
+/**
+* UF AltPermissions
+*
+* @link      https://github.com/lcharette/UF-AltPermissions
+* @copyright Copyright (c) 2016 Louis Charette
+* @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+*/
+namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
 
-namespace UserFrosting\Tests\Unit;
-
+use Illuminate\Database\Eloquent\Collection;
 use UserFrosting\Tests\TestCase;
-use UserFrosting\Tests\DatabaseTransactions;
-
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
+use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
+use UserFrosting\Sprinkle\Core\Tests\RefreshDatabase;
 
 abstract class AltPermissions extends TestCase
 {
-    use DatabaseTransactions;
+    use TestDatabase;
+    use RefreshDatabase;
 
     /**
-     * @var The test data we'll in each test
+     * @var Collection The test users
      */
     protected $users;
+
+    /**
+     * @var Collection The test roles
+     */
     protected $roles;
+
+    /**
+     * @var Collection The seeker objects instance
+     */
     protected $seekers;
 
     /**
-     * @var The seeker that will be tested
+     * @var string The seeker that will be tested
      */
     protected $seeker;
 
     /**
-     * @var The seeker model, to test the config works
+     * @var string The seeker model, to test the config works
      */
     protected $seekerModel;
 
     /**
-     * @var The seeker class. So we don't have to call a new one each time
+     * @var string The seeker class. So we don't have to call a new one each time
      */
     protected $seekerClass;
 
     /**
-     * @var Bool. Enabled/Disable verbose debugging
+     * @var bool. Enabled/Disable verbose debugging
      */
     protected $debug = false;
 
@@ -48,13 +64,21 @@ abstract class AltPermissions extends TestCase
         // Setup parent first to get access to the container
         parent::setUp();
 
+        // Setup test database
+        $this->setupTestDatabase();
+        $this->refreshDatabase();
+        $this->runTestMigrations();
+
         // @var League\FactoryMuffin\FactoryMuffin
         $fm = $this->ci->factory;
 
+        // Create a first user. He will be master user and we don't want to test against him
+        $fm->create(User::class);
+
         // Create 2 users
         $users = collect([
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\User', ['user_name' => 'User 1']),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\User', ['user_name' => 'User 2'])
+            $fm->create(User::class, ['user_name' => 'User 1']),
+            $fm->create(User::class, ['user_name' => 'User 2'])
         ]);
 
         // Create 4 seekers
@@ -62,9 +86,9 @@ abstract class AltPermissions extends TestCase
 
         // Create 3 roles
         $roles =  collect([
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 1"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 2"]),
-            $fm->create('UserFrosting\Sprinkle\AltPermissions\Database\Models\Role', ['seeker' => $this->seeker, 'name' => "Role 3"])
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 1"]),
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 2"]),
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 3"])
         ]);
 
         // Assign them all together
@@ -87,6 +111,13 @@ abstract class AltPermissions extends TestCase
         // Se we don't have to call "new" each time
         $this->seekerClass = new $this->seekerModel;
     }
+
+    /**
+     * Extend this method to run migration before seeding the database
+     * @return void
+     */
+    protected function runTestMigrations()
+    {}
 
     /**
      * Test fetching a seeker config value (getSeekerModel function)
@@ -202,7 +233,6 @@ abstract class AltPermissions extends TestCase
      * test_relations function.
      * Mother of all tests
      *
-     * @access public
      * @return void
      */
     public function test_relations()
@@ -549,7 +579,6 @@ abstract class AltPermissions extends TestCase
     /**
      * debug function.
      *
-     * @access protected
      * @param mixed $message
      * @return void
      */
@@ -564,7 +593,6 @@ abstract class AltPermissions extends TestCase
     /**
      * debugAuth function.
      *
-     * @access protected
      * @param mixed $auth
      * @return void
      */

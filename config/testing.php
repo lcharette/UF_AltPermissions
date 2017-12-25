@@ -8,7 +8,7 @@
     return [
         'AltPermissions' => [
             'seekers' => [
-                'foo' => 'UserFrosting\Tests\Models\Foo'
+                'foo' => 'UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo'
             ]
         ]
     ];

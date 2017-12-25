@@ -22,7 +22,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "UserFrosting\\Tests\\": "tests/"
+            "UserFrosting\\Sprinkle\\AltPermissions\\Tests\\": "tests/"
         }
     },
     "extra": {

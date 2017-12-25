@@ -6,22 +6,20 @@
  * @copyright Copyright (c) 2016 Louis Charette
  * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
-namespace UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100;
+namespace UserFrosting\Sprinkle\AltPermissions\Tests\Migrations;
 
 use UserFrosting\System\Bakery\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Schema\Builder;
 
 /**
  * altFoo table migration
- * @extends Migration
  */
 class AltFooTable extends Migration
 {
     /**
      * {@inheritDoc}
      */
-    public $dependencies = [
+    static public $dependencies = [
         '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsRolesTable'
     ];
 

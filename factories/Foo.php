@@ -8,12 +8,12 @@
  */
 
 use League\FactoryMuffin\Faker\Facade as Faker;
-
+use UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo;
 
 /**
  * General factory for the User Model
  */
-$fm->define('UserFrosting\Tests\Models\Foo')->setDefinitions([
+$fm->define(Foo::class)->setDefinitions([
     'name' => Faker::sentence(3),
     'description' => Faker::text()
 ]);
