@@ -8,7 +8,7 @@
  */
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Migrations;
 
-use UserFrosting\System\Bakery\Migration;
+use UserFrosting\Sprinkle\Core\Database\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
 /**
