@@ -12,7 +12,6 @@ trait FooTableMigration
         $migrator->setLocator(new migrationLocatorStub());
         $result = $migrator->run();
 
-        //echo "\nTEST :: " . print_r($result, true);
         $this->assertEquals(['\\UserFrosting\\Sprinkle\\AltPermissions\\Tests\\Migrations\\AltFooTable'], $result);
     }
 }
