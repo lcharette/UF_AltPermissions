@@ -15,6 +15,7 @@
         "php": ">=5.6",
         "lcharette/uf_formgenerator": "^3.0.0-beta"
     },
+    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "UserFrosting\\Sprinkle\\AltPermissions\\": "src/"
