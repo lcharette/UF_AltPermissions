@@ -1,26 +1,27 @@
 <?php
  /**
- * UF AltPermissions
+ *    UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
- * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ *    @link      https://github.com/lcharette/UF-AltPermissions
+ *    @copyright Copyright (c) 2016 Louis Charette
+ *    @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 namespace UserFrosting\Sprinkle\AltPermissions;
 
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission;
 use UserFrosting\Sprinkle\Core\Facades\Debug;
+use UserFrosting\Support\Repository\Repository as Config;
 
 /**
- * Bootstrapper class for the 'AltPermissions' sprinkle.
+ *    Bootstrapper class for the 'AltPermissions' sprinkle.
  *
- * @author Louis Charette (https://github.com/lcharette)
+ *    @author Louis Charette (https://github.com/lcharette)
  */
 class AccessControlLayer
 {
     /**
-     * @var ContainerInterface The global container object, which holds all your services.
+     * @var Config The global configuration repository
      */
     protected $config;
 
@@ -30,23 +31,22 @@ class AccessControlLayer
     protected $debug;
 
     /**
-     * Create a new AuthorizationManager object.
+     *    Create a new AccessControlLayer object.
      *
-     * @param ContainerInterface $ci The global container object, which holds all your services.
+     *    @param Config $config The global configuration repository
      */
-    public function __construct($config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
         $this->debug = $this->config['debug.auth'];
     }
 
     /**
-     * getSeekerModel function.
-     * Returns the model associated with a seeker name
+     *    getSeekerModel function.
+     *    Returns the model associated with a seeker name
      *
-     * @access public
-     * @param string $seeker The Seeker name
-     * @return string The seeker full class name
+     *    @param string $seeker The Seeker name
+     *    @return string The seeker full class name
      */
     public function getSeekerModel($seeker)
     {
@@ -59,12 +59,11 @@ class AccessControlLayer
     }
 
     /**
-     * getSeekerKey function.
-     * Returns the model associated with a seeker name
+     *    getSeekerKey function.
+     *    Returns the model associated with a seeker name
      *
-     * @access public
-     * @param string $seekerModel The seeker full class name
-     * @return string The Seeker name
+     *    @param string $seekerModel The seeker full class name
+     *    @return string The Seeker name
      */
     public function getSeekerKey($seekerModel)
     {
@@ -78,22 +77,21 @@ class AccessControlLayer
     }
 
     /**
-     * hasPermission function.
+     *    hasPermission function.
      *
-     * Return true or false if the user have the specified permission set
-     * to `on` for the specified seeker id.
+     *    Return true or false if the user have the specified permission set
+     *    to `on` for the specified seeker id.
      *
-     * N.B.: Note that this method doesn't require the `seeker_type`, as the
-     * permission slug is forced to be bound to the same seeker_type as the
-     * info in the `Auth` table
+     *    N.B.: Note that this method doesn't require the `seeker_type`, as the
+     *    permission slug is forced to be bound to the same seeker_type as the
+     *    info in the `Auth` table
      *
-     * @access public
-     * @param mixed $user The user model we want to perform the auth check on
-     * @param mixed $slug The permission slug
-     * @param mixed $seeker_id The seeker id
-     * @return bool User has permission or not
+     *    @param mixed $user The user model we want to perform the auth check on
+     *    @param mixed $slug The permission slug
+     *    @param mixed $seeker_id The seeker id
+     *    @return bool User has permission or not
      *
-     * !TODO : The slug must accept an array
+     *    !TODO : The slug must accept an array
      */
     public function hasPermission($user, $slug, $seeker_id)
     {
@@ -142,16 +140,15 @@ class AccessControlLayer
     }
 
     /**
-     * getSeekersForPermissions function.
+     *    getSeekersForPermissions function.
      *
-     * This method returns a list of seeker ids where the
-     * selected user has a role containing a permission defined in `$slug`
-     * The goal here is to get a list of seekers ids the user have that permission set to "on"
+     *    This method returns a list of seeker ids where the
+     *    selected user has a role containing a permission defined in `$slug`
+     *    The goal here is to get a list of seekers ids the user have that permission set to "on"
      *
-     * @access public
-     * @param mixed $user The user model we want to perform the auth check on
-     * @param mixed $slug The permission slug
-     * @return array A list of Seekers ID
+     *    @param mixed $user The user model we want to perform the auth check on
+     *    @param mixed $slug The permission slug
+     *    @return array A list of Seekers ID
      */
     public function getSeekersForPermission($user, $slug)
     {
@@ -195,20 +192,19 @@ class AccessControlLayer
     }
 
     /**
-     * getPermissionsForSeeker function.
+     *    getPermissionsForSeeker function.
      *
-     * Return a list of permissions slugs the users have for a specific seeker id
+     *    Return a list of permissions slugs the users have for a specific seeker id
      *
-     * N.B.: Note that this method DOES require the `seeker_type`, as a user might
-     * have in the `Auth` table two roles for the same value of `seeker_id`,
-     * but different `seeker_id, seeker_type` combinaison.
+     *    N.B.: Note that this method DOES require the `seeker_type`, as a user might
+     *    have in the `Auth` table two roles for the same value of `seeker_id`,
+     *    but different `seeker_id, seeker_type` combinaison.
      *
-     * @access public
-     * @param UserModel $user The user model we want to perform the auth check on
-     * @param int $seeker_id The seeker id
-     * @param string $seeker_type The seeker type (string slug or full class. See next params)
-     * @param bool $getSeekerClass (default: false) Set to false if `$seeker_type` is already the full class
-     * @return Array an array of slugs as string
+     *    @param User $user The user model we want to perform the auth check on
+     *    @param int $seeker_id The seeker id
+     *    @param string $seeker_type The seeker type (string slug or full class. See next params)
+     *    @param bool $getSeekerClass (default: false) Set to false if `$seeker_type` is already the full class
+     *    @return array an array of slugs as string
      */
     public function getPermissionsForSeeker($user, $seeker_id, $seeker_type, $getSeekerClass = true)
     {
@@ -268,13 +264,12 @@ class AccessControlLayer
     }
 
     /**
-     * Decompose a slug formated with dot notation to find all of the
-     * inherited permissions
+     *       Decompose a slug formated with dot notation to find all of the
+     *       inherited permissions
      *
-     * @access public
-     * @param string $slug
-     * @param string $separator (default: ".")
-     * @return array Decomposed slugs
+     *       @param string $slug
+     *       @param string $separator (default: ".")
+     *       @return array Decomposed slugs
      */
     public function decomposeSlug($slug, $separator = ".")
     {
