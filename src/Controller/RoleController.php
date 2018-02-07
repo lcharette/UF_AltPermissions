@@ -14,17 +14,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
 use UserFrosting\Fortress\RequestSchema;
-use UserFrosting\Fortress\RequestSchema\RequestSchemaRepository;
 use UserFrosting\Fortress\RequestDataTransformer;
 use UserFrosting\Fortress\ServerSideValidator;
 use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
 use UserFrosting\Support\Exception\BadRequestException;
 use UserFrosting\Support\Exception\ForbiddenException;
-use UserFrosting\Support\Exception\HttpException;
-use UserFrosting\Sprinkle\Account\Database\Models\Role;
-use UserFrosting\Sprinkle\Account\Database\Models\User;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
-use UserFrosting\Sprinkle\Core\Facades\Debug;
 use UserFrosting\Sprinkle\FormGenerator\Form;
 
 /**
@@ -35,13 +30,11 @@ use UserFrosting\Sprinkle\FormGenerator\Form;
 class RoleController extends SimpleController
 {
     /**
-     * __construct function.
-     * Create a new ConfigManagerController object.
+     *    __construct function.
+     *    Create a new ConfigManagerController object.
      *
-     * @access public
-     * @param ContainerInterface $ci
-     * @return void
-     * OK
+     *    @param ContainerInterface $ci
+     *    @return void
      */
     public function __construct(ContainerInterface $ci) {
         $this->ci = $ci;
@@ -53,39 +46,42 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Renders the modal form for creating a new role.
+     *    Renders the modal form for creating a new role.
+     *    This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
+     *    This page requires authentication.
+     *    Request type: GET
      *
-     * This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
-     * This page requires authentication.
-     * Request type: GET
-     * OK
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function getModalCreate($request, $response, $args)
+    public function getModalCreate(Request $request, Response $response, $args)
     {
         // GET parameters
         $params = $request->getQueryParams();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
-        /** @var UserFrosting\I18n\MessageTranslator $translator */
+        /** @var \UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
         // Request GET data
         $get = $request->getQueryParams();
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'create_role')) {
+        if (!$authorizer->checkAccess($currentUser, 'alt_create_role')) {
             throw new ForbiddenException();
         }
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var \UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
         // Create a dummy role to prepopulate fields
@@ -108,42 +104,46 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Processes the request to create a new role.
+     *    Processes the request to create a new role.
      *
-     * Processes the request from the role creation form, checking that:
-     * 1. The role name and slug are not already in use;
-     * 2. The user has permission to create a new role;
-     * 3. The submitted data is valid.
-     * This route requires authentication (and should generally be limited to admins or the root user).
-     * Request type: POST
-     * @see getModalCreateRole
-     * OK
+     *    Processes the request from the role creation form, checking that:
+     *    1. The role name and slug are not already in use;
+     *    2. The user has permission to create a new role;
+     *    3. The submitted data is valid.
+     *    This route requires authentication (and should generally be limited to admins or the root user).
+     *    Request type: POST
+     *    @see getModalCreateRole
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function create($request, $response, $args)
+    public function create(Request $request, Response $response, $args)
     {
         // Get POST parameters: name, slug, description
         $params = $request->getParsedBody();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var Config $config */
+        // Get config service
         $config = $this->ci->config;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
-        /** @var UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $auth */
+        /** @var /UserFrosting\Sprinkle\AltPermissions\AccessControlLayer $auth */
         $acl = $this->ci->acl;
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'create_role')) {
+        if (!$authorizer->checkAccess($currentUser, 'alt_create_role')) {
             throw new ForbiddenException();
         }
 
@@ -199,27 +199,32 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Renders the modal form for editing an existing role.
+     *    Renders the modal form for editing an existing role.
      *
-     * This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
-     * This page requires authentication.
-     * Request type: GET
+     *    This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function getModalEdit($request, $response, $args)
+    public function getModalEdit(Request $request, Response $response, $args)
     {
         // GET parameters
         $params = $request->getQueryParams();
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var \UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var \UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var \UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
         // Get the role
@@ -259,18 +264,23 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Renders the modal form for editing a role's permissions.
+     *    Renders the modal form for editing a role's permissions.
      *
-     * This does NOT render a complete page.  Instead, it renders the HTML for the form, which can be embedded in other pages.
-     * This page requires authentication.
-     * Request type: GET
+     *    This does NOT render a complete page.  Instead, it renders the HTML for the form, which can be embedded in other pages.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function getModalEditPermissions($request, $response, $args)
+    public function getModalEditPermissions(Request $request, Response $response, $args)
     {
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
         // GET parameters
@@ -282,7 +292,7 @@ class RoleController extends SimpleController
         }
 
         // Access-controlled resource - check that currentUser has permission to edit "permissions" field for this role
-        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+        if (!$authorizer->checkAccess($currentUser, 'alt_update_role_field', [
             'role' => $role,
             'fields' => ['permissions']
         ])) {
@@ -295,37 +305,42 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Processes the request to update an existing role's details.
+     *    Processes the request to update an existing role's details.
      *
-     * Processes the request from the role update form, checking that:
-     * 1. The role name/slug are not already in use;
-     * 2. The user has the necessary permissions to update the posted field(s);
-     * 3. The submitted data is valid.
-     * This route requires authentication (and should generally be limited to admins or the root user).
-     * Request type: PUT
-     * @see getModalRoleEdit
+     *    Processes the request from the role update form, checking that:
+     *    1. The role name/slug are not already in use;
+     *    2. The user has the necessary permissions to update the posted field(s);
+     *    3. The submitted data is valid.
+     *    This route requires authentication (and should generally be limited to admins or the root user).
+     *    Request type: PUT
+     *    @see getModalRoleEdit
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function updateInfo($request, $response, $args)
+    public function updateInfo(Request $request, Response $response, $args)
     {
-        /** @var Config $config */
+        // Get config service
         $config = $this->ci->config;
 
         // Get PUT parameters: (name, slug, description)
         $params = $request->getParsedBody();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        /** @var UserFrosting\I18n\MessageTranslator $translator */
+        /** @var /UserFrosting\I18n\MessageTranslator $translator */
         $translator = $this->ci->translator;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
         // Get the role
@@ -358,7 +373,7 @@ class RoleController extends SimpleController
 
         // Access-controlled resource - check that currentUser has permission to edit submitted fields for this role
         // !TODO
-        if (!$authorizer->checkAccess($currentUser, 'update_role_field', [
+        if (!$authorizer->checkAccess($currentUser, 'alt_update_role_field', [
             'role' => $role,
             'fields' => array_values(array_unique($fieldNames))
         ])) {
@@ -404,30 +419,33 @@ class RoleController extends SimpleController
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
-
     /**
-     * Processes the request to delete an existing role.
+     *    Processes the request to delete an existing role.
      *
-     * Deletes the specified role.
-     * Before doing so, checks that:
-     * 1. The user has permission to delete this role;
-     * 2. The submitted data is valid.
-     * This route requires authentication (and should generally be limited to admins or the root user).
-     * Request type: DELETE
-     * OK
+     *    Deletes the specified role.
+     *    Before doing so, checks that:
+     *    1. The user has permission to delete this role;
+     *    2. The submitted data is valid.
+     *    This route requires authentication (and should generally be limited to admins or the root user).
+     *    Request type: DELETE
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function delete($request, $response, $args)
+    public function delete(Request $request, Response $response, $args)
     {
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
         // Get the role
@@ -437,7 +455,7 @@ class RoleController extends SimpleController
         }
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'delete_role', [
+        if (!$authorizer->checkAccess($currentUser, 'alt_delete_role', [
             'role' => $role
         ])) {
             throw new ForbiddenException();
@@ -470,24 +488,29 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Returns a list of Permissions for a specified Role.
+     *    Returns a list of Permissions for a specified Role.
      *
-     * Generates a list of permissions, optionally paginated, sorted and/or filtered.
-     * This page requires authentication.
-     * Request type: GET
+     *    Generates a list of permissions, optionally paginated, sorted and/or filtered.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function getPermissions($request, $response, $args)
+    public function getPermissions(Request $request, Response $response, $args)
     {
         // GET parameters
         $params = $request->getQueryParams();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
         // If the role no longer exists, forward to main role listing page
@@ -496,7 +519,7 @@ class RoleController extends SimpleController
         }
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'view_role_field', [
+        if (!$authorizer->checkAccess($currentUser, 'alt_view_role_field', [
             'role' => $role,
             'property' => 'permissions'
         ])) {
@@ -514,23 +537,28 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Renders a page displaying a role's information, in read-only mode.
+     *    Renders a page displaying a role's information, in read-only mode.
      *
-     * This checks that the currently logged-in user has permission to view the requested role's info.
-     * It checks each field individually, showing only those that you have permission to view.
-     * This will also try to show buttons for deleting and editing the role.
-     * This page requires authentication.
-     * Request type: GET
+     *    This checks that the currently logged-in user has permission to view the requested role's info.
+     *    It checks each field individually, showing only those that you have permission to view.
+     *    This will also try to show buttons for deleting and editing the role.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function pageInfo($request, $response, $args)
+    public function pageInfo(Request $request, Response $response, $args)
     {
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
         // Get the role
@@ -540,7 +568,7 @@ class RoleController extends SimpleController
         }
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'uri_role', [
+        if (!$authorizer->checkAccess($currentUser, 'alt_uri_role', [
                 'role' => $role
             ])) {
             throw new ForbiddenException();
@@ -569,27 +597,31 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Renders the role listing page.
+     *    Renders the role listing page.
      *
-     * This page renders a table of roles, with dropdown menus for admin actions for each role.
-     * Actions typically include: edit role, delete role.
-     * This page requires authentication.
-     * Request type: GET
-     * OK
+     *    This page renders a table of roles, with dropdown menus for admin actions for each role.
+     *    Actions typically include: edit role, delete role.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function pageList($request, $response, $args)
+    public function pageList(Request $request, Response $response, $args)
     {
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Router $router */
+        /** @var /UserFrosting\Sprinkle\Core\Router $router */
         $router = $this->ci->router;
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
+        if (!$authorizer->checkAccess($currentUser, 'alt_uri_role')) {
             throw new ForbiddenException();
         }
 
@@ -603,29 +635,33 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Returns a list of Roles
+     *    Returns a list of Roles
      *
-     * Generates a list of roles, optionally paginated, sorted and/or filtered.
-     * This page requires authentication.
-     * Request type: GET
-     * OK
+     *    Generates a list of roles, optionally paginated, sorted and/or filtered.
+     *    This page requires authentication.
+     *    Request type: GET
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function getList($request, $response, $args)
+    public function getList(Request $request, Response $response, $args)
     {
         // GET parameters
         $params = $request->getQueryParams();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'uri_roles')) {
+        if (!$authorizer->checkAccess($currentUser, 'alt_uri_role')) {
             throw new ForbiddenException();
         }
 
@@ -638,32 +674,37 @@ class RoleController extends SimpleController
     }
 
     /**
-     * Processes the request to update a specific field for an existing role, including permissions.
+     *    Processes the request to update a specific field for an existing role, including permissions.
      *
-     * Processes the request from the role update form, checking that:
-     * 1. The logged-in user has the necessary permissions to update the putted field(s);
-     * 2. The submitted data is valid.
-     * This route requires authentication.
-     * Request type: PUT
+     *    Processes the request from the role update form, checking that:
+     *    1. The logged-in user has the necessary permissions to update the putted field(s);
+     *    2. The submitted data is valid.
+     *    This route requires authentication.
+     *    Request type: PUT
+     *
+     *    @param  Request $request
+     *    @param  Response $response
+     *    @param  array $args
+     *    @return void
      */
-    public function updatePermissions($request, $response, $args)
+    public function updatePermissions(Request $request, Response $response, $args)
     {
         // Get PUT parameters: value
         $put = $request->getParsedBody();
 
-        /** @var UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
+        /** @var /UserFrosting\Sprinkle\Account\Authorize\AuthorizationManager */
         $authorizer = $this->ci->authorizer;
 
-        /** @var UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
+        /** @var /UserFrosting\Sprinkle\Account\Database\Models\User $currentUser */
         $currentUser = $this->ci->currentUser;
 
-        /** @var Config $config */
+        // Get config service
         $config = $this->ci->config;
 
-        /** @var MessageStream $ms */
+        /** @var \UserFrosting\Sprinkle\Core\Alert\AlertStream $ms */
         $ms = $this->ci->alerts;
 
-        /** @var UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
+        /** @var /UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
 
         // Get the role
