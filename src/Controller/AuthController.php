@@ -533,9 +533,10 @@ class AuthController extends SimpleController
         $currentUser = $this->ci->currentUser;
 
         // Access-controlled page
-        if (!$authorizer->checkAccess($currentUser, 'alt_uri_role')) {
+        // TODO
+        /*if (!$authorizer->checkAccess($currentUser, 'alt_uri_role')) {
             throw new ForbiddenException();
-        }
+        }*/
 
         /** @var \UserFrosting\Sprinkle\Core\Util\ClassMapper $classMapper */
         $classMapper = $this->ci->classMapper;
