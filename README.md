@@ -1,6 +1,6 @@
 # AltPermission Sprinkle for [UserFrosting 4](https://www.userfrosting.com)
 
-[![Build Status](https://travis-ci.org/lcharette/uf_altpermissions.svg?branch=master)](https://travis-ci.org/lcharette/uf_altpermissions) [![UserFrosting Version](https://img.shields.io/badge/UserFrosting->=%204.2-brightgreen.svg)](https://github.com/userfrosting/UserFrosting) [![Donate](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-brightgreen.svg)](https://ko-fi.com/A7052ICP)
+[![Build Status](https://travis-ci.org/lcharette/UF_AltPermissions.svg?branch=master)](https://travis-ci.org/lcharette/UF_AltPermissions) [![UserFrosting Version](https://img.shields.io/badge/UserFrosting->=%204.2-brightgreen.svg)](https://github.com/userfrosting/UserFrosting) [![Donate](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-brightgreen.svg)](https://ko-fi.com/A7052ICP)
 
 Alternate/complementary permission system for [UserFrosting 4](https://www.userfrosting.com)
 
@@ -14,7 +14,7 @@ If you need help using this sprinkle or found any bug, feels free to open an iss
 
 Edit UserFrosting `app/sprinkles/sprinkles.json` file and add the following to the `require` list :
 ```
-"lcharette/uf_altpermissions": "dev-master"
+"lcharette/UF_AltPermissions": "dev-master"
 ```
 
 Run `composer update` then `composer run-script bake` to install the sprinkle.
