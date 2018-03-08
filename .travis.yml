@@ -25,7 +25,7 @@ cache:
 before_install:
   # clone UserFrosting
   - cd ../
-  - git clone https://github.com/userfrosting/UserFrosting.git
+  - git clone -b develop https://github.com/userfrosting/UserFrosting.git
   - cd UserFrosting
   # move and add sprinkle
   - mv ../UF_AltPermissions app/sprinkles/AltPermissions/
