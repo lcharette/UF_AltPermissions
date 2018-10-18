@@ -1,15 +1,18 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\ServicesProvider;
 
-use UserFrosting\Sprinkle\AltPermissions\Middleware\CheckAuthSeeker;
 use UserFrosting\Sprinkle\AltPermissions\AccessControlLayer;
+use UserFrosting\Sprinkle\AltPermissions\Middleware\CheckAuthSeeker;
 
 /**
  * Registers services for the AltPermissions sprinkle, such as classmapper, etc.
@@ -26,7 +29,7 @@ class ServicesProvider
     public function register($container)
     {
 
-        /**
+        /*
          * Extend the 'classMapper' service to register model classes.
          *
          * Mappings added: User, Group, Role, Permission, Activity, PasswordReset, Verification
@@ -39,16 +42,18 @@ class ServicesProvider
             $classMapper->setClassMapping('altRole_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\RoleSprunje');
             $classMapper->setClassMapping('auth_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\AuthSprunje');
             $classMapper->setClassMapping('authUser_sprunje', 'UserFrosting\Sprinkle\AltPermissions\Sprunje\AuthUsersSprunje');
+
             return $classMapper;
         });
 
-        /**
+        /*
          * Middleware to check environment.
          *
          * @todo We should cache the results of this, the first time that it succeeds.
          */
         $container['checkAuthSeeker'] = function ($c) {
             $checkAuthSeeker = new CheckAuthSeeker($c->config['AltPermissions']);
+
             return $checkAuthSeeker;
         };
 

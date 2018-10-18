@@ -1,17 +1,20 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Sprunje;
 
 use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
 
 /**
- * RoleSprunje
+ * RoleSprunje.
  *
  * Implements Sprunje for the roles API.
  *
@@ -25,17 +28,17 @@ class RoleSprunje extends Sprunje
        used for sorting and filtering at this time */
     protected $sortable = [
         'name',
-        'description'
+        'description',
     ];
     protected $filterable = [
         'name',
-        'description'
+        'description',
     ];
 
-    protected $seeker = "";
+    protected $seeker = '';
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function __construct($classMapper, $options, $seeker)
     {
@@ -44,7 +47,7 @@ class RoleSprunje extends Sprunje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function baseQuery()
     {
@@ -52,7 +55,7 @@ class RoleSprunje extends Sprunje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function applyTransformations($collection)
     {
@@ -60,10 +63,10 @@ class RoleSprunje extends Sprunje
 
             // Routes
             $item->uri = [
-                'view'   => $item->getRoute('alt_uri_roles.view'),
-                'delete' => $item->getRoute('api.roles.delete'),
-                'edit'   => $item->getRoute('modal.roles.edit'),
-                'permissions' => $item->getRoute('modal.roles.permissions')
+                'view'        => $item->getRoute('alt_uri_roles.view'),
+                'delete'      => $item->getRoute('api.roles.delete'),
+                'edit'        => $item->getRoute('modal.roles.edit'),
+                'permissions' => $item->getRoute('modal.roles.permissions'),
             ];
 
             return $item;

@@ -1,15 +1,17 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 
 /**
  * Routes for administrative auth management.
- * Route eveything related to the AuthController
+ * Route eveything related to the AuthController.
  */
 $app->group('/api/auth/{seeker}', function () {
 
@@ -22,25 +24,20 @@ $app->group('/api/auth/{seeker}', function () {
 
     $this->get('/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getUserList')
          ->setName('api.autocomplete.auth.username');
-
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/api/auth', function () {
-
     $this->delete('/id/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:delete')
          ->setName('api.auth.delete');
 
     $this->put('/id/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:updateInfo')
          ->setName('api.auth.edit');
-
 })->add('authGuard');
 
 $app->group('/modals/auth', function () {
-
     $this->get('/create/{seeker}/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalCreate')
          ->setName('modal.auth.create');
 
     $this->get('/edit/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\AuthController:getModalEdit')
          ->setName('modal.auth.edit');
-
 })->add('authGuard');

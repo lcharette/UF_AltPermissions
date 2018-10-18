@@ -1,10 +1,12 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 
 namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
@@ -12,9 +14,10 @@ namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 use UserFrosting\Sprinkle\Account\Database\Models\User as CoreUser;
 
 /**
- * AltPermissionUser
+ * AltPermissionUser.
  *
  * Trait to add AltPermission Sprinkle methods to the core User Model
+ *
  * @author Louis Charette (https://github.com/lcharette)
  */
 class User extends CoreUser
@@ -25,31 +28,32 @@ class User extends CoreUser
     public function seeker($seeker)
     {
         $seekerClass = static::$ci->acl->getSeekerModel($seeker);
+
         return $this->morphedByMany($seekerClass, 'seeker', 'alt_role_users')->withPivot('role_id');
     }
 
     /**
      * auth relation. Link to the auth model (man-to-many) relation. User $seeker to restrict rows to a specific seeker class.
+     *
      * @param string $seeker (default: "") seeker name
      */
-    public function auth($seeker = "")
+    public function auth($seeker = '')
     {
-        if ($seeker != "")
-        {
+        if ($seeker != '') {
             $seekerClass = static::$ci->acl->getSeekerModel($seeker);
+
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth')->where('seeker_type', $seekerClass)->get();
-        }
-        else
-        {
+        } else {
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth');
         }
     }
 
     /**
-     * roleForSeeker. Use it to get the user role for a specific seeker
+     * roleForSeeker. Use it to get the user role for a specific seeker.
      *
      * @param string $seeker
-     * @param int $seeker_id
+     * @param int    $seeker_id
+     *
      * @return Role Model or false if no role found
      */
     public function roleForSeeker($seeker, $seeker_id)

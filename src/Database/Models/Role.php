@@ -1,20 +1,25 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
 use UserFrosting\Sprinkle\Core\Database\Models\Model;
 
 /**
- * Role Class
+ * Role Class.
  *
  * Represents a role, which aggregates permissions and to which a user can be assigned.
+ *
  * @author Louis Charette (https://github.com/lcharette)
+ *
  * @property string slug
  * @property string name
  * @property string description
@@ -24,13 +29,13 @@ class Role extends Model
     /**
      * @var string The name of the table for the current model.
      */
-    protected $table = "alt_roles";
+    protected $table = 'alt_roles';
 
     protected $fillable = [
-        "seeker",
-        "name",
-        "description",
-        "lock"
+        'seeker',
+        'name',
+        'description',
+        'lock',
     ];
 
     /**
@@ -40,7 +45,6 @@ class Role extends Model
 
     /**
      * Delete this role from the database, removing associations with permissions and users.
-     *
      */
     public function delete()
     {
@@ -67,30 +71,27 @@ class Role extends Model
         return $this->belongsToMany($classMapper->getClassMapping('altPermission'), 'alt_permission_roles', 'role_id', 'permission_id')->withTimestamps();
     }
 
-    public function auth($seeker = "")
+    public function auth($seeker = '')
     {
-        if ($seeker != "")
-        {
+        if ($seeker != '') {
             $seekerClass = static::$ci->acl->getSeekerModel($seeker);
+
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth')->where('seeker_type', $seekerClass)->get();
-        }
-        else
-        {
+        } else {
             return $this->hasMany('UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth');
         }
     }
 
     /**
-     * Model's getter
-     *
+     * Model's getter.
      */
 
     /**
      * getRoute function.
-     * Helper function for when the $ci is not directly avaiable
+     * Helper function for when the $ci is not directly avaiable.
      *
-     * @access public
      * @param string $routeName
+     *
      * @return Route for the designated route name
      */
     public function getRoute($routeName)
@@ -104,20 +105,21 @@ class Role extends Model
     }
 
     /**
-     * Model's Scope
-     *
+     * Model's Scope.
      */
 
     /**
      * Query scope to get all roles assigned to a specific seeker.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $seeker
+     * @param string                                $seeker
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForSeeker($query, $seeker)
     {
         $seekerClass = static::$ci->acl->getSeekerModel($seeker);
+
         return $query->where('seeker', $seekerClass);
     }
 }

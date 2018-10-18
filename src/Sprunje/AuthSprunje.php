@@ -1,19 +1,21 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Sprunje;
 
-use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
-use UserFrosting\Sprinkle\Core\Facades\Debug;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth;
+use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
 
 /**
- * AuthSprunje
+ * AuthSprunje.
  *
  * Sprunje displaying the
  *
@@ -27,17 +29,17 @@ class AuthSprunje extends Sprunje
        used for sorting and filtering at this time */
     protected $sortable = [
         'user',
-        'role'
+        'role',
     ];
     protected $filterable = [
         'user',
-        'role'
+        'role',
     ];
 
     /*
      * @var Seeker. The seeker we will be looking for
      */
-    protected $seeker = "";
+    protected $seeker = '';
 
     /*
      * @var where The attribute we'll be doing a where on
@@ -45,9 +47,9 @@ class AuthSprunje extends Sprunje
     protected $where;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function __construct($classMapper, $options, $seeker = "", $where = [])
+    public function __construct($classMapper, $options, $seeker = '', $where = [])
     {
         $this->seeker = $seeker;
         $this->where = $where;
@@ -57,7 +59,7 @@ class AuthSprunje extends Sprunje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function baseQuery()
     {
@@ -79,7 +81,7 @@ class AuthSprunje extends Sprunje
 
         // Select only what we really need from role and users for the filter/sort to work
         $query = $query->select(
-            $baseModel->getTable().".*",
+            $baseModel->getTable().'.*',
             'users.first_name',
             'users.last_name',
             'users.user_name',
@@ -90,7 +92,7 @@ class AuthSprunje extends Sprunje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function applyTransformations($collection)
     {
@@ -110,30 +112,36 @@ class AuthSprunje extends Sprunje
      * Filter LIKE the user info.
      *
      * @param Builder $query
-     * @param mixed $value
+     * @param mixed   $value
+     *
      * @return Builder
      */
     protected function filterUser($query, $value)
     {
         // Split value on separator for OR queries
         $values = explode($this->orSeparator, $value);
+
         return $query->where(function ($query) use ($values) {
             foreach ($values as $value) {
                 $query = $query->orLike('users.first_name', $value)
                                 ->orLike('users.last_name', $value)
                                 ->orLike('users.user_name', $value);
             }
+
             return $query;
         });
     }
+
     protected function filterRole($query, $value)
     {
         // Split value on separator for OR queries
         $values = explode($this->orSeparator, $value);
+
         return $query->where(function ($query) use ($values) {
             foreach ($values as $value) {
                 $query = $query->orLike('alt_roles.name', $value);
             }
+
             return $query;
         });
     }
@@ -142,13 +150,15 @@ class AuthSprunje extends Sprunje
      * Sort based on user last name.
      *
      * @param Builder $query
-     * @param string $direction
+     * @param string  $direction
+     *
      * @return Builder
      */
     protected function sortUser($query, $direction)
     {
         return $query->orderBy('users.first_name', $direction);
     }
+
     protected function sortRole($query, $direction)
     {
         return $query->orderBy('alt_roles.name', $direction);

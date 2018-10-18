@@ -1,25 +1,28 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Interop\Container\ContainerInterface;
-use UserFrosting\Fortress\RequestSchema;
-use UserFrosting\Fortress\RequestDataTransformer;
-use UserFrosting\Fortress\ServerSideValidator;
 use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
-use UserFrosting\Support\Exception\ForbiddenException;
-use UserFrosting\Support\Exception\HttpException;
+use UserFrosting\Fortress\RequestDataTransformer;
+use UserFrosting\Fortress\RequestSchema;
+use UserFrosting\Fortress\ServerSideValidator;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
 use UserFrosting\Sprinkle\FormGenerator\Form;
+use UserFrosting\Support\Exception\ForbiddenException;
+use UserFrosting\Support\Exception\HttpException;
 
 /**
  * Controller class for role-related requests, including listing roles, CRUD for roles, etc.
@@ -33,9 +36,11 @@ class AuthController extends SimpleController
      *    Create a new ConfigManagerController object.
      *
      *    @param ContainerInterface $ci
+     *
      *    @return void
      */
-    public function __construct(ContainerInterface $ci) {
+    public function __construct(ContainerInterface $ci)
+    {
         $this->ci = $ci;
     }
 
@@ -49,6 +54,7 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getModalCreate(Request $request, Response $response, $args)
@@ -95,34 +101,36 @@ class AuthController extends SimpleController
         $roleSelect = $possibleRoles->pluck('name', 'id');
 
         // We pass the roles as the option of the selects
-        $form->setInputArgument("role", "options", $roleSelect);
+        $form->setInputArgument('role', 'options', $roleSelect);
 
         // Get the modal title. Depend if the seeker specific key is define
-        $seekerTitle = "AUTH.".strtoupper($args['seeker']).".ADD_USER";
-        $boxTitle = $translator->has($seekerTitle) ? $seekerTitle : "AUTH.ADD_USER";
+        $seekerTitle = 'AUTH.'.strtoupper($args['seeker']).'.ADD_USER';
+        $boxTitle = $translator->has($seekerTitle) ? $seekerTitle : 'AUTH.ADD_USER';
 
         // Using custom form here to add the javascript we need fo Typeahead.
-        $this->ci->view->render($response, "FormGenerator/userSelect.html.twig", [
-            "box_id" => $get['box_id'],
-            "box_title" => $boxTitle,
-            "form_action" => $router->pathFor('api.auth.create', $args),
-            "fields" => $form->generate(),
-            "collection_placeholder" => 'USER.SELECT',
-            "collection_api" => $router->pathFor('api.autocomplete.auth.username', $args),
-            "validators" => $validator->rules('json', true)
+        $this->ci->view->render($response, 'FormGenerator/userSelect.html.twig', [
+            'box_id'                 => $get['box_id'],
+            'box_title'              => $boxTitle,
+            'form_action'            => $router->pathFor('api.auth.create', $args),
+            'fields'                 => $form->generate(),
+            'collection_placeholder' => 'USER.SELECT',
+            'collection_api'         => $router->pathFor('api.autocomplete.auth.username', $args),
+            'validators'             => $validator->rules('json', true),
         ]);
     }
 
     /**
      *    getUserList function.
-     *    Function for the custom sprunje returning the list of user NOT in the Seeker
+     *    Function for the custom sprunje returning the list of user NOT in the Seeker.
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
-    public function getUserList(Request $request, Response $response, $args) {
+    public function getUserList(Request $request, Response $response, $args)
+    {
 
         // GET parameters
         $params = $request->getQueryParams();
@@ -159,11 +167,13 @@ class AuthController extends SimpleController
      *    3. The submitted data is valid.
      *    This route requires authentication (and should generally be limited to admins or the root user).
      *    Request type: POST
+     *
      *    @see getModalCreateRole
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function create(Request $request, Response $response, $args)
@@ -240,15 +250,15 @@ class AuthController extends SimpleController
 
         // Create the auth
         $auth = $classMapper->createInstance('altAuth', [
-            "role_id" => $role->id,
-            "user_id" => $user->id,
-            "seeker_id" => $args['id'],
-            "seeker_type" => $seekerClass
+            'role_id'     => $role->id,
+            'user_id'     => $user->id,
+            'seeker_id'   => $args['id'],
+            'seeker_type' => $seekerClass,
         ]);
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($classMapper, $auth, $currentUser, $user, $role) {
+        Capsule::transaction(function () use ($classMapper, $auth, $currentUser, $user, $role) {
 
             // Save the auth data
             $auth->save();
@@ -262,7 +272,7 @@ class AuthController extends SimpleController
 
         $ms->addMessageTranslated('success', 'AUTH.CREATED', [
             'role_name' => $translator->translate($role->name),
-            'user_name' => $user->user_name
+            'user_name' => $user->user_name,
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
@@ -278,6 +288,7 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getModalEdit(Request $request, Response $response, $args)
@@ -298,10 +309,10 @@ class AuthController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
-        {
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id'])) {
             $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
-            $e->addUserMessage("AUTH.NOT_FOUND");
+            $e->addUserMessage('AUTH.NOT_FOUND');
+
             throw $e;
         }
 
@@ -329,21 +340,21 @@ class AuthController extends SimpleController
         $roleSelect = $possibleRoles->pluck('name', 'id');
 
         // We pass the role as the option of the selects
-        $form->setInputArgument("role", "options", $roleSelect);
+        $form->setInputArgument('role', 'options', $roleSelect);
 
         // We need to the the value manually. If we pass the relation, it will associate the relation
         // as the value of the select
-        $form->setValue("role", $auth->role_id);
+        $form->setValue('role', $auth->role_id);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
-            "box_id" => $params['box_id'],
-            "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->router->pathFor('api.auth.edit', [
-                'id' => $args['id']
+            'box_id'      => $params['box_id'],
+            'box_title'   => 'ROLE.EDIT',
+            'form_action' => $this->ci->router->pathFor('api.auth.edit', [
+                'id' => $args['id'],
             ]),
-            "form_method" => "PUT",
-            "fields" => $form->generate(),
-            "validators" => $validator->rules('json', true)
+            'form_method' => 'PUT',
+            'fields'      => $form->generate(),
+            'validators'  => $validator->rules('json', true),
         ]);
     }
 
@@ -356,11 +367,13 @@ class AuthController extends SimpleController
      *    3. The submitted data is valid.
      *    This route requires authentication (and should generally be limited to admins or the root user).
      *    Request type: PUT
+     *
      *    @see getModalRoleEdit
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function updateInfo(Request $request, Response $response, $args)
@@ -393,10 +406,10 @@ class AuthController extends SimpleController
         }*/
 
         // Get the auth data from the id in the route
-        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
-        {
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id'])) {
             $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
-            $e->addUserMessage("AUTH.NOT_FOUND");
+            $e->addUserMessage('AUTH.NOT_FOUND');
+
             throw $e;
         }
 
@@ -407,17 +420,19 @@ class AuthController extends SimpleController
         // 1° Check it exist
         if (!$newRole) {
             $ms->addMessageTranslated('danger', 'AUTH.NOT_FOUND');
+
             return $response->withStatus(400);
         }
 
         // 2° Make sure the role is for the same seeker
         if ($newRole->seeker != $auth->seeker_type) {
             $ms->addMessageTranslated('danger', 'AUTH.BAD_SEEKER');
+
             return $response->withStatus(400);
         }
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($currentUser, $auth, $newRole) {
+        Capsule::transaction(function () use ($currentUser, $auth, $newRole) {
             // Update the role and generate success messages
             // We are allowed to change the `auth` relation directly for the role
             // (It's expected to change for a given user/seeker combo)
@@ -434,7 +449,7 @@ class AuthController extends SimpleController
 
         $ms->addMessageTranslated('success', 'AUTH.UPDATED', [
             'role_name' => $translator->translate($newRole->name),
-            'user_name' => $auth->user->user_name
+            'user_name' => $auth->user->user_name,
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
@@ -455,6 +470,7 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function delete(Request $request, Response $response, $args)
@@ -475,10 +491,10 @@ class AuthController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id']))
-        {
+        if (!$auth = $classMapper->staticMethod('altAuth', 'find', $args['id'])) {
             $e = new HttpException("Alt Authorization role '{$args['id']}' does not exist.");
-            $e->addUserMessage("AUTH.NOT_FOUND");
+            $e->addUserMessage('AUTH.NOT_FOUND');
+
             throw $e;
         }
 
@@ -490,8 +506,7 @@ class AuthController extends SimpleController
         }*/
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($auth, $currentUser) {
-
+        Capsule::transaction(function () use ($auth, $currentUser) {
             $auth->delete();
 
             // Create activity record
@@ -503,14 +518,14 @@ class AuthController extends SimpleController
 
         $ms->addMessageTranslated('success', 'AUTH.DELETED', [
             'role_name' => $translator->translate($auth->role->name),
-            'user_name' => $auth->user->user_name
+            'user_name' => $auth->user->user_name,
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
     }
 
     /**
-     *    Returns a list of auth data
+     *    Returns a list of auth data.
      *
      *    Generates a list of auth data, optionally paginated, sorted and/or filtered.
      *    This page requires authentication.
@@ -519,6 +534,7 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getList(Request $request, Response $response, $args)
@@ -542,8 +558,8 @@ class AuthController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Make sure the group arguments are valid
-        if (in_array($args['group'], ["seeker", "user", "role"])) {
-            $where = [$args['group']."_id" => $args['id']];
+        if (in_array($args['group'], ['seeker', 'user', 'role'])) {
+            $where = [$args['group'].'_id' => $args['id']];
         } else {
             $where = [];
         }

@@ -1,18 +1,20 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Sprunje;
 
 use UserFrosting\Sprinkle\Core\Sprunje\Sprunje;
-use UserFrosting\Sprinkle\Core\Facades\Debug;
 
 /**
- * AuthUsersSprunje
+ * AuthUsersSprunje.
  *
  * Sprunje used to add a new user to the seeker id
  *
@@ -24,14 +26,14 @@ class AuthUsersSprunje extends Sprunje
 
     protected $sortable = [];
     protected $filterable = [
-        'info'
+        'info',
     ];
 
     /*
      * @var Seeker. The seeker we will be looking for
      */
-    protected $seeker_type = "";
-    protected $seeker_id = "";
+    protected $seeker_type = '';
+    protected $seeker_id = '';
 
     /*
      * @var where The attribute we'll be doing a where on
@@ -39,7 +41,7 @@ class AuthUsersSprunje extends Sprunje
     protected $where;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function __construct($classMapper, $options, $seeker_type, $seeker_id)
     {
@@ -51,7 +53,7 @@ class AuthUsersSprunje extends Sprunje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function baseQuery()
     {
@@ -69,25 +71,28 @@ class AuthUsersSprunje extends Sprunje
      * Filter LIKE the user info.
      *
      * @param Builder $query
-     * @param mixed $value
+     * @param mixed   $value
+     *
      * @return Builder
      */
     protected function filterInfo($query, $value)
     {
         // Split value on separator for OR queries
         $values = explode($this->orSeparator, $value);
+
         return $query->where(function ($query) use ($values) {
             foreach ($values as $value) {
                 $query = $query->orLike('first_name', $value)
                                 ->orLike('last_name', $value)
                                 ->orLike('user_name', $value);
             }
+
             return $query;
         });
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function applyTransformations($collection)
     {

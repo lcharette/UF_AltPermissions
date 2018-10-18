@@ -1,11 +1,14 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
 
 use UserFrosting\Sprinkle\Core\Database\Models\Model;
@@ -14,7 +17,9 @@ use UserFrosting\Sprinkle\Core\Database\Models\Model;
  * Permission Class.
  *
  * Represents a permission for a role.
+ *
  * @author Louis Charette (https://github.com/lcharette)
+ *
  * @property string slug
  * @property string name
  * @property string conditions
@@ -25,13 +30,13 @@ class Permission extends Model
     /**
      * @var string The name of the table for the current model.
      */
-    protected $table = "alt_permissions";
+    protected $table = 'alt_permissions';
 
     protected $fillable = [
-        "slug",
-        "seeker",
-        "name",
-        "description"
+        'slug',
+        'seeker',
+        'name',
+        'description',
     ];
 
     /**
@@ -41,7 +46,6 @@ class Permission extends Model
 
     /**
      * Delete this permission from the database, removing associations with roles.
-     *
      */
     public function delete()
     {
@@ -67,15 +71,15 @@ class Permission extends Model
 
     /**
      * getStatusTxt function.
-     * Prend le code de status et retourne la version localisé que le code représente
+     * Prend le code de status et retourne la version localisé que le code représente.
      *
-     * @access public
      * @return void
      */
     public function getLocaleName()
     {
         return static::$ci->translator->translate($this->name);
     }
+
     public function getLocaleDescription()
     {
         return static::$ci->translator->translate($this->description);
@@ -85,16 +89,18 @@ class Permission extends Model
      * Query scope to get all roles assigned to a specific seeker.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $seeker
+     * @param string                                $seeker
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeForSeeker($query, $seeker)
     {
         $seekerClass = static::$ci->acl->getSeekerModel($seeker);
+
         return $query->where('seeker', $seekerClass);
     }
 
-    /**
+    /*
      * Query scope to get all permissions assigned to a specific role.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -109,7 +115,7 @@ class Permission extends Model
         });
     }*/
 
-    /**
+    /*
      * Query scope to get all permissions NOT associated with a specific role.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
