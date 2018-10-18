@@ -1,11 +1,14 @@
 <?php
- /**
- *    UF AltPermissions
+
+/*
+ * UF AltPermissions
  *
- *    @link      https://github.com/lcharette/UF-AltPermissions
- *    @copyright Copyright (c) 2016 Louis Charette
- *    @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
+ * @copyright Copyright (c) 2016 Louis Charette
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions;
 
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Auth;
@@ -43,14 +46,15 @@ class AccessControlLayer
 
     /**
      *    getSeekerModel function.
-     *    Returns the model associated with a seeker name
+     *    Returns the model associated with a seeker name.
      *
      *    @param string $seeker The Seeker name
+     *
      *    @return string The seeker full class name
      */
     public function getSeekerModel($seeker)
     {
-        if ($seeker == "" || !array_key_exists($seeker, $this->config['AltPermissions.seekers'])) {
+        if ($seeker == '' || !array_key_exists($seeker, $this->config['AltPermissions.seekers'])) {
             throw new \InvalidArgumentException("Seeker '$seeker' not found");
         } else {
             //!TODO : Check class exist
@@ -60,16 +64,17 @@ class AccessControlLayer
 
     /**
      *    getSeekerKey function.
-     *    Returns the model associated with a seeker name
+     *    Returns the model associated with a seeker name.
      *
      *    @param string $seekerModel The seeker full class name
+     *
      *    @return string The Seeker name
      */
     public function getSeekerKey($seekerModel)
     {
         $config = array_flip($this->config['AltPermissions.seekers']);
 
-        if ($seekerModel == "" || !array_key_exists($seekerModel, $config)) {
+        if ($seekerModel == '' || !array_key_exists($seekerModel, $config)) {
             throw new \InvalidArgumentException("Seeker '$seekerModel' not found");
         } else {
             return $config[$seekerModel];
@@ -89,6 +94,7 @@ class AccessControlLayer
      *    @param mixed $user The user model we want to perform the auth check on
      *    @param mixed $slug The permission slug
      *    @param mixed $seeker_id The seeker id
+     *
      *    @return bool User has permission or not
      *
      *    !TODO : The slug must accept an array
@@ -97,15 +103,16 @@ class AccessControlLayer
     {
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            Debug::debug("Authorization check requested at: ", $trace);
+            Debug::debug('Authorization check requested at: ', $trace);
             Debug::debug("Checking authorization for user {$user->id} ('{$user->user_name}') on permission '$slug' and seeker id '$seeker_id'...");
         }
 
         // The master (root) account has access to everything.
         if ($user->id == $this->config['reserved_user_ids.master']) {
             if ($this->debug) {
-                Debug::debug("User is the master (root) user.  Access granted.");
+                Debug::debug('User is the master (root) user.  Access granted.');
             }
+
             return true;
         }
 
@@ -120,7 +127,7 @@ class AccessControlLayer
         // The `orWhere` need to be in a bracket, otherwise it will create false positivewith `wherehas`
         // See http://laraveldaily.com/and-or-and-brackets-with-eloquent/
         $query = Permission::where(function ($query) use ($slug) {
-            $query->where('slug', $slug)->orWhere('slug', 'like', $slug . '.%');
+            $query->where('slug', $slug)->orWhere('slug', 'like', $slug.'.%');
         });
 
         // We query the role.auth relation for the user and correct seeker
@@ -148,6 +155,7 @@ class AccessControlLayer
      *
      *    @param mixed $user The user model we want to perform the auth check on
      *    @param mixed $slug The permission slug
+     *
      *    @return array A list of Seekers ID
      */
     public function getSeekersForPermission($user, $slug)
@@ -155,7 +163,7 @@ class AccessControlLayer
         // Display initial debug statement
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            Debug::debug("Seekers for permission authorization list requested at: ", $trace);
+            Debug::debug('Seekers for permission authorization list requested at: ', $trace);
             Debug::debug("Getting all seekers for user {$user->id} ('{$user->user_name}') on permission '$slug'...");
         }
 
@@ -169,7 +177,7 @@ class AccessControlLayer
         // done on the `whereHas` function on the `Auth` relation (ask permission relation throught the `role` relation)
         $query->whereHas('role.permissions', function ($query) use ($slug) {
             $query->where('slug', $slug)
-                  ->orWhere('slug', 'like', $slug . '.%');
+                  ->orWhere('slug', 'like', $slug.'.%');
         });
 
         // Run query
@@ -204,6 +212,7 @@ class AccessControlLayer
      *    @param int $seeker_id The seeker id
      *    @param string $seeker_type The seeker type (string slug or full class. See next params)
      *    @param bool $getSeekerClass (default: false) Set to false if `$seeker_type` is already the full class
+     *
      *    @return array an array of slugs as string
      */
     public function getPermissionsForSeeker($user, $seeker_id, $seeker_type, $getSeekerClass = true)
@@ -211,7 +220,7 @@ class AccessControlLayer
         // Display initial debug statement
         if ($this->debug) {
             $trace = array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3), 1);
-            Debug::debug("Permissions for seeker authorization list requested at: ", $trace);
+            Debug::debug('Permissions for seeker authorization list requested at: ', $trace);
             Debug::debug("Getting all permissions for user {$user->id} ('{$user->user_name}') on seekers '$seeker_id' or type `$seeker_type`...");
         }
 
@@ -225,9 +234,9 @@ class AccessControlLayer
         // individual seeker, we'll always get 1 or 0 role. Then it's just a
         // matter of finding the permissions associated with this role
         $auth = Auth::where([
-            'user_id' => $user->id,
-            'seeker_id' => $seeker_id,
-            'seeker_type' => $seeker_type
+            'user_id'     => $user->id,
+            'seeker_id'   => $seeker_id,
+            'seeker_type' => $seeker_type,
         ])->with(['role', 'role.permissions'])->first();
 
         // !TODO : Cache the result
@@ -265,13 +274,14 @@ class AccessControlLayer
 
     /**
      *       Decompose a slug formated with dot notation to find all of the
-     *       inherited permissions
+     *       inherited permissions.
      *
      *       @param string $slug
      *       @param string $separator (default: ".")
+     *
      *       @return array Decomposed slugs
      */
-    public function decomposeSlug($slug, $separator = ".")
+    public function decomposeSlug($slug, $separator = '.')
     {
         $decomposedSlug = explode($separator, $slug);
         $result = [];
@@ -280,7 +290,7 @@ class AccessControlLayer
             if (empty($result)) {
                 $result[] = $part;
             } else {
-                $result[] = end($result) . $separator . $part;
+                $result[] = end($result).$separator.$part;
             }
         }
 

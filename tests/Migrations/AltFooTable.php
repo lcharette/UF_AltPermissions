@@ -1,30 +1,33 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Migrations;
 
-use UserFrosting\Sprinkle\Core\Database\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use UserFrosting\Sprinkle\Core\Database\Migration;
 
 /**
- * altFoo table migration
+ * altFoo table migration.
  */
 class AltFooTable extends Migration
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    static public $dependencies = [
-        '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsRolesTable'
+    public static $dependencies = [
+        '\UserFrosting\Sprinkle\AltPermissions\Database\Migrations\v100\AltPermissionsRolesTable',
     ];
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function up()
     {
@@ -43,7 +46,7 @@ class AltFooTable extends Migration
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function down()
     {

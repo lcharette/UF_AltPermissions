@@ -1,26 +1,29 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
-use Interop\Container\ContainerInterface;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\NotFoundException;
-use UserFrosting\Fortress\RequestSchema;
-use UserFrosting\Fortress\RequestDataTransformer;
-use UserFrosting\Fortress\ServerSideValidator;
 use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
-use UserFrosting\Support\Exception\BadRequestException;
-use UserFrosting\Support\Exception\ForbiddenException;
+use UserFrosting\Fortress\RequestDataTransformer;
+use UserFrosting\Fortress\RequestSchema;
+use UserFrosting\Fortress\ServerSideValidator;
 use UserFrosting\Sprinkle\Core\Controller\SimpleController;
 use UserFrosting\Sprinkle\FormGenerator\Form;
+use UserFrosting\Support\Exception\BadRequestException;
+use UserFrosting\Support\Exception\ForbiddenException;
 
 /**
  * Controller class for role-related requests, including listing roles, CRUD for roles, etc.
@@ -34,14 +37,16 @@ class RoleController extends SimpleController
      *    Create a new ConfigManagerController object.
      *
      *    @param ContainerInterface $ci
+     *
      *    @return void
      */
-    public function __construct(ContainerInterface $ci) {
+    public function __construct(ContainerInterface $ci)
+    {
         $this->ci = $ci;
 
         // This Sprinkle required FormGenerator Sprinkle. Make sure it's there, otherwise error will be thrown later
-        if (!$this->ci->sprinkleManager->isAvailable("FormGenerator")) {
-            throw new \Exception("Sprinkle dependencies not met. FormGenerator Sprinkle is not available");
+        if (!$this->ci->sprinkleManager->isAvailable('FormGenerator')) {
+            throw new \Exception('Sprinkle dependencies not met. FormGenerator Sprinkle is not available');
         }
     }
 
@@ -49,11 +54,12 @@ class RoleController extends SimpleController
      *    Renders the modal form for creating a new role.
      *    This does NOT render a complete page.  Instead, it renders the HTML for the modal, which can be embedded in other pages.
      *    This page requires authentication.
-     *    Request type: GET
+     *    Request type: GET.
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getModalCreate(Request $request, Response $response, $args)
@@ -95,11 +101,11 @@ class RoleController extends SimpleController
         $form = new Form($schema, $role);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
-            "box_id" => $get['box_id'],
-            "box_title" => "ROLE.CREATE",
-            "form_action" => $this->ci->router->pathFor('api.roles.create.post', $args),
-            "fields" => $form->generate(),
-            "validators" => $validator->rules('json', true)
+            'box_id'      => $get['box_id'],
+            'box_title'   => 'ROLE.CREATE',
+            'form_action' => $this->ci->router->pathFor('api.roles.create.post', $args),
+            'fields'      => $form->generate(),
+            'validators'  => $validator->rules('json', true),
         ]);
     }
 
@@ -112,11 +118,13 @@ class RoleController extends SimpleController
      *    3. The submitted data is valid.
      *    This route requires authentication (and should generally be limited to admins or the root user).
      *    Request type: POST
+     *
      *    @see getModalCreateRole
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function create(Request $request, Response $response, $args)
@@ -178,7 +186,7 @@ class RoleController extends SimpleController
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($classMapper, $data, $ms, $config, $currentUser) {
+        Capsule::transaction(function () use ($classMapper, $data, $ms, $config, $currentUser) {
 
             // Create the role
             $role = $classMapper->createInstance('altRole', $data);
@@ -188,8 +196,8 @@ class RoleController extends SimpleController
 
             // Create activity record
             $this->ci->userActivityLogger->info("User {$currentUser->user_name} created role {$role->name}.", [
-                'type' => 'role_create',
-                'user_id' => $currentUser->id
+                'type'    => 'role_create',
+                'user_id' => $currentUser->id,
             ]);
 
             $ms->addMessageTranslated('success', 'ROLE.CREATION_SUCCESSFUL', $data);
@@ -208,6 +216,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getModalEdit(Request $request, Response $response, $args)
@@ -228,8 +237,7 @@ class RoleController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first())
-        {
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $params['id'])->first()) {
             throw new NotFoundException($request, $response);
         }
 
@@ -251,15 +259,15 @@ class RoleController extends SimpleController
         $form = new Form($schema, $role);
 
         return $this->ci->view->render($response, 'FormGenerator/modal.html.twig', [
-            "box_id" => $params['box_id'],
-            "box_title" => "ROLE.EDIT",
-            "form_action" => $this->ci->router->pathFor('api.roles.edit.put', [
+            'box_id'      => $params['box_id'],
+            'box_title'   => 'ROLE.EDIT',
+            'form_action' => $this->ci->router->pathFor('api.roles.edit.put', [
                 'seeker' => $args['seeker'],
-                'id' => $params['id']
+                'id'     => $params['id'],
             ]),
-            "form_method" => "PUT",
-            "fields" => $form->generate(),
-            "validators" => $validator->rules('json', true)
+            'form_method' => 'PUT',
+            'fields'      => $form->generate(),
+            'validators'  => $validator->rules('json', true),
         ]);
     }
 
@@ -273,6 +281,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getModalEditPermissions(Request $request, Response $response, $args)
@@ -294,13 +303,13 @@ class RoleController extends SimpleController
         // Access-controlled resource - check that currentUser has permission to edit "permissions" field for this role
         if (!$authorizer->checkAccess($currentUser, 'alt_update_role_field', [
             'role' => $role,
-            'fields' => ['permissions']
+            'fields' => ['permissions'],
         ])) {
             throw new ForbiddenException();
         }
 
         return $this->ci->view->render($response, 'modals/role-manage-permissions.html.twig', [
-            'role' => $role
+            'role' => $role,
         ]);
     }
 
@@ -313,11 +322,13 @@ class RoleController extends SimpleController
      *    3. The submitted data is valid.
      *    This route requires authentication (and should generally be limited to admins or the root user).
      *    Request type: PUT
+     *
      *    @see getModalRoleEdit
      *
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function updateInfo(Request $request, Response $response, $args)
@@ -344,8 +355,7 @@ class RoleController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
-        {
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first()) {
             throw new NotFoundException($request, $response);
         }
 
@@ -375,7 +385,7 @@ class RoleController extends SimpleController
         // !TODO
         if (!$authorizer->checkAccess($currentUser, 'alt_update_role_field', [
             'role' => $role,
-            'fields' => array_values(array_unique($fieldNames))
+            'fields' => array_values(array_unique($fieldNames)),
         ])) {
             throw new ForbiddenException();
         }
@@ -395,10 +405,10 @@ class RoleController extends SimpleController
         }
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($data, $role, $currentUser) {
+        Capsule::transaction(function () use ($data, $role, $currentUser) {
             // Update the role and generate success messages
             foreach ($data as $name => $value) {
-                if ($value != $role->$name){
+                if ($value != $role->$name) {
                     $role->$name = $value;
                 }
             }
@@ -407,13 +417,13 @@ class RoleController extends SimpleController
 
             // Create activity record
             $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated details for role {$role->name}.", [
-                'type' => 'role_update_info',
-                'user_id' => $currentUser->id
+                'type'    => 'role_update_info',
+                'user_id' => $currentUser->id,
             ]);
         });
 
         $ms->addMessageTranslated('success', 'ROLE.UPDATED', [
-            'name' => $translator->translate($role->name)
+            'name' => $translator->translate($role->name),
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
@@ -432,6 +442,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function delete(Request $request, Response $response, $args)
@@ -449,14 +460,13 @@ class RoleController extends SimpleController
         $ms = $this->ci->alerts;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
-        {
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first()) {
             throw new NotFoundException($request, $response);
         }
 
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'alt_delete_role', [
-            'role' => $role
+            'role' => $role,
         ])) {
             throw new ForbiddenException();
         }
@@ -466,22 +476,23 @@ class RoleController extends SimpleController
         if ($countUsers > 0) {
             $e = new BadRequestException();
             $e->addUserMessage('ROLE.HAS_USERS');
+
             throw $e;
         }
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($role, $currentUser) {
+        Capsule::transaction(function () use ($role, $currentUser) {
             $role->delete();
 
             // Create activity record
             $this->ci->userActivityLogger->info("User {$currentUser->user_name} deleted role {$role->name}.", [
-                'type' => 'role_delete',
-                'user_id' => $currentUser->id
+                'type'    => 'role_delete',
+                'user_id' => $currentUser->id,
             ]);
         });
 
         $ms->addMessageTranslated('success', 'ROLE.DELETION_SUCCESSFUL', [
-            'name' => $role->name
+            'name' => $role->name,
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);
@@ -497,6 +508,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getPermissions(Request $request, Response $response, $args)
@@ -521,7 +533,7 @@ class RoleController extends SimpleController
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'alt_view_role_field', [
             'role' => $role,
-            'property' => 'permissions'
+            'property' => 'permissions',
         ])) {
             throw new ForbiddenException();
         }
@@ -548,6 +560,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function pageInfo(Request $request, Response $response, $args)
@@ -562,14 +575,13 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->with('permissions')->first())
-        {
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->with('permissions')->first()) {
             throw new NotFoundException($request, $response);
         }
 
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'alt_uri_role', [
-                'role' => $role
+                'role' => $role,
             ])) {
             throw new ForbiddenException();
         }
@@ -583,16 +595,17 @@ class RoleController extends SimpleController
         // Marked as defined the permissions that the role have
         $permissions = $permissions->map(function ($item, $key) use ($role_permissions) {
             $item->active = $role_permissions->contains($item->id);
+
             return $item;
         });
 
         return $this->ci->view->render($response, 'pages/altRole.html.twig', [
-            'seeker' => $args['seeker'],
-            'role' => $role,
+            'seeker'      => $args['seeker'],
+            'role'        => $role,
             'permissions' => $permissions,
-            'uri' => [
-                'edit' => $role->getRoute('modal.roles.edit')
-            ]
+            'uri'         => [
+                'edit' => $role->getRoute('modal.roles.edit'),
+            ],
         ]);
     }
 
@@ -607,6 +620,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function pageList(Request $request, Response $response, $args)
@@ -627,15 +641,15 @@ class RoleController extends SimpleController
 
         return $this->ci->view->render($response, 'pages/altRoles.html.twig', [
             'seeker' => $args['seeker'],
-            'uri' => [
-                'create' => $router->pathFor('modal.roles.create', $args),
-                'sprunje' => $router->pathFor('api.roles.sprunje', $args)
-            ]
+            'uri'    => [
+                'create'  => $router->pathFor('modal.roles.create', $args),
+                'sprunje' => $router->pathFor('api.roles.sprunje', $args),
+            ],
         ]);
     }
 
     /**
-     *    Returns a list of Roles
+     *    Returns a list of Roles.
      *
      *    Generates a list of roles, optionally paginated, sorted and/or filtered.
      *    This page requires authentication.
@@ -644,6 +658,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function getList(Request $request, Response $response, $args)
@@ -685,6 +700,7 @@ class RoleController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
+     *
      *    @return void
      */
     public function updatePermissions(Request $request, Response $response, $args)
@@ -708,8 +724,7 @@ class RoleController extends SimpleController
         $classMapper = $this->ci->classMapper;
 
         // Get the role
-        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first())
-        {
+        if (!$role = $classMapper->staticMethod('altRole', 'where', 'id', $args['id'])->first()) {
             throw new NotFoundException($request, $response);
         }
 
@@ -732,20 +747,19 @@ class RoleController extends SimpleController
         })->keys();
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction( function() use ($newPermissions, $role, $currentUser) {
-
+        Capsule::transaction(function () use ($newPermissions, $role, $currentUser) {
             $role->permissions()->sync($newPermissions);
 
             // Create activity record
             $this->ci->userActivityLogger->info("User {$currentUser->user_name} updated permissions for role {$role->name}.", [
-                'type' => 'role_update_field',
-                'user_id' => $currentUser->id
+                'type'    => 'role_update_field',
+                'user_id' => $currentUser->id,
             ]);
         });
 
         // Add success messages
         $ms->addMessageTranslated('success', 'ROLE.PERMISSIONS_UPDATED', [
-            'name' => $role->name
+            'name' => $role->name,
         ]);
 
         return $response->withJson([], 200, JSON_PRETTY_PRINT);

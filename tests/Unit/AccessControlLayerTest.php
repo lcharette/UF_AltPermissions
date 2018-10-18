@@ -1,21 +1,24 @@
 <?php
-/**
-* UF AltPermissions
-*
-* @link      https://github.com/lcharette/UF-AltPermissions
-* @copyright Copyright (c) 2016 Louis Charette
-* @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
-*/
+
+/*
+ * UF AltPermissions
+ *
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
+ * @copyright Copyright (c) 2016 Louis Charette
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
 
 use Illuminate\Database\Eloquent\Collection;
-use UserFrosting\Tests\TestCase;
-use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
-use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Permission;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
 use UserFrosting\Sprinkle\AltPermissions\Tests\FooTableMigration;
-use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
 use UserFrosting\Sprinkle\Core\Tests\RefreshDatabase;
+use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
+use UserFrosting\Tests\TestCase;
 
 class AccessControlLayerTest extends TestCase
 {
@@ -26,7 +29,7 @@ class AccessControlLayerTest extends TestCase
     /**
      * @var string The seeker that will be tested
      */
-    protected $seeker = "foo";
+    protected $seeker = 'foo';
 
     /**
      * @var string The seeker model
@@ -60,7 +63,7 @@ class AccessControlLayerTest extends TestCase
 
     /**
      * setUp function.
-     * Load the model factories
+     * Load the model factories.
      */
     protected function setUp()
     {
@@ -100,23 +103,23 @@ class AccessControlLayerTest extends TestCase
         $this->seekers = collect($fm->seed(3, $this->seekerModel));
 
         // Create roles
-        $this->role = $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 1"]);
+        $this->role = $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => 'Role 1']);
 
         // Creates permissions
         $this->permissions = collect([
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission", 'slug' => "permission"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Test", 'slug' => "permission.test"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Foo", 'slug' => "permission.foo"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "Permission Foo Bar", 'slug' => "permission.foo.bar"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "PermissionFooBar", 'slug' => "permissionFooBar"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "PermissionFoo", 'slug' => "permissionFoo"]),
-            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => "TestFoorBar", 'slug' => "test.foo.bar"])
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'Permission', 'slug' => 'permission']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'Permission Test', 'slug' => 'permission.test']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'Permission Foo', 'slug' => 'permission.foo']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'Permission Foo Bar', 'slug' => 'permission.foo.bar']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'PermissionFooBar', 'slug' => 'permissionFooBar']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'PermissionFoo', 'slug' => 'permissionFoo']),
+            $fm->create(Permission::class, ['seeker' => $this->seeker, 'name' => 'TestFoorBar', 'slug' => 'test.foo.bar']),
         ]);
 
         // Assign users to role and seeker
         $this->user->seeker($this->seeker)->sync([
             $this->seekers[0]->id => ['role_id' => $this->role->id],
-            $this->seekers[2]->id => ['role_id' => $this->role->id]
+            $this->seekers[2]->id => ['role_id' => $this->role->id],
         ]);
 
         // Assign Permission to role
@@ -124,7 +127,7 @@ class AccessControlLayerTest extends TestCase
             $this->permissions[0]->id,
             $this->permissions[3]->id,
             $this->permissions[4]->id,
-            $this->permissions[6]->id
+            $this->permissions[6]->id,
         ]);
     }
 
@@ -140,20 +143,20 @@ class AccessControlLayerTest extends TestCase
         $seeker_id = $this->seekers[0]->id;
 
         // For seeker 1, user should have...
-        $this->assertTrue($acl->hasPermission($this->user, "permission", $seeker_id));
-        $this->assertTrue($acl->hasPermission($this->user, "permission.foo", $seeker_id)); // Inherit from `permission.foo.bar`
-        $this->assertTrue($acl->hasPermission($this->user, "permission.foo.bar", $seeker_id));
-        $this->assertTrue($acl->hasPermission($this->user, "permissionFooBar", $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, 'permission', $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, 'permission.foo', $seeker_id)); // Inherit from `permission.foo.bar`
+        $this->assertTrue($acl->hasPermission($this->user, 'permission.foo.bar', $seeker_id));
+        $this->assertTrue($acl->hasPermission($this->user, 'permissionFooBar', $seeker_id));
 
         // Those should be false
-        $this->assertFalse($acl->hasPermission($this->user, "permission.test", $seeker_id));
-        $this->assertFalse($acl->hasPermission($this->user, "permissionFoo", $seeker_id));
+        $this->assertFalse($acl->hasPermission($this->user, 'permission.test', $seeker_id));
+        $this->assertFalse($acl->hasPermission($this->user, 'permissionFoo', $seeker_id));
 
         // Testing fake permissions
-        $this->assertTrue($acl->hasPermission($this->user, "test.foo.bar", $seeker_id)); // Direct true
-        $this->assertTrue($acl->hasPermission($this->user, "test.foo", $seeker_id)); // Fake inhererited from `test.foo.bar`
-        $this->assertTrue($acl->hasPermission($this->user, "test", $seeker_id)); // Fake inhererited from `test.foo.bar`
-        $this->assertFalse($acl->hasPermission($this->user, "testme", $seeker_id)); // False
+        $this->assertTrue($acl->hasPermission($this->user, 'test.foo.bar', $seeker_id)); // Direct true
+        $this->assertTrue($acl->hasPermission($this->user, 'test.foo', $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertTrue($acl->hasPermission($this->user, 'test', $seeker_id)); // Fake inhererited from `test.foo.bar`
+        $this->assertFalse($acl->hasPermission($this->user, 'testme', $seeker_id)); // False
     }
 
     /**
@@ -176,12 +179,11 @@ class AccessControlLayerTest extends TestCase
         // We should have only the two seekers the user have a role for: 1 & 3
         $expected = [
             $this->seekers[0]->id,
-            $this->seekers[2]->id
+            $this->seekers[2]->id,
         ];
 
         // Test asertion
         $this->assertEquals($expected, $resultIds);
-
 
         // With the 3rd permission (permission.foo), it should be the same result
         $slug = $this->permissions[2]->slug;
@@ -238,18 +240,16 @@ class AccessControlLayerTest extends TestCase
             'permissionFooBar',
             'test', // (inherited)
             'test.foo', // (inherited)
-            'test.foo.bar'
+            'test.foo.bar',
         ];
 
         // Test asertion
         $this->assertEquals(array_values($expected), array_values($result));
 
-
         // With seeker 3, the result should be the same
         $seeker_id = $this->seekers[2]->id;
         $result = $acl->getPermissionsForSeeker($this->user, $seeker_id, $this->seeker);
         $this->assertEquals(array_values($expected), array_values($result));
-
 
         // With seeker 2, should be empty array
         $seeker_id = $this->seekers[1]->id;
@@ -258,7 +258,7 @@ class AccessControlLayerTest extends TestCase
     }
 
     /**
-     * Test the decompose slug method
+     * Test the decompose slug method.
      */
     public function test_decomposeSlug()
     {
@@ -271,7 +271,7 @@ class AccessControlLayerTest extends TestCase
             'test',
             'test.foo',
             'test.foo.bar',
-            'test.foo.bar.blah'
+            'test.foo.bar.blah',
         ];
 
         $this->assertEquals($expected, $actual);

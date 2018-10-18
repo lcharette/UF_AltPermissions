@@ -1,15 +1,17 @@
 <?php
- /**
+
+/*
  * UF AltPermissions
  *
- * @link      https://github.com/lcharette/UF-AltPermissions
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
- * @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
 
 /**
  * Routes for administrative role management.
- * Route anything related to the RoleController
+ * Route anything related to the RoleController.
  */
 $app->group('/roles/{seeker}', function () {
     $this->get('', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageList')
@@ -17,7 +19,6 @@ $app->group('/roles/{seeker}', function () {
 
     $this->get('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:pageInfo')
          ->setName('alt_uri_roles.view');
-
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/api/roles/{seeker}', function () {
@@ -38,7 +39,6 @@ $app->group('/api/roles/{seeker}', function () {
 
     $this->put('/r/{id}', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:updateInfo')
          ->setName('api.roles.edit.put');
-
 })->add('checkAuthSeeker')->add('authGuard');
 
 $app->group('/modals/roles/{seeker}', function () {
@@ -50,5 +50,4 @@ $app->group('/modals/roles/{seeker}', function () {
 
     $this->get('/permissions', 'UserFrosting\Sprinkle\AltPermissions\Controller\RoleController:getModalEditPermissions')
          ->setName('modal.roles.permissions');
-
 })->add('checkAuthSeeker')->add('authGuard');

@@ -1,19 +1,22 @@
 <?php
-/**
-* UF AltPermissions
-*
-* @link      https://github.com/lcharette/UF-AltPermissions
-* @copyright Copyright (c) 2016 Louis Charette
-* @license   https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
-*/
+
+/*
+ * UF AltPermissions
+ *
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
+ * @copyright Copyright (c) 2016 Louis Charette
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
 
 use Illuminate\Database\Eloquent\Collection;
-use UserFrosting\Tests\TestCase;
-use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Role;
-use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
+use UserFrosting\Sprinkle\AltPermissions\Database\Models\User;
 use UserFrosting\Sprinkle\Core\Tests\RefreshDatabase;
+use UserFrosting\Sprinkle\Core\Tests\TestDatabase;
+use UserFrosting\Tests\TestCase;
 
 abstract class AltPermissions extends TestCase
 {
@@ -57,7 +60,7 @@ abstract class AltPermissions extends TestCase
 
     /**
      * setUp function.
-     * Load the model factories
+     * Load the model factories.
      */
     protected function setUp()
     {
@@ -78,29 +81,29 @@ abstract class AltPermissions extends TestCase
         // Create 2 users
         $users = collect([
             $fm->create(User::class, ['user_name' => 'User 1']),
-            $fm->create(User::class, ['user_name' => 'User 2'])
+            $fm->create(User::class, ['user_name' => 'User 2']),
         ]);
 
         // Create 4 seekers
         $seekers = collect($fm->seed(4, $this->seekerModel));
 
         // Create 3 roles
-        $roles =  collect([
-            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 1"]),
-            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 2"]),
-            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => "Role 3"])
+        $roles = collect([
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => 'Role 1']),
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => 'Role 2']),
+            $fm->create(Role::class, ['seeker' => $this->seeker, 'name' => 'Role 3']),
         ]);
 
         // Assign them all together
         $users[0]->seeker($this->seeker)->sync([
             $seekers[0]->id => ['role_id' => $roles[0]->id],
             $seekers[1]->id => ['role_id' => $roles[0]->id],
-            $seekers[2]->id => ['role_id' => $roles[2]->id]
+            $seekers[2]->id => ['role_id' => $roles[2]->id],
         ]);
         $users[1]->seeker($this->seeker)->sync([
             $seekers[0]->id => ['role_id' => $roles[2]->id],
             $seekers[1]->id => ['role_id' => $roles[0]->id],
-            $seekers[3]->id => ['role_id' => $roles[1]->id]
+            $seekers[3]->id => ['role_id' => $roles[1]->id],
         ]);
 
         // Add everyone to the testData
@@ -109,25 +112,27 @@ abstract class AltPermissions extends TestCase
         $this->seekers = (object) $seekers->pluck('id');
 
         // Se we don't have to call "new" each time
-        $this->seekerClass = new $this->seekerModel;
+        $this->seekerClass = new $this->seekerModel();
     }
 
     /**
-     * Extend this method to run migration before seeding the database
+     * Extend this method to run migration before seeding the database.
+     *
      * @return void
      */
     protected function runTestMigrations()
-    {}
+    {
+    }
 
     /**
-     * Test fetching a seeker config value (getSeekerModel function)
+     * Test fetching a seeker config value (getSeekerModel function).
      */
     public function test_config()
     {
         $config = $this->ci->config;
 
         // Query config value manually
-        $this->assertEquals($this->seekerModel, $config["AltPermissions.seekers"][$this->seeker]);
+        $this->assertEquals($this->seekerModel, $config['AltPermissions.seekers'][$this->seeker]);
 
         // Test dynamic relation using the auth service
         $seekerClass = $this->ci->acl->getSeekerModel($this->seeker);
@@ -135,7 +140,7 @@ abstract class AltPermissions extends TestCase
     }
 
     /**
-     * Test fetching a user's role for a seeker
+     * Test fetching a user's role for a seeker.
      */
     public function test_individualUser()
     {
@@ -151,13 +156,11 @@ abstract class AltPermissions extends TestCase
         // User n° 1 role for seeker n° 2 should be n° 1
         $this->assertEquals($this->roles[2], $auth->role->id);
 
-
         // Same test, but on one line. We'll improove on that later ;)
         $this->assertEquals(
             $this->roles[2],
             User::find($this->users[0])->auth($this->seeker)->where('seeker_id', $seeker_id)->first()->role->id
         );
-
 
         // The one above is too long for nothing...
         //$role = $user->roleForSeeker($this->seeker, $seeker_id)
@@ -169,7 +172,7 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Test fetching a seeker's role for a user
-     * Plus make sure we can get a role name too
+     * Plus make sure we can get a role name too.
      */
     public function test_individualSeeker()
     {
@@ -187,7 +190,6 @@ abstract class AltPermissions extends TestCase
         $auth = $seeker->auth->where('user_id', $user_id)->first();
         $this->assertEquals($role_id, $auth->role->id);
         $this->assertEquals($role_name, $auth->role->name);
-
 
         // The one above is too long for nothing...
         //$role = $seeker->roleForUser($user_id)
@@ -231,7 +233,7 @@ abstract class AltPermissions extends TestCase
 
     /**
      * test_relations function.
-     * Mother of all tests
+     * Mother of all tests.
      *
      * @return void
      */
@@ -253,7 +255,7 @@ abstract class AltPermissions extends TestCase
      * 1    3   3
      * 2    1   3
      * 2    2   1
-     * 2    4   2
+     * 2    4   2.
      */
     public function U_S_R()
     {
@@ -264,25 +266,23 @@ abstract class AltPermissions extends TestCase
             $this->users[0] => [
                 $this->seekers[0] => $this->roles[0],
                 $this->seekers[1] => $this->roles[0],
-                $this->seekers[2] => $this->roles[2]
+                $this->seekers[2] => $this->roles[2],
             ],
             // User 2
             $this->users[1] => [
                 $this->seekers[0] => $this->roles[2],
                 $this->seekers[1] => $this->roles[0],
-                $this->seekers[3] => $this->roles[1]
-            ]
+                $this->seekers[3] => $this->roles[1],
+            ],
         ];
 
         $results = [];
 
         $users = User::find($this->users->toArray());
         foreach ($users as $user) {
+            $this->debug("\n ---- ".$user->user_name.' ---- ');
 
-            $this->debug("\n ---- " . $user->user_name . " ---- ");
-
-            foreach ($user->auth($this->seeker) as $auth)
-            {
+            foreach ($user->auth($this->seeker) as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->user->id][$auth->seeker->id] = $auth->role->id;
             }
@@ -298,7 +298,7 @@ abstract class AltPermissions extends TestCase
      * 1    3   3
      * 2    1   2
      * 2    2   7
-     * 2    3   1
+     * 2    3   1.
      */
     public function U_R_S()
     {
@@ -309,35 +309,33 @@ abstract class AltPermissions extends TestCase
             $this->users[0] => [
                 $this->roles[0] => [
                     $this->seekers[0],
-                    $this->seekers[1]
+                    $this->seekers[1],
                 ],
                 $this->roles[2] => [
-                    $this->seekers[2]
-                ]
+                    $this->seekers[2],
+                ],
             ],
             // User 2
             $this->users[1] => [
                 $this->roles[2] => [
-                    $this->seekers[0]
+                    $this->seekers[0],
                 ],
                 $this->roles[0] => [
-                    $this->seekers[1]
+                    $this->seekers[1],
                 ],
                 $this->roles[1] => [
-                    $this->seekers[3]
-                ]
-            ]
+                    $this->seekers[3],
+                ],
+            ],
         ];
 
         $results = [];
 
         $users = User::find($this->users->toArray());
         foreach ($users as $user) {
+            $this->debug("\n ---- ".$user->user_name.' ---- ');
 
-            $this->debug("\n ---- " . $user->user_name . " ---- ");
-
-            foreach ($user->auth($this->seeker) as $auth)
-            {
+            foreach ($user->auth($this->seeker) as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->user->id][$auth->role->id][] = $auth->seeker->id;
             }
@@ -353,7 +351,7 @@ abstract class AltPermissions extends TestCase
      * 1    2   2
      * 2    2   4
      * 3    1   3
-     * 3    2   1
+     * 3    2   1.
      */
     public function R_U_S()
     {
@@ -364,38 +362,36 @@ abstract class AltPermissions extends TestCase
             $this->roles[0] => [
                 $this->users[0] => [
                     $this->seekers[0],
-                    $this->seekers[1]
+                    $this->seekers[1],
                 ],
                 $this->users[1] => [
-                    $this->seekers[1]
-                ]
+                    $this->seekers[1],
+                ],
             ],
             // Role 2
             $this->roles[1] => [
                 $this->users[1] => [
-                    $this->seekers[3]
-                ]
+                    $this->seekers[3],
+                ],
             ],
             // Role 3
             $this->roles[2] => [
                 $this->users[0] => [
-                    $this->seekers[2]
+                    $this->seekers[2],
                 ],
                 $this->users[1] => [
-                    $this->seekers[0]
-                ]
-            ]
+                    $this->seekers[0],
+                ],
+            ],
         ];
 
         $results = [];
 
         $roles = Role::find($this->roles->toArray());
         foreach ($roles as $role) {
+            $this->debug("\n ---- ".$role->name.' ---- ');
 
-            $this->debug("\n ---- " . $role->name . " ---- ");
-
-            foreach ($role->auth($this->seeker) as $auth)
-            {
+            foreach ($role->auth($this->seeker) as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->role->id][$auth->user->id][] = $auth->seeker->id;
             }
@@ -411,7 +407,7 @@ abstract class AltPermissions extends TestCase
      * 1    2   1,2
      * 2    4   2
      * 3    1   2
-     * 3    3   1
+     * 3    3   1.
      */
     public function R_S_U()
     {
@@ -421,39 +417,37 @@ abstract class AltPermissions extends TestCase
             // Role 1
             $this->roles[0] => [
                 $this->seekers[0] => [
-                    $this->users[0]
+                    $this->users[0],
                 ],
                 $this->seekers[1] => [
                     $this->users[0],
-                    $this->users[1]
-                ]
+                    $this->users[1],
+                ],
             ],
             // Role 2
             $this->roles[1] => [
                 $this->seekers[3] => [
-                    $this->users[1]
-                ]
+                    $this->users[1],
+                ],
             ],
             // Role 3
             $this->roles[2] => [
                 $this->seekers[2] => [
-                    $this->users[0]
+                    $this->users[0],
                 ],
                 $this->seekers[0] => [
-                    $this->users[1]
-                ]
-            ]
+                    $this->users[1],
+                ],
+            ],
         ];
 
         $results = [];
 
         $roles = Role::find($this->roles->toArray());
         foreach ($roles as $role) {
+            $this->debug("\n ---- ".$role->name.' ---- ');
 
-            $this->debug("\n ---- " . $role->name . " ---- ");
-
-            foreach ($role->auth($this->seeker) as $auth)
-            {
+            foreach ($role->auth($this->seeker) as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->role->id][$auth->seeker->id][] = $auth->user->id;
             }
@@ -469,7 +463,7 @@ abstract class AltPermissions extends TestCase
      * 1    3   2
      * 2    1   1,2
      * 3    3   1
-     * 4    2   2
+     * 4    2   2.
      */
     public function S_R_U()
     {
@@ -479,42 +473,40 @@ abstract class AltPermissions extends TestCase
             // Seeker 1
             $this->seekers[0] => [
                 $this->roles[0] => [
-                    $this->users[0]
+                    $this->users[0],
                 ],
                 $this->roles[2] => [
-                    $this->users[1]
-                ]
+                    $this->users[1],
+                ],
             ],
             // Seeker 2
             $this->seekers[1] => [
                 $this->roles[0] => [
                     $this->users[0],
-                    $this->users[1]
-                ]
+                    $this->users[1],
+                ],
             ],
             // Seeker 3
             $this->seekers[2] => [
                 $this->roles[2] => [
-                    $this->users[0]
-                ]
+                    $this->users[0],
+                ],
             ],
             // Seeker 4
             $this->seekers[3] => [
                 $this->roles[1] => [
-                    $this->users[1]
-                ]
-            ]
+                    $this->users[1],
+                ],
+            ],
         ];
 
         $results = [];
 
         $seekers = $this->seekerClass->find($this->seekers->toArray());
         foreach ($seekers as $seeker) {
+            $this->debug("\n ---- ".$seeker->id.' ---- ');
 
-            $this->debug("\n ---- " . $seeker->id . " ---- ");
-
-            foreach ($seeker->auth as $auth)
-            {
+            foreach ($seeker->auth as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->seeker->id][$auth->role->id][] = $auth->user->id;
             }
@@ -531,7 +523,7 @@ abstract class AltPermissions extends TestCase
      * 2    1   1
      * 2    2   1
      * 3    1   3
-     * 4    2   2
+     * 4    2   2.
      */
     public function S_U_R()
     {
@@ -541,32 +533,30 @@ abstract class AltPermissions extends TestCase
             // Seeker 1
             $this->seekers[0] => [
                 $this->users[0] => $this->roles[0],
-                $this->users[1] => $this->roles[2]
+                $this->users[1] => $this->roles[2],
             ],
             // Seeker 2
             $this->seekers[1] => [
                 $this->users[0] => $this->roles[0],
-                $this->users[1] => $this->roles[0]
+                $this->users[1] => $this->roles[0],
             ],
             // Seeker 3
             $this->seekers[2] => [
-                $this->users[0] => $this->roles[2]
+                $this->users[0] => $this->roles[2],
             ],
             // Seeker 4
             $this->seekers[3] => [
-                $this->users[1] => $this->roles[1]
-            ]
+                $this->users[1] => $this->roles[1],
+            ],
         ];
 
         $results = [];
 
         $seekers = $this->seekerClass->find($this->seekers->toArray());
         foreach ($seekers as $seeker) {
+            $this->debug("\n ---- ".$seeker->id.' ---- ');
 
-            $this->debug("\n ---- " . $seeker->id . " ---- ");
-
-            foreach ($seeker->auth as $auth)
-            {
+            foreach ($seeker->auth as $auth) {
                 $this->debugAuth($auth);
                 $results[$auth->seeker->id][$auth->user->id] = $auth->role->id;
             }
@@ -575,18 +565,17 @@ abstract class AltPermissions extends TestCase
         $this->assertEquals($expected_results, $results);
     }
 
-
     /**
      * debug function.
      *
      * @param mixed $message
+     *
      * @return void
      */
     protected function debug($message)
     {
-        if ($this->debug)
-        {
-            echo "\n" . $message;
+        if ($this->debug) {
+            echo "\n".$message;
         }
     }
 
@@ -594,13 +583,14 @@ abstract class AltPermissions extends TestCase
      * debugAuth function.
      *
      * @param mixed $auth
+     *
      * @return void
      */
     protected function debugAuth($auth)
     {
-        $seeker_name = isset($auth->seeker->name) ? " - " . $auth->seeker->name : ""; //Name might not exist
-        $this->debug("\n USER :: #" . $auth->user->id . " - " . $auth->user->user_name .
-                     "\n ROLE :: #" . $auth->role->id . " - " . $auth->role->name .
-                     "\n SEEKER :: #" . $auth->seeker->id . $seeker_name . "\n");
+        $seeker_name = isset($auth->seeker->name) ? ' - '.$auth->seeker->name : ''; //Name might not exist
+        $this->debug("\n USER :: #".$auth->user->id.' - '.$auth->user->user_name.
+                     "\n ROLE :: #".$auth->role->id.' - '.$auth->role->name.
+                     "\n SEEKER :: #".$auth->seeker->id.$seeker_name."\n");
     }
 }

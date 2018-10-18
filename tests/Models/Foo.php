@@ -1,15 +1,18 @@
 <?php
-/**
- * GASTON (https://github.com/lcharette/GASTON)
+
+/*
+ * UF AltPermissions
  *
- * @author Louis Charette
- * @link https://github.com/lcharette
+ * @link https://github.com/lcharette/UF-AltPermissions
+ *
  * @copyright Copyright (c) 2016 Louis Charette
+ * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
  */
+
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Models;
 
-use UserFrosting\Sprinkle\Core\Database\Models\Model;
 use UserFrosting\Sprinkle\AltPermissions\Database\Models\Traits\Auth;
+use UserFrosting\Sprinkle\Core\Database\Models\Model;
 
 /**
  * Foo model class.
@@ -21,14 +24,14 @@ class Foo extends Model
     /**
      * @var string The name of the table for the current model.
      */
-    protected $table = "alt_foo";
+    protected $table = 'alt_foo';
 
     /**
      * @var array The fields of the table for the current model.
      */
     protected $fillable = [
-        "name",
-        "description"
+        'name',
+        'description',
     ];
 
     /**
