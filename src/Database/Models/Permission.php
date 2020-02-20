@@ -1,12 +1,12 @@
 <?php
 
 /*
- * UF AltPermissions
+ * UF AltPermissions Sprinkle
  *
- * @link https://github.com/lcharette/UF-AltPermissions
- *
- * @copyright Copyright (c) 2016 Louis Charette
- * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @author    Louis Charette
+ * @copyright Copyright (c) 2018 Louis Charette
+ * @link      https://github.com/lcharette/UF_AltPermissions
+ * @license   https://github.com/lcharette/UF_AltPermissions/blob/master/LICENSE.md (MIT License)
  */
 
 namespace UserFrosting\Sprinkle\AltPermissions\Database\Models;
@@ -72,8 +72,6 @@ class Permission extends Model
     /**
      * getStatusTxt function.
      * Prend le code de status et retourne la version localisé que le code représente.
-     *
-     * @return void
      */
     public function getLocaleName()
     {

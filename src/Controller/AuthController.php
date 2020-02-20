@@ -1,12 +1,12 @@
 <?php
 
 /*
- * UF AltPermissions
+ * UF AltPermissions Sprinkle
  *
- * @link https://github.com/lcharette/UF-AltPermissions
- *
- * @copyright Copyright (c) 2016 Louis Charette
- * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @author    Louis Charette
+ * @copyright Copyright (c) 2018 Louis Charette
+ * @link      https://github.com/lcharette/UF_AltPermissions
+ * @license   https://github.com/lcharette/UF_AltPermissions/blob/master/LICENSE.md (MIT License)
  */
 
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
@@ -36,8 +36,6 @@ class AuthController extends SimpleController
      *    Create a new ConfigManagerController object.
      *
      *    @param ContainerInterface $ci
-     *
-     *    @return void
      */
     public function __construct(ContainerInterface $ci)
     {
@@ -54,8 +52,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function getModalCreate(Request $request, Response $response, $args)
     {
@@ -126,8 +122,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function getUserList(Request $request, Response $response, $args)
     {
@@ -173,8 +167,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function create(Request $request, Response $response, $args)
     {
@@ -288,8 +280,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function getModalEdit(Request $request, Response $response, $args)
     {
@@ -373,8 +363,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function updateInfo(Request $request, Response $response, $args)
     {
@@ -470,8 +458,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function delete(Request $request, Response $response, $args)
     {
@@ -534,8 +520,6 @@ class AuthController extends SimpleController
      *    @param  Request $request
      *    @param  Response $response
      *    @param  array $args
-     *
-     *    @return void
      */
     public function getList(Request $request, Response $response, $args)
     {

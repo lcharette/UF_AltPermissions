@@ -1,12 +1,12 @@
 <?php
 
 /*
- * UF AltPermissions
+ * UF AltPermissions Sprinkle
  *
- * @link https://github.com/lcharette/UF-AltPermissions
- *
- * @copyright Copyright (c) 2016 Louis Charette
- * @license https://github.com/lcharette/UF-AltPermissions/blob/master/licenses/UserFrosting.md (MIT License)
+ * @author    Louis Charette
+ * @copyright Copyright (c) 2018 Louis Charette
+ * @link      https://github.com/lcharette/UF_AltPermissions
+ * @license   https://github.com/lcharette/UF_AltPermissions/blob/master/LICENSE.md (MIT License)
  */
 
 namespace UserFrosting\Sprinkle\AltPermissions\Tests\Unit;
@@ -117,8 +117,6 @@ abstract class AltPermissions extends TestCase
 
     /**
      * Extend this method to run migration before seeding the database.
-     *
-     * @return void
      */
     protected function runTestMigrations()
     {
@@ -234,8 +232,6 @@ abstract class AltPermissions extends TestCase
     /**
      * test_relations function.
      * Mother of all tests.
-     *
-     * @return void
      */
     public function test_relations()
     {
@@ -569,8 +565,6 @@ abstract class AltPermissions extends TestCase
      * debug function.
      *
      * @param mixed $message
-     *
-     * @return void
      */
     protected function debug($message)
     {
@@ -583,8 +577,6 @@ abstract class AltPermissions extends TestCase
      * debugAuth function.
      *
      * @param mixed $auth
-     *
-     * @return void
      */
     protected function debugAuth($auth)
     {
