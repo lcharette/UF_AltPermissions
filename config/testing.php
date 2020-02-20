@@ -10,9 +10,9 @@
  */
 
 return [
-        'AltPermissions' => [
-            'seekers' => [
-                'foo' => 'UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo',
-            ],
+    'AltPermissions' => [
+        'seekers' => [
+            'foo' => 'UserFrosting\Sprinkle\AltPermissions\Tests\Models\Foo',
         ],
-    ];
+    ],
+];

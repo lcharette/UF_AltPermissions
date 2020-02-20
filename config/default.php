@@ -10,7 +10,7 @@
  */
 
 return [
-        'AltPermissions' => [
-            'seekers' => [],
-        ],
-    ];
+    'AltPermissions' => [
+        'seekers' => [],
+    ],
+];

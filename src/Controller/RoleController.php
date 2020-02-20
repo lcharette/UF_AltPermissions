@@ -581,8 +581,8 @@ class RoleController extends SimpleController
 
         // Access-controlled page
         if (!$authorizer->checkAccess($currentUser, 'alt_uri_role', [
-                'role' => $role,
-            ])) {
+            'role' => $role,
+        ])) {
             throw new ForbiddenException();
         }
 
