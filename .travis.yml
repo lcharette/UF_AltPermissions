@@ -13,9 +13,9 @@ php:
 
 env:
   matrix:
-    - DB=mysql UF_BRANCH=master
-    - DB=sqlite UF_BRANCH=master
-    - DB=pgsql UF_BRANCH=master
+    - DB=mysql UF_BRANCH=dev-master
+    - DB=sqlite UF_BRANCH=dev-master
+    - DB=pgsql UF_BRANCH=dev-master
     - DB=mysql UF_BRANCH=dev-develop
     - DB=sqlite UF_BRANCH=dev-develop
     - DB=pgsql UF_BRANCH=dev-develop
