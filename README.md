@@ -1,6 +1,6 @@
 # AltPermission Sprinkle for [UserFrosting 4](https://www.userfrosting.com)
 
-[![Build Status](https://github.com/lcharette/UF_AltPermissions/actions?query=workflow%3ABuild)](https://github.com/lcharette/UF_AltPermissions/workflows/Build/badge.svg?branch=master) [![StyleCI](https://github.styleci.io/repos/86100743/shield?branch=master)](https://github.styleci.io/repos/86100743) [![UserFrosting Version](https://img.shields.io/badge/UserFrosting->=%204.2-brightgreen.svg)](https://github.com/userfrosting/UserFrosting) [![Donate](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-brightgreen.svg)](https://ko-fi.com/A7052ICP)
+[![Build Status](https://github.com/lcharette/UF_AltPermissions/workflows/Build/badge.svg?branch=master)](https://github.com/lcharette/UF_AltPermissions/actions?query=workflow%3ABuild) [![StyleCI](https://github.styleci.io/repos/86100743/shield?branch=master)](https://github.styleci.io/repos/86100743) [![UserFrosting Version](https://img.shields.io/badge/UserFrosting->=%204.2-brightgreen.svg)](https://github.com/userfrosting/UserFrosting) [![Donate](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-brightgreen.svg)](https://ko-fi.com/A7052ICP)
 
 Alternate/complementary permission system for [UserFrosting 4](https://www.userfrosting.com)
 
