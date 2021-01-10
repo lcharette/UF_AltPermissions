@@ -80,6 +80,3 @@ jobs:
         with:
           root_dir: ./app/sprinkles/AltPermissions/
           fail_ci_if_error: true
-
-      - name: Execute UF Integration tests
-        run: app/vendor/bin/phpunit
