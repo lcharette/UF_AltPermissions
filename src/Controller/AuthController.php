@@ -12,7 +12,7 @@
 namespace UserFrosting\Sprinkle\AltPermissions\Controller;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use UserFrosting\Fortress\Adapter\JqueryValidationAdapter;
