@@ -250,7 +250,7 @@ class AuthController extends SimpleController
 
         // All checks passed!  log events/activities and create role
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction(function () use ($classMapper, $auth, $currentUser, $user, $role) {
+        Capsule::transaction(function () use ($auth) {
 
             // Save the auth data
             $auth->save();
@@ -420,7 +420,7 @@ class AuthController extends SimpleController
         }
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction(function () use ($currentUser, $auth, $newRole) {
+        Capsule::transaction(function () use ($auth, $newRole) {
             // Update the role and generate success messages
             // We are allowed to change the `auth` relation directly for the role
             // (It's expected to change for a given user/seeker combo)
@@ -492,7 +492,7 @@ class AuthController extends SimpleController
         }*/
 
         // Begin transaction - DB will be rolled back if an exception occurs
-        Capsule::transaction(function () use ($auth, $currentUser) {
+        Capsule::transaction(function () use ($auth) {
             $auth->delete();
 
             // Create activity record
