@@ -65,7 +65,7 @@ class AccessControlLayerTest extends TestCase
      * setUp function.
      * Load the model factories.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         // Setup parent first to get access to the container
         parent::setUp();
